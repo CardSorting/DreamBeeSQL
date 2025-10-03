@@ -2,7 +2,8 @@
  * End-to-end tests for security features and vulnerabilities
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { withTestDatabase, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 
@@ -30,8 +31,7 @@ describe('Security E2E Tests', () => {
             firstName: 'SQLInjection',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           // Test SQL injection attempts
           const maliciousInputs = [
             "'; DROP TABLE users; --",
@@ -53,7 +53,7 @@ describe('Security E2E Tests', () => {
             // Test findWhere with malicious input
             const whereResults = await userRepo.findWhere({
               email: maliciousInput
-            })
+            }))
             expect(whereResults).to.have.length(0)
           }
           
@@ -64,8 +64,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('sql-injection-user')
-        })
-
+        }))
         it('should prevent SQL injection in updates', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -79,8 +78,7 @@ describe('Security E2E Tests', () => {
             firstName: 'UpdateInjection',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           // Test SQL injection attempts in updates
           const maliciousInputs = [
             "'; DROP TABLE users; --",
@@ -92,8 +90,7 @@ describe('Security E2E Tests', () => {
             // Test update with malicious input
             const updated = await userRepo.update('update-injection-user', {
               firstName: maliciousInput
-            })
-            
+            }))
             // Should update safely (malicious input treated as literal string)
             expect(updated).to.exist
             expect(updated!.firstName).to.equal(maliciousInput)
@@ -101,7 +98,7 @@ describe('Security E2E Tests', () => {
             // Reset for next test
             await userRepo.update('update-injection-user', {
               firstName: 'UpdateInjection'
-            })
+            }))
           }
           
           // Verify user still exists and table structure is intact
@@ -111,8 +108,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('update-injection-user')
-        })
-
+        }))
         it('should prevent SQL injection in deletes', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -126,16 +122,14 @@ describe('Security E2E Tests', () => {
             firstName: 'DeleteInjection1',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           const user2 = await userRepo.create({
             id: 'delete-injection-user2',
             email: 'deleteinjection2@example.com',
             firstName: 'DeleteInjection2',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           // Test SQL injection attempts in deletes
           const maliciousInputs = [
             "'; DROP TABLE users; --",
@@ -159,8 +153,7 @@ describe('Security E2E Tests', () => {
           // Clean up
           await userRepo.delete('delete-injection-user1')
           await userRepo.delete('delete-injection-user2')
-        })
-
+        }))
         it('should prevent SQL injection in complex queries', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -175,16 +168,14 @@ describe('Security E2E Tests', () => {
             firstName: 'ComplexInjection',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           const post = await postRepo.create({
             id: 'complex-injection-post',
             userId: user.id,
             title: 'Complex Injection Post',
             content: 'This post tests complex SQL injection',
             published: true
-          })
-          
+          }))
           // Test SQL injection in relationship queries
           const maliciousInputs = [
             "'; DROP TABLE posts; --",
@@ -210,11 +201,10 @@ describe('Security E2E Tests', () => {
           // Clean up
           await postRepo.delete('complex-injection-post')
           await userRepo.delete('complex-injection-user')
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Data Validation and Sanitization', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -266,8 +256,7 @@ describe('Security E2E Tests', () => {
           for (const input of maliciousInputs) {
             await userRepo.delete(input.id)
           }
-        })
-
+        }))
         it('should validate data types properly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -318,8 +307,7 @@ describe('Security E2E Tests', () => {
               expect(error).to.be.instanceOf(Error)
             }
           }
-        })
-
+        }))
         it('should enforce data length limits', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -336,8 +324,7 @@ describe('Security E2E Tests', () => {
               firstName: longString,
               lastName: 'User',
               active: true
-            })
-            
+            }))
             // Should either succeed or fail gracefully
             if (user) {
               const retrievedUser = await userRepo.findById('long-string-user')
@@ -350,11 +337,10 @@ describe('Security E2E Tests', () => {
             // Expected for extremely long strings
             expect(error).to.be.instanceOf(Error)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Access Control and Permissions', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -371,8 +357,7 @@ describe('Security E2E Tests', () => {
             firstName: 'Permission',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           expect(user).to.exist
           
           // Test read operations
@@ -382,7 +367,7 @@ describe('Security E2E Tests', () => {
           // Test update operations
           const updatedUser = await userRepo.update('permission-user', {
             firstName: 'UpdatedPermission'
-          })
+          }))
           expect(updatedUser).to.exist
           expect(updatedUser!.firstName).to.equal('UpdatedPermission')
           
@@ -393,8 +378,7 @@ describe('Security E2E Tests', () => {
           // Verify deletion
           const deletedUser = await userRepo.findById('permission-user')
           expect(deletedUser).to.be.null
-        })
-
+        }))
         it('should handle insufficient permissions gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -410,8 +394,7 @@ describe('Security E2E Tests', () => {
               firstName: 'Insufficient',
               lastName: 'Permission',
               active: true
-            })
-            
+            }))
             expect(user).to.exist
             
             // Clean up
@@ -420,8 +403,7 @@ describe('Security E2E Tests', () => {
             // Might fail due to insufficient permissions
             expect(error).to.be.instanceOf(Error)
           }
-        })
-
+        }))
         it('should prevent unauthorized schema modifications', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -442,11 +424,10 @@ describe('Security E2E Tests', () => {
             // Expected to fail due to insufficient permissions
             expect(error).to.be.instanceOf(Error)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Connection Security', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -462,14 +443,12 @@ describe('Security E2E Tests', () => {
             firstName: 'Secure',
             lastName: 'Connection',
             active: true
-          })
-          
+          }))
           expect(user).to.exist
           
           // Clean up
           await userRepo.delete('secure-connection-user')
-        })
-
+        }))
         it('should handle connection timeouts securely', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -485,8 +464,7 @@ describe('Security E2E Tests', () => {
               firstName: 'Timeout',
               lastName: 'User',
               active: true
-            })
-            
+            }))
             expect(user).to.exist
             
             // Clean up
@@ -495,8 +473,7 @@ describe('Security E2E Tests', () => {
             // Might fail due to timeout
             expect(error).to.be.instanceOf(Error)
           }
-        })
-
+        }))
         it('should prevent connection hijacking', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -511,8 +488,7 @@ describe('Security E2E Tests', () => {
             firstName: 'HijackTest',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           // Verify user was created by current connection
           const retrievedUser = await userRepo.findById('hijack-test-user')
           expect(retrievedUser).to.exist
@@ -520,11 +496,10 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('hijack-test-user')
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Data Encryption and Privacy', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -553,8 +528,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('sensitive-user')
-        })
-
+        }))
         it('should prevent data leakage in error messages', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -569,8 +543,7 @@ describe('Security E2E Tests', () => {
               firstName: 'LeakTest',
               lastName: 'User',
               active: true
-            })
-            
+            }))
             // Force an error
             await userRepo.create({
               id: 'leak-test-user', // Duplicate ID
@@ -578,8 +551,7 @@ describe('Security E2E Tests', () => {
               firstName: 'LeakTest2',
               lastName: 'User2',
               active: true
-            })
-            
+            }))
             expect.fail('Should have thrown an error')
           } catch (error) {
             // Verify error message doesn't contain sensitive data
@@ -590,8 +562,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('leak-test-user')
-        })
-
+        }))
         it('should handle data anonymization', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -605,26 +576,23 @@ describe('Security E2E Tests', () => {
             firstName: 'Anonymize',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           // Test anonymization by updating with generic data
           const anonymizedUser = await userRepo.update('anonymize-user', {
             email: 'anonymous@example.com',
             firstName: 'Anonymous',
             lastName: 'User'
-          })
-          
+          }))
           expect(anonymizedUser).to.exist
           expect(anonymizedUser!.email).to.equal('anonymous@example.com')
           expect(anonymizedUser!.firstName).to.equal('Anonymous')
           
           // Clean up
           await userRepo.delete('anonymize-user')
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Rate Limiting and DoS Protection', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -644,7 +612,7 @@ describe('Security E2E Tests', () => {
                 firstName: `RateLimit${i}`,
                 lastName: 'User',
                 active: true
-              })
+              }))
             )
           }
           
@@ -660,8 +628,7 @@ describe('Security E2E Tests', () => {
             // Might fail due to rate limiting
             expect(error).to.be.instanceOf(Error)
           }
-        })
-
+        }))
         it('should prevent resource exhaustion attacks', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -679,7 +646,7 @@ describe('Security E2E Tests', () => {
                 firstName: `Exhaustion${i}`,
                 lastName: 'User',
                 active: true
-              })
+              }))
               users.push(user)
             }
             
@@ -694,8 +661,7 @@ describe('Security E2E Tests', () => {
             // Might fail due to resource limits
             expect(error).to.be.instanceOf(Error)
           }
-        })
-
+        }))
         it('should handle concurrent access securely', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -712,7 +678,7 @@ describe('Security E2E Tests', () => {
                 firstName: `Concurrent${i}`,
                 lastName: 'User',
                 active: true
-              })
+              }))
             )
           }
           
@@ -728,11 +694,10 @@ describe('Security E2E Tests', () => {
             // Might fail due to concurrency limits
             expect(error).to.be.instanceOf(Error)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Audit and Logging Security', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -749,21 +714,19 @@ describe('Security E2E Tests', () => {
             firstName: 'Audit',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           expect(user).to.exist
           
           // Test update operation
           const updatedUser = await userRepo.update('audit-user', {
             firstName: 'UpdatedAudit'
-          })
+          }))
           expect(updatedUser).to.exist
           
           // Test delete operation
           const deleted = await userRepo.delete('audit-user')
           expect(deleted).to.be.true
-        })
-
+        }))
         it('should prevent log injection attacks', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -794,8 +757,7 @@ describe('Security E2E Tests', () => {
             // Might fail due to log injection prevention
             expect(error).to.be.instanceOf(Error)
           }
-        })
-
+        }))
         it('should handle sensitive data in logs appropriately', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -816,8 +778,8 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('sensitive-log-user')
-        })
-      })
+        }))
+      }))
     }
-  })
-})
+  }))
+}))

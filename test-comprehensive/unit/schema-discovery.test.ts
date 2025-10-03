@@ -2,7 +2,8 @@
  * Comprehensive unit tests for Schema Discovery functionality
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { SchemaDiscovery } from '../../src/schema/schema-discovery.js'
 import { withTestDatabase, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
@@ -34,8 +35,7 @@ describe('Schema Discovery', () => {
           expect(tableNames).to.include('post_tags')
           
           expect(schemaInfo.tables.length).to.be.greaterThan(0)
-        })
-
+        }))
         it('should discover table columns correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -54,8 +54,7 @@ describe('Schema Discovery', () => {
           expect(columnNames).to.include('firstName')
           expect(columnNames).to.include('lastName')
           expect(columnNames).to.include('active')
-        })
-
+        }))
         it('should discover primary keys', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -66,8 +65,7 @@ describe('Schema Discovery', () => {
           expect(usersTable).to.exist
           expect(usersTable!.primaryKey).to.be.an('array')
           expect(usersTable!.primaryKey).to.include('id')
-        })
-
+        }))
         it('should discover column types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -92,8 +90,7 @@ describe('Schema Discovery', () => {
           expect(emailColumn!.nullable).to.be.false
           expect(ageColumn!.nullable).to.be.true
           expect(activeColumn!.nullable).to.be.false
-        })
-
+        }))
         it('should discover indexes', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -106,8 +103,7 @@ describe('Schema Discovery', () => {
           
           // Should have at least the primary key index
           expect(usersTable!.indexes.length).to.be.greaterThan(0)
-        })
-
+        }))
         it('should discover foreign keys', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -124,11 +120,10 @@ describe('Schema Discovery', () => {
             expect(userFk.referencedTable).to.equal('users')
             expect(userFk.referencedColumn).to.equal('id')
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Relationship Discovery', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -139,8 +134,7 @@ describe('Schema Discovery', () => {
           const schemaInfo = await db.getSchemaInfo()
           expect(schemaInfo.relationships).to.be.an('array')
           expect(schemaInfo.relationships.length).to.be.greaterThan(0)
-        })
-
+        }))
         it('should discover one-to-many relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -155,8 +149,7 @@ describe('Schema Discovery', () => {
             r.fromTable === 'users' && r.toTable === 'posts'
           )
           expect(userPostsRel).to.exist
-        })
-
+        }))
         it('should discover many-to-one relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -171,8 +164,7 @@ describe('Schema Discovery', () => {
             r.fromTable === 'posts' && r.toTable === 'users'
           )
           expect(postUserRel).to.exist
-        })
-
+        }))
         it('should generate proper relationship names', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -185,8 +177,7 @@ describe('Schema Discovery', () => {
             expect(rel.name.length).to.be.greaterThan(0)
             expect(rel.name).to.not.include('_') // Should be camelCase
           }
-        })
-
+        }))
         it('should discover reverse relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -205,11 +196,10 @@ describe('Schema Discovery', () => {
             expect(reverseRel).to.exist
             expect(reverseRel!.type).to.not.equal(rel.type)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Configuration', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -221,8 +211,7 @@ describe('Schema Discovery', () => {
             introspection: {
               excludeTables: ['comments', 'tags']
             }
-          })
-          
+          }))
           await db.initialize()
           const schemaInfo = await db.getSchemaInfo()
           
@@ -233,8 +222,7 @@ describe('Schema Discovery', () => {
           // But should still include other tables
           expect(tableNames).to.include('users')
           expect(tableNames).to.include('posts')
-        })
-
+        }))
         it('should respect custom type mappings', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           
@@ -246,8 +234,7 @@ describe('Schema Discovery', () => {
                 'integer': 'CustomNumber'
               }
             }
-          })
-          
+          }))
           await db.initialize()
           const schemaInfo = await db.getSchemaInfo()
           
@@ -265,8 +252,7 @@ describe('Schema Discovery', () => {
           if (ageColumn && ageColumn.type === 'integer') {
             expect(ageColumn.type).to.equal('CustomNumber')
           }
-        })
-
+        }))
         it('should handle includeViews configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           
@@ -275,18 +261,16 @@ describe('Schema Discovery', () => {
             introspection: {
               includeViews: false
             }
-          })
-          
+          }))
           await db.initialize()
           const schemaInfo = await db.getSchemaInfo()
           
           expect(schemaInfo.views).to.be.an('array')
           // Views should be empty or minimal
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Performance', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -295,12 +279,10 @@ describe('Schema Discovery', () => {
           
           const duration = await performanceHelper.measure('schema-discovery', async () => {
             await db.initialize()
-          })
-          
+          }))
           // Schema discovery should be reasonably fast
           expect(duration).to.be.lessThan(5000) // 5 seconds max
-        })
-
+        }))
         it('should cache schema information', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -317,23 +299,20 @@ describe('Schema Discovery', () => {
           
           expect(schema1).to.deep.equal(schema2)
           expect(duration2).to.be.lessThan(duration1)
-        })
-
+        }))
         it('should refresh schema efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
           
           const duration = await performanceHelper.measure('schema-refresh', async () => {
             await db.refreshSchema()
-          })
-          
+          }))
           // Schema refresh should be reasonably fast
           expect(duration).to.be.lessThan(3000) // 3 seconds max
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Error Handling', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -347,11 +326,9 @@ describe('Schema Discovery', () => {
               username: 'invalid-user',
               password: 'invalid-password'
             }
-          })
-          
+          }))
           await expect(invalidDb.initialize()).to.be.rejected
-        })
-
+        }))
         it('should handle schema introspection errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           
@@ -366,8 +343,7 @@ describe('Schema Discovery', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        })
-
+        }))
         it('should handle invalid table names gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -376,11 +352,10 @@ describe('Schema Discovery', () => {
           const schemaInfo = await db.getSchemaInfo()
           const nonExistentTable = schemaInfo.tables.find(t => t.name === 'non_existent_table')
           expect(nonExistentTable).to.be.undefined
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Edge Cases', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -395,8 +370,7 @@ describe('Schema Discovery', () => {
               username: '',
               password: ''
             }
-          })
-          
+          }))
           await emptyDb.initialize()
           const schemaInfo = await emptyDb.getSchemaInfo()
           
@@ -406,8 +380,7 @@ describe('Schema Discovery', () => {
           expect(schemaInfo.relationships.length).to.equal(0)
           
           await emptyDb.close()
-        })
-
+        }))
         it('should handle tables with no primary key', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -430,8 +403,7 @@ describe('Schema Discovery', () => {
           
           // Clean up
           await kysely.schema.dropTable('no_pk_table').execute()
-        })
-
+        }))
         it('should handle tables with composite primary keys', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -458,8 +430,8 @@ describe('Schema Discovery', () => {
           
           // Clean up
           await kysely.schema.dropTable('composite_pk_table').execute()
-        })
-      })
+        }))
+      }))
     }
-  })
-})
+  }))
+}))

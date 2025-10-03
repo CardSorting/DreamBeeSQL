@@ -2,7 +2,8 @@
  * End-to-end tests for complete workflows
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { withTestDatabase, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 
@@ -33,8 +34,7 @@ describe('Full Workflow E2E Tests', () => {
             firstName: 'Workflow',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           expect(user).to.exist
           expect(user.id).to.equal('workflow-user')
           
@@ -45,8 +45,7 @@ describe('Full Workflow E2E Tests', () => {
             bio: 'Workflow test user',
             avatar: 'https://example.com/avatar.jpg',
             website: 'https://workflow.example.com'
-          })
-          
+          }))
           expect(profile).to.exist
           expect(profile.userId).to.equal(user.id)
           
@@ -59,7 +58,7 @@ describe('Full Workflow E2E Tests', () => {
               title: `Workflow Post ${i}`,
               content: `This is workflow post ${i} content.`,
               published: i % 2 === 0
-            })
+            }))
             posts.push(post)
           }
           
@@ -73,7 +72,7 @@ describe('Full Workflow E2E Tests', () => {
               postId: posts[i % 3].id,
               userId: user.id,
               content: `This is comment ${i} on post ${i % 3}.`
-            })
+            }))
             comments.push(comment)
           }
           
@@ -134,8 +133,7 @@ describe('Full Workflow E2E Tests', () => {
           // 11. Verify cleanup
           const deletedUser = await userRepo.findById(user.id)
           expect(deletedUser).to.be.null
-        })
-
+        }))
         it('should handle complete blog workflow', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -154,7 +152,7 @@ describe('Full Workflow E2E Tests', () => {
               firstName: `Author${i}`,
               lastName: 'Blogger',
               active: true
-            })
+            }))
             authors.push(author)
           }
           
@@ -166,7 +164,7 @@ describe('Full Workflow E2E Tests', () => {
               id: `blog-tag-${i}`,
               name: tagNames[i],
               color: `#${i}${i}${i}${i}${i}${i}`
-            })
+            }))
             tags.push(tag)
           }
           
@@ -179,7 +177,7 @@ describe('Full Workflow E2E Tests', () => {
               title: `Blog Post ${i}: ${tagNames[i % 4]} Topic`,
               content: `This is the content for blog post ${i}. It covers ${tagNames[i % 4]} topics.`,
               published: i % 3 !== 0 // 2/3 of posts are published
-            })
+            }))
             posts.push(post)
           }
           
@@ -191,7 +189,7 @@ describe('Full Workflow E2E Tests', () => {
               .values({
                 postId: posts[i].id,
                 tagId: tags[i % tags.length].id
-              })
+              }))
               .execute()
           }
           
@@ -204,7 +202,7 @@ describe('Full Workflow E2E Tests', () => {
               postId: publishedPosts[i % publishedPosts.length].id,
               userId: authors[i % 3].id,
               content: `Great post! Comment ${i}`
-            })
+            }))
             comments.push(comment)
           }
           
@@ -261,8 +259,7 @@ describe('Full Workflow E2E Tests', () => {
           for (const author of authors) {
             await userRepo.delete(author.id)
           }
-        })
-
+        }))
         it('should handle complete e-commerce workflow', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -280,7 +277,7 @@ describe('Full Workflow E2E Tests', () => {
               firstName: `Customer${i}`,
               lastName: 'Shopper',
               active: true
-            })
+            }))
             customers.push(customer)
           }
           
@@ -294,7 +291,7 @@ describe('Full Workflow E2E Tests', () => {
               title: `${productNames[i]} - Premium Quality`,
               content: `Description of ${productNames[i]}. High quality product with great features.`,
               published: true
-            })
+            }))
             products.push(product)
           }
           
@@ -306,7 +303,7 @@ describe('Full Workflow E2E Tests', () => {
               postId: products[i % products.length].id,
               userId: customers[i % customers.length].id,
               content: `Great product! Rating: ${(i % 5) + 1}/5 stars.`
-            })
+            }))
             reviews.push(review)
           }
           
@@ -370,11 +367,10 @@ describe('Full Workflow E2E Tests', () => {
           for (const customer of customers) {
             await userRepo.delete(customer.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Complex Relationship Workflows', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -396,7 +392,7 @@ describe('Full Workflow E2E Tests', () => {
               firstName: `Social${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
           }
           
@@ -408,7 +404,7 @@ describe('Full Workflow E2E Tests', () => {
               id: `trending-tag-${i}`,
               name: tagNames[i],
               color: `#${i}${i}${i}${i}${i}${i}`
-            })
+            }))
             trendingTags.push(tag)
           }
           
@@ -421,7 +417,7 @@ describe('Full Workflow E2E Tests', () => {
               title: `Social Post ${i}`,
               content: `This is social media post ${i} with trending content.`,
               published: true
-            })
+            }))
             posts.push(post)
           }
           
@@ -433,7 +429,7 @@ describe('Full Workflow E2E Tests', () => {
               .values({
                 postId: posts[i].id,
                 tagId: trendingTags[i % trendingTags.length].id
-              })
+              }))
               .execute()
           }
           
@@ -445,7 +441,7 @@ describe('Full Workflow E2E Tests', () => {
               postId: posts[i % posts.length].id,
               userId: users[i % users.length].id,
               content: `Comment ${i} on post ${i % posts.length}`
-            })
+            }))
             comments.push(comment)
           }
           
@@ -500,8 +496,7 @@ describe('Full Workflow E2E Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should handle complex content management workflow', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -522,7 +517,7 @@ describe('Full Workflow E2E Tests', () => {
               firstName: `Creator${i}`,
               lastName: 'Writer',
               active: true
-            })
+            }))
             creators.push(creator)
           }
           
@@ -533,7 +528,7 @@ describe('Full Workflow E2E Tests', () => {
               firstName: `Editor${i}`,
               lastName: 'Reviewer',
               active: true
-            })
+            }))
             editors.push(editor)
           }
           
@@ -545,7 +540,7 @@ describe('Full Workflow E2E Tests', () => {
               id: `category-${i}`,
               name: categoryNames[i],
               color: `#${i}${i}${i}${i}${i}${i}`
-            })
+            }))
             categories.push(category)
           }
           
@@ -558,7 +553,7 @@ describe('Full Workflow E2E Tests', () => {
               title: `Article ${i}: ${categoryNames[i % categoryNames.length]} Topic`,
               content: `This is a comprehensive article about ${categoryNames[i % categoryNames.length]}. It covers various aspects and provides detailed information.`,
               published: i % 3 !== 0 // 2/3 of articles are published
-            })
+            }))
             articles.push(article)
           }
           
@@ -570,7 +565,7 @@ describe('Full Workflow E2E Tests', () => {
               .values({
                 postId: articles[i].id,
                 tagId: categories[i % categories.length].id
-              })
+              }))
               .execute()
           }
           
@@ -582,7 +577,7 @@ describe('Full Workflow E2E Tests', () => {
               postId: articles[i % articles.length].id,
               userId: editors[i % editors.length].id,
               content: `Editorial feedback ${i}: This article needs ${i % 2 === 0 ? 'more detail' : 'better structure'}.`
-            })
+            }))
             editorialComments.push(comment)
           }
           
@@ -650,11 +645,10 @@ describe('Full Workflow E2E Tests', () => {
           for (const creator of creators) {
             await userRepo.delete(creator.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Performance Workflows', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -679,7 +673,7 @@ describe('Full Workflow E2E Tests', () => {
               firstName: `Perf${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
           }
           
@@ -691,7 +685,7 @@ describe('Full Workflow E2E Tests', () => {
               title: `Performance Post ${i}`,
               content: `This is performance test post ${i}.`,
               published: true
-            })
+            }))
             posts.push(post)
           }
           
@@ -702,7 +696,7 @@ describe('Full Workflow E2E Tests', () => {
               postId: posts[i % posts.length].id,
               userId: users[i % users.length].id,
               content: `Performance comment ${i}`
-            })
+            }))
             comments.push(comment)
           }
           
@@ -722,8 +716,7 @@ describe('Full Workflow E2E Tests', () => {
             for (const post of posts) {
               await postRepo.findById(post.id)
             }
-          })
-          
+          }))
           // Should handle high-performance operations efficiently
           expect(duration).to.be.lessThan(30000) // 30 seconds max
           
@@ -747,8 +740,7 @@ describe('Full Workflow E2E Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should handle concurrent workflow operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -765,7 +757,7 @@ describe('Full Workflow E2E Tests', () => {
               firstName: `Concurrent${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
           }
           
@@ -779,7 +771,7 @@ describe('Full Workflow E2E Tests', () => {
                 userRepo.update({
                   ...user,
                   firstName: `Updated${user.firstName}`
-                })
+                }))
               )
             }
             
@@ -792,13 +784,12 @@ describe('Full Workflow E2E Tests', () => {
                   title: `Concurrent Post ${i}`,
                   content: `Concurrent content ${i}`,
                   published: true
-                })
+                }))
               )
             }
             
             await Promise.all(promises)
-          })
-          
+          }))
           // Should handle concurrent operations efficiently
           expect(duration).to.be.lessThan(10000) // 10 seconds max
           
@@ -822,8 +813,8 @@ describe('Full Workflow E2E Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-})
+  }))
+}))

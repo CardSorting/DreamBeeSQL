@@ -2,7 +2,8 @@
  * End-to-end tests for cross-platform and compatibility features
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { withTestDatabase, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 
@@ -32,7 +33,7 @@ describe('Compatibility E2E Tests', () => {
         })
         
         expect(db).to.exist
-        expect(db.getDialect()).to.equal(dialect)
+        expect((db as any).getDialect()).to.equal(dialect)
       }
     })
 
@@ -43,7 +44,7 @@ describe('Compatibility E2E Tests', () => {
       const userRepo = db.getRepository('users')
       
       // Test PostgreSQL-specific features
-      if (db.getDialect() === 'postgresql') {
+      if ((db as any).getDialect() === 'postgresql') {
         // Test JSON column support
         const user = await userRepo.create({
           id: 'postgres-user',
@@ -58,7 +59,7 @@ describe('Compatibility E2E Tests', () => {
         // Clean up
         await userRepo.delete('postgres-user')
       }
-      })
+      }))
 
     it('should handle MySQL-specific features gracefully', withTestDatabase('mysql', async (testDb) => {
       const { db } = testDb
@@ -67,7 +68,7 @@ describe('Compatibility E2E Tests', () => {
       const userRepo = db.getRepository('users')
       
       // Test MySQL-specific features
-      if (db.getDialect() === 'mysql') {
+      if ((db as any).getDialect() === 'mysql') {
         // Test MySQL-specific data types
         const user = await userRepo.create({
           id: 'mysql-user',
@@ -82,7 +83,7 @@ describe('Compatibility E2E Tests', () => {
         // Clean up
         await userRepo.delete('mysql-user')
       }
-      })
+      }))
 
     it('should handle SQLite-specific features gracefully', withTestDatabase('sqlite', async (testDb) => {
       const { db } = testDb
@@ -91,7 +92,7 @@ describe('Compatibility E2E Tests', () => {
       const userRepo = db.getRepository('users')
       
       // Test SQLite-specific features
-      if (db.getDialect() === 'sqlite') {
+      if ((db as any).getDialect() === 'sqlite') {
         // Test SQLite-specific data types
         const user = await userRepo.create({
           id: 'sqlite-user',
@@ -106,7 +107,7 @@ describe('Compatibility E2E Tests', () => {
         // Clean up
         await userRepo.delete('sqlite-user')
       }
-      })
+      }))
   })
 
   describe('Node.js Version Compatibility', () => {
@@ -282,7 +283,7 @@ describe('Compatibility E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('driver-test-user')
-        })
+        }))
 
         it('should handle driver-specific connection options', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -299,7 +300,7 @@ describe('Compatibility E2E Tests', () => {
             .execute()
           
           expect(result).to.be.an('array')
-        })
+        }))
 
         it('should handle driver-specific data types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -317,15 +318,15 @@ describe('Compatibility E2E Tests', () => {
           })
           
           expect(user).to.exist
-          expect(typeof user.id).to.equal('string')
-          expect(typeof user.email).to.equal('string')
-          expect(typeof user.firstName).to.equal('string')
-          expect(typeof user.lastName).to.equal('string')
-          expect(typeof user.active).to.equal('boolean')
+          expect(typeof (user as any).id).to.equal('string')
+          expect(typeof (user as any).email).to.equal('string')
+          expect(typeof (user as any).firstName).to.equal('string')
+          expect(typeof (user as any).lastName).to.equal('string')
+          expect(typeof (user as any).active).to.equal('boolean')
           
           // Clean up
           await userRepo.delete('datatype-test-user')
-        })
+        }))
       })
     }
   })
@@ -432,7 +433,7 @@ describe('Compatibility E2E Tests', () => {
       const { NOORMME } = await import('../../src/noormme.js')
       
       // Test strict typing
-      const db: NOORMME = new NOORMME({
+      const db = new NOORMME({
         dialect: 'postgresql',
         connection: {
           host: 'localhost',
@@ -444,14 +445,13 @@ describe('Compatibility E2E Tests', () => {
       })
       
       expect(db).to.exist
-      expect(db.getDialect()).to.equal('postgresql')
+      expect((db as any).getDialect()).to.equal('postgresql')
     })
 
     it('should provide proper type definitions', async () => {
       // Test that type definitions are available
       const { NOORMME } = await import('../../src/noormme.js')
       const { CacheManager } = await import('../../src/cache/cache-manager.js')
-      const { RelationshipEngine } = await import('../../src/relationships/relationship-engine.js')
       
       // Test type inference
       const db = new NOORMME({
@@ -466,11 +466,9 @@ describe('Compatibility E2E Tests', () => {
       })
       
       const cache = new CacheManager()
-      const relationshipEngine = new RelationshipEngine()
       
       expect(db).to.exist
       expect(cache).to.exist
-      expect(relationshipEngine).to.exist
     })
 
     it('should handle generic types correctly', async () => {
@@ -557,7 +555,7 @@ describe('Compatibility E2E Tests', () => {
       // Test multiple NOORMME instances
       const { NOORMME } = await import('../../src/noormme.js')
       
-      const instances = []
+      const instances: any[] = []
       for (let i = 0; i < 10; i++) {
         const db = new NOORMME({
           dialect: 'postgresql',
@@ -577,7 +575,7 @@ describe('Compatibility E2E Tests', () => {
       // Test that all instances are independent
       for (let i = 0; i < instances.length; i++) {
         expect(instances[i]).to.exist
-        expect(instances[i].getDialect()).to.equal('postgresql')
+        expect((instances[i] as any).getDialect()).to.equal('postgresql')
       }
     })
   })

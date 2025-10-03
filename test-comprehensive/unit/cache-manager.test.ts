@@ -2,7 +2,8 @@
  * Comprehensive unit tests for Cache Manager functionality
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { CacheManager } from '../../src/cache/cache-manager.js'
 import { performanceHelper, memoryHelper } from '../setup/test-helpers.js'
 
@@ -15,8 +16,7 @@ describe('Cache Manager', () => {
       expect(typeof cache.set).to.equal('function')
       expect(typeof cache.delete).to.equal('function')
       expect(typeof cache.clear).to.equal('function')
-    })
-
+    }))
     it('should create cache manager with custom configuration', () => {
       const config = {
         ttl: 60000,
@@ -26,8 +26,7 @@ describe('Cache Manager', () => {
       
       const cache = new CacheManager(config)
       expect(cache).to.exist
-    })
-
+    }))
     it('should set and get values', async () => {
       const cache = new CacheManager()
       
@@ -35,15 +34,13 @@ describe('Cache Manager', () => {
       const value = cache.get('key1')
       
       expect(value).to.equal('value1')
-    })
-
+    }))
     it('should return null for non-existent keys', () => {
       const cache = new CacheManager()
       
       const value = cache.get('non-existent-key')
       expect(value).to.be.null
-    })
-
+    }))
     it('should delete values', async () => {
       const cache = new CacheManager()
       
@@ -52,8 +49,7 @@ describe('Cache Manager', () => {
       
       cache.delete('key1')
       expect(cache.get('key1')).to.be.null
-    })
-
+    }))
     it('should clear all values', async () => {
       const cache = new CacheManager()
       
@@ -70,8 +66,7 @@ describe('Cache Manager', () => {
       expect(cache.get('key1')).to.be.null
       expect(cache.get('key2')).to.be.null
       expect(cache.get('key3')).to.be.null
-    })
-
+    }))
     it('should handle different data types', async () => {
       const cache = new CacheManager()
       
@@ -104,9 +99,8 @@ describe('Cache Manager', () => {
       // Undefined
       await cache.set('undefined', undefined)
       expect(cache.get('undefined')).to.be.undefined
-    })
-  })
-
+    }))
+  }))
   describe('TTL (Time To Live)', () => {
     it('should expire values after TTL', async () => {
       const cache = new CacheManager({ ttl: 100 }) // 100ms TTL
@@ -118,8 +112,7 @@ describe('Cache Manager', () => {
       await new Promise(resolve => setTimeout(resolve, 150))
       
       expect(cache.get('key1')).to.be.null
-    })
-
+    }))
     it('should use custom TTL for specific values', async () => {
       const cache = new CacheManager({ ttl: 1000 }) // 1 second default TTL
       
@@ -130,8 +123,7 @@ describe('Cache Manager', () => {
       await new Promise(resolve => setTimeout(resolve, 100))
       
       expect(cache.get('key1')).to.be.null
-    })
-
+    }))
     it('should not expire values before TTL', async () => {
       const cache = new CacheManager({ ttl: 1000 }) // 1 second TTL
       
@@ -142,24 +134,20 @@ describe('Cache Manager', () => {
       await new Promise(resolve => setTimeout(resolve, 500))
       
       expect(cache.get('key1')).to.equal('value1')
-    })
-
+    }))
     it('should handle zero TTL', async () => {
-      const cache = new CacheManager({ ttl: 0 })
-      
+      const cache = new CacheManager({ ttl: 0 }))
       await cache.set('key1', 'value1')
       expect(cache.get('key1')).to.equal('value1')
       
       // With zero TTL, value should not expire
       await new Promise(resolve => setTimeout(resolve, 100))
       expect(cache.get('key1')).to.equal('value1')
-    })
-  })
-
+    }))
+  }))
   describe('Cache Size Management', () => {
     it('should respect max size limit', async () => {
-      const cache = new CacheManager({ maxSize: 3 })
-      
+      const cache = new CacheManager({ maxSize: 3 }))
       await cache.set('key1', 'value1')
       await cache.set('key2', 'value2')
       await cache.set('key3', 'value3')
@@ -174,11 +162,9 @@ describe('Cache Manager', () => {
       
       expect(cache.size()).to.equal(3)
       expect(cache.get('key4')).to.equal('value4')
-    })
-
+    }))
     it('should use LRU eviction strategy by default', async () => {
-      const cache = new CacheManager({ maxSize: 3, strategy: 'lru' })
-      
+      const cache = new CacheManager({ maxSize: 3, strategy: 'lru' }))
       await cache.set('key1', 'value1')
       await cache.set('key2', 'value2')
       await cache.set('key3', 'value3')
@@ -193,11 +179,9 @@ describe('Cache Manager', () => {
       expect(cache.get('key2')).to.be.null // Should be evicted
       expect(cache.get('key3')).to.equal('value3') // Should still exist
       expect(cache.get('key4')).to.equal('value4') // Should exist
-    })
-
+    }))
     it('should use FIFO eviction strategy when configured', async () => {
-      const cache = new CacheManager({ maxSize: 3, strategy: 'fifo' })
-      
+      const cache = new CacheManager({ maxSize: 3, strategy: 'fifo' }))
       await cache.set('key1', 'value1')
       await cache.set('key2', 'value2')
       await cache.set('key3', 'value3')
@@ -209,11 +193,9 @@ describe('Cache Manager', () => {
       expect(cache.get('key2')).to.equal('value2') // Should still exist
       expect(cache.get('key3')).to.equal('value3') // Should still exist
       expect(cache.get('key4')).to.equal('value4') // Should exist
-    })
-
+    }))
     it('should handle unlimited size when maxSize is not set', async () => {
-      const cache = new CacheManager({ maxSize: undefined })
-      
+      const cache = new CacheManager({ maxSize: undefined }))
       // Add many items
       for (let i = 0; i < 1000; i++) {
         await cache.set(`key${i}`, `value${i}`)
@@ -222,9 +204,8 @@ describe('Cache Manager', () => {
       expect(cache.size()).to.equal(1000)
       expect(cache.get('key0')).to.equal('value0')
       expect(cache.get('key999')).to.equal('value999')
-    })
-  })
-
+    }))
+  }))
   describe('Statistics and Monitoring', () => {
     it('should track cache statistics', async () => {
       const cache = new CacheManager()
@@ -252,8 +233,7 @@ describe('Cache Manager', () => {
       expect(stats.hits).to.equal(2)
       expect(stats.misses).to.equal(1)
       expect(stats.hitRate).to.be.closeTo(0.67, 0.01) // 2/3
-    })
-
+    }))
     it('should track hit rate correctly', async () => {
       const cache = new CacheManager()
       
@@ -270,8 +250,7 @@ describe('Cache Manager', () => {
       // 33% hit rate
       cache.get('key3')
       expect(cache.getHitRate()).to.be.closeTo(0.33, 0.01)
-    })
-
+    }))
     it('should reset statistics when cleared', async () => {
       const cache = new CacheManager()
       
@@ -289,16 +268,13 @@ describe('Cache Manager', () => {
       expect(stats.hits).to.equal(0)
       expect(stats.misses).to.equal(0)
       expect(stats.hitRate).to.equal(0)
-    })
-  })
-
+    }))
+  }))
   describe('Configuration Updates', () => {
     it('should update configuration', async () => {
-      const cache = new CacheManager({ ttl: 1000, maxSize: 10 })
-      
+      const cache = new CacheManager({ ttl: 1000, maxSize: 10 }))
       // Update configuration
-      cache.updateConfig({ ttl: 2000, maxSize: 20 })
-      
+      cache.updateConfig({ ttl: 2000, maxSize: 20 }))
       // Test that new configuration is applied
       await cache.set('key1', 'value1')
       expect(cache.get('key1')).to.equal('value1')
@@ -306,14 +282,11 @@ describe('Cache Manager', () => {
       // Wait for old TTL to expire but new TTL should still be valid
       await new Promise(resolve => setTimeout(resolve, 1500))
       expect(cache.get('key1')).to.equal('value1')
-    })
-
+    }))
     it('should handle partial configuration updates', async () => {
-      const cache = new CacheManager({ ttl: 1000, maxSize: 10 })
-      
+      const cache = new CacheManager({ ttl: 1000, maxSize: 10 }))
       // Update only TTL
-      cache.updateConfig({ ttl: 2000 })
-      
+      cache.updateConfig({ ttl: 2000 }))
       // TTL should be updated
       await cache.set('key1', 'value1')
       await new Promise(resolve => setTimeout(resolve, 1500))
@@ -324,9 +297,8 @@ describe('Cache Manager', () => {
         await cache.set(`key${i}`, `value${i}`)
       }
       expect(cache.size()).to.equal(10) // Should still be limited to 10
-    })
-  })
-
+    }))
+  }))
   describe('Utility Methods', () => {
     it('should check if key exists', async () => {
       const cache = new CacheManager()
@@ -338,11 +310,9 @@ describe('Cache Manager', () => {
       
       cache.delete('key1')
       expect(cache.has('key1')).to.be.false
-    })
-
+    }))
     it('should handle expired keys in has check', async () => {
-      const cache = new CacheManager({ ttl: 100 })
-      
+      const cache = new CacheManager({ ttl: 100 }))
       await cache.set('key1', 'value1')
       expect(cache.has('key1')).to.be.true
       
@@ -350,8 +320,7 @@ describe('Cache Manager', () => {
       await new Promise(resolve => setTimeout(resolve, 150))
       
       expect(cache.has('key1')).to.be.false
-    })
-
+    }))
     it('should get all keys', async () => {
       const cache = new CacheManager()
       
@@ -366,8 +335,7 @@ describe('Cache Manager', () => {
       expect(keys).to.include('key2')
       expect(keys).to.include('key3')
       expect(keys.length).to.equal(3)
-    })
-
+    }))
     it('should get all values', async () => {
       const cache = new CacheManager()
       
@@ -382,8 +350,7 @@ describe('Cache Manager', () => {
       expect(values).to.include('value2')
       expect(values).to.include('value3')
       expect(values.length).to.equal(3)
-    })
-
+    }))
     it('should get all entries', async () => {
       const cache = new CacheManager()
       
@@ -396,8 +363,7 @@ describe('Cache Manager', () => {
       expect(entries).to.deep.include(['key1', 'value1'])
       expect(entries).to.deep.include(['key2', 'value2'])
       expect(entries.length).to.equal(2)
-    })
-
+    }))
     it('should get cache size', async () => {
       const cache = new CacheManager()
       
@@ -414,13 +380,11 @@ describe('Cache Manager', () => {
       
       cache.clear()
       expect(cache.size()).to.equal(0)
-    })
-  })
-
+    }))
+  }))
   describe('Cleanup and Maintenance', () => {
     it('should clean expired items', async () => {
-      const cache = new CacheManager({ ttl: 100 })
-      
+      const cache = new CacheManager({ ttl: 100 }))
       await cache.set('key1', 'value1')
       await cache.set('key2', 'value2')
       
@@ -435,8 +399,7 @@ describe('Cache Manager', () => {
       expect(cache.size()).to.equal(0)
       expect(cache.get('key1')).to.be.null
       expect(cache.get('key2')).to.be.null
-    })
-
+    }))
     it('should close cache manager', async () => {
       const cache = new CacheManager()
       
@@ -448,9 +411,8 @@ describe('Cache Manager', () => {
       // Cache should be cleared after closing
       expect(cache.get('key1')).to.be.null
       expect(cache.size()).to.equal(0)
-    })
-  })
-
+    }))
+  }))
   describe('Performance', () => {
     it('should perform operations efficiently', async () => {
       const cache = new CacheManager()
@@ -460,8 +422,7 @@ describe('Cache Manager', () => {
         for (let i = 0; i < 1000; i++) {
           await cache.set(`key${i}`, `value${i}`)
         }
-      })
-      
+      }))
       expect(setDuration).to.be.lessThan(100) // 100ms max for 1000 operations
       
       // Test get performance
@@ -469,11 +430,9 @@ describe('Cache Manager', () => {
         for (let i = 0; i < 1000; i++) {
           cache.get(`key${i}`)
         }
-      })
-      
+      }))
       expect(getDuration).to.be.lessThan(50) // 50ms max for 1000 operations
-    })
-
+    }))
     it('should handle memory efficiently', async () => {
       const cache = new CacheManager()
       
@@ -482,12 +441,10 @@ describe('Cache Manager', () => {
         for (let i = 0; i < 10000; i++) {
           await cache.set(`key${i}`, `value${i}`)
         }
-      })
-      
+      }))
       // Memory usage should be reasonable
       expect(delta.heapUsed).to.be.lessThan(50) // 50MB limit
-    })
-
+    }))
     it('should handle concurrent operations', async () => {
       const cache = new CacheManager()
       
@@ -504,9 +461,8 @@ describe('Cache Manager', () => {
       
       expect(duration).to.be.lessThan(1000) // 1 second max
       expect(cache.size()).to.equal(100)
-    })
-  })
-
+    }))
+  }))
   describe('Edge Cases', () => {
     it('should handle empty string keys', async () => {
       const cache = new CacheManager()
@@ -517,24 +473,21 @@ describe('Cache Manager', () => {
       
       cache.delete('')
       expect(cache.get('')).to.be.null
-    })
-
+    }))
     it('should handle special characters in keys', async () => {
       const cache = new CacheManager()
       
       const specialKey = 'key with spaces and symbols!@#$%^&*()'
       await cache.set(specialKey, 'special-value')
       expect(cache.get(specialKey)).to.equal('special-value')
-    })
-
+    }))
     it('should handle very large values', async () => {
       const cache = new CacheManager()
       
       const largeValue = 'x'.repeat(1000000) // 1MB string
       await cache.set('large-key', largeValue)
       expect(cache.get('large-key')).to.equal(largeValue)
-    })
-
+    }))
     it('should handle rapid set/get operations', async () => {
       const cache = new CacheManager()
       
@@ -546,8 +499,7 @@ describe('Cache Manager', () => {
       }
       
       expect(cache.size()).to.equal(1000)
-    })
-
+    }))
     it('should handle undefined and null values', async () => {
       const cache = new CacheManager()
       
@@ -559,6 +511,6 @@ describe('Cache Manager', () => {
       
       expect(cache.has('null-key')).to.be.true
       expect(cache.has('undefined-key')).to.be.true
-    })
-  })
-})
+    }))
+  }))
+}))

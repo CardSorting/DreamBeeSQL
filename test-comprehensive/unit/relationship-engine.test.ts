@@ -2,7 +2,8 @@
  * Comprehensive unit tests for Relationship Engine functionality
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { RelationshipEngine } from '../../src/relationships/relationship-engine.js'
 import { withTestDatabase, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
@@ -30,8 +31,7 @@ describe('Relationship Engine', () => {
           const allRelationships = relationshipEngine.getAllRelationships()
           expect(allRelationships).to.be.an('array')
           expect(allRelationships.length).to.be.greaterThan(0)
-        })
-
+        }))
         it('should handle empty relationships array', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -43,8 +43,7 @@ describe('Relationship Engine', () => {
           const allRelationships = relationshipEngine.getAllRelationships()
           expect(allRelationships).to.be.an('array')
           expect(allRelationships.length).to.equal(0)
-        })
-
+        }))
         it('should get relationships for specific table', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -61,8 +60,7 @@ describe('Relationship Engine', () => {
           const relationshipNames = userRelationships.map(r => r.name)
           expect(relationshipNames).to.include('posts')
           expect(relationshipNames).to.include('profiles')
-        })
-
+        }))
         it('should add new relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -86,8 +84,7 @@ describe('Relationship Engine', () => {
           expect(allRelationships).to.be.an('array')
           expect(allRelationships.length).to.equal(1)
           expect(allRelationships[0]).to.deep.equal(newRelationship)
-        })
-
+        }))
         it('should remove relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -112,11 +109,10 @@ describe('Relationship Engine', () => {
           
           allRelationships = relationshipEngine.getAllRelationships()
           expect(allRelationships.length).to.equal(0)
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Relationship Loading', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -142,8 +138,7 @@ describe('Relationship Engine', () => {
             expect(user.posts).to.exist
             expect(user.posts).to.be.an('array')
           }
-        })
-
+        }))
         it('should load many-to-one relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -167,8 +162,7 @@ describe('Relationship Engine', () => {
             expect(post.users).to.be.an('object')
             expect(post.users.id).to.equal(post.userId)
           }
-        })
-
+        }))
         it('should load multiple relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -192,8 +186,7 @@ describe('Relationship Engine', () => {
             expect(user.posts).to.be.an('array')
             expect(user.profiles).to.exist
           }
-        })
-
+        }))
         it('should handle empty entities array', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -205,8 +198,7 @@ describe('Relationship Engine', () => {
           
           // Should not throw with empty array
           await expect(relationshipEngine.loadRelationships([], ['posts'])).to.not.be.rejected
-        })
-
+        }))
         it('should handle empty relations array', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -221,8 +213,7 @@ describe('Relationship Engine', () => {
           
           // Should not throw with empty relations array
           await expect(relationshipEngine.loadRelationships(users, [])).to.not.be.rejected
-        })
-
+        }))
         it('should handle non-existent relationships gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -237,11 +228,10 @@ describe('Relationship Engine', () => {
           
           // Should not throw with non-existent relationship
           await expect(relationshipEngine.loadRelationships(users, ['nonExistentRelation'])).to.not.be.rejected
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Batch Loading', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -253,8 +243,7 @@ describe('Relationship Engine', () => {
           const relationshipEngine = new RelationshipEngine(db.getKysely(), {
             enableBatchLoading: true,
             maxBatchSize: 10
-          })
-          
+          }))
           relationshipEngine.initialize(schemaInfo.relationships)
           
           const userRepo = db.getRepository('users')
@@ -268,7 +257,7 @@ describe('Relationship Engine', () => {
               firstName: `Batch${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
           }
           
@@ -290,8 +279,7 @@ describe('Relationship Engine', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should respect batch size configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -300,8 +288,7 @@ describe('Relationship Engine', () => {
           const relationshipEngine = new RelationshipEngine(db.getKysely(), {
             enableBatchLoading: true,
             maxBatchSize: 5
-          })
-          
+          }))
           relationshipEngine.initialize(schemaInfo.relationships)
           
           const userRepo = db.getRepository('users')
@@ -315,7 +302,7 @@ describe('Relationship Engine', () => {
               firstName: `BatchSize${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
           }
           
@@ -332,8 +319,7 @@ describe('Relationship Engine', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should handle batch loading with different relationship types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -342,8 +328,7 @@ describe('Relationship Engine', () => {
           const relationshipEngine = new RelationshipEngine(db.getKysely(), {
             enableBatchLoading: true,
             maxBatchSize: 10
-          })
-          
+          }))
           relationshipEngine.initialize(schemaInfo.relationships)
           
           const userRepo = db.getRepository('users')
@@ -358,7 +343,7 @@ describe('Relationship Engine', () => {
               firstName: `MixedBatch${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
           }
           
@@ -370,7 +355,7 @@ describe('Relationship Engine', () => {
               title: `Post ${i}`,
               content: `Content ${i}`,
               published: true
-            })
+            }))
             posts.push(post)
           }
           
@@ -398,11 +383,10 @@ describe('Relationship Engine', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Performance', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -420,12 +404,10 @@ describe('Relationship Engine', () => {
           
           const duration = await performanceHelper.measure('relationship-loading', async () => {
             await relationshipEngine.loadRelationships(users, ['posts'])
-          })
-          
+          }))
           // Should be efficient
           expect(duration).to.be.lessThan(1000) // 1 second max
-        })
-
+        }))
         it('should handle large datasets efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -434,8 +416,7 @@ describe('Relationship Engine', () => {
           const relationshipEngine = new RelationshipEngine(db.getKysely(), {
             enableBatchLoading: true,
             maxBatchSize: 50
-          })
-          
+          }))
           relationshipEngine.initialize(schemaInfo.relationships)
           
           const userRepo = db.getRepository('users')
@@ -449,14 +430,13 @@ describe('Relationship Engine', () => {
               firstName: `Perf${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
           }
           
           const duration = await performanceHelper.measure('large-dataset-relationships', async () => {
             await relationshipEngine.loadRelationships(users, ['posts'])
-          })
-          
+          }))
           // Should be efficient even for large datasets
           expect(duration).to.be.lessThan(3000) // 3 seconds max
           
@@ -464,8 +444,7 @@ describe('Relationship Engine', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should handle concurrent relationship loading', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -489,7 +468,7 @@ describe('Relationship Engine', () => {
               firstName: `Concurrent${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
             
             const post = await postRepo.create({
@@ -498,7 +477,7 @@ describe('Relationship Engine', () => {
               title: `Post ${i}`,
               content: `Content ${i}`,
               published: true
-            })
+            }))
             posts.push(post)
           }
           
@@ -533,11 +512,10 @@ describe('Relationship Engine', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Error Handling', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -563,8 +541,7 @@ describe('Relationship Engine', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        })
-
+        }))
         it('should handle invalid relationship configurations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -593,8 +570,7 @@ describe('Relationship Engine', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        })
-
+        }))
         it('should handle entities with null foreign keys', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -613,8 +589,7 @@ describe('Relationship Engine', () => {
             firstName: 'NullFK',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           // Manually set a null foreign key
           ;(user as any).userId = null
           
@@ -623,8 +598,8 @@ describe('Relationship Engine', () => {
           
           // Clean up
           await userRepo.delete(user.id)
-        })
-      })
+        }))
+      }))
     }
-  })
-})
+  }))
+}))

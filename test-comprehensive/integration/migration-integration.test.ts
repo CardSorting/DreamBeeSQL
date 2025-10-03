@@ -2,7 +2,7 @@
  * Comprehensive integration tests for migration system
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
 import { withTestDatabase, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 import { createNodeMigrationManager } from '../../src/migration/node-migration-manager.js'
@@ -10,6 +10,7 @@ import { NOORMME } from '../../src/noormme.js'
 
 describe('Migration System Integration', () => {
   const enabledDatabases = getEnabledDatabases()
+  const { expect } = require('chai')
   
   if (enabledDatabases.length === 0) {
     console.warn('No databases enabled for testing')
@@ -29,7 +30,6 @@ describe('Migration System Integration', () => {
             migrationTimeout: 30000,
             maxConcurrentMigrations: 3
           })
-          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -51,8 +51,8 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should handle migration execution', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -61,7 +61,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -82,8 +81,8 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should create migration files', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -92,7 +91,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -113,8 +111,8 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should handle configuration updates', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -125,7 +123,6 @@ describe('Migration System Integration', () => {
             migrationTimeout: 30000,
             maxConcurrentMigrations: 3
           })
-          
           // Get initial configuration
           const initialConfig = migrationManager.getConfig()
           expect(initialConfig.migrationTimeout).to.equal(30000)
@@ -136,7 +133,6 @@ describe('Migration System Integration', () => {
             migrationTimeout: 60000,
             maxConcurrentMigrations: 5
           })
-          
           // Get updated configuration
           const updatedConfig = migrationManager.getConfig()
           expect(updatedConfig.migrationTimeout).to.equal(60000)
@@ -144,8 +140,8 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should provide component access', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -154,7 +150,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Get components
           const components = migrationManager.getComponents()
           
@@ -165,11 +160,11 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        })
+        }))
       })
     }
   })
-
+  
   describe('Migration with Database Operations', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -181,7 +176,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize and run migrations
           await migrationManager.initialize()
           await migrationManager.migrate()
@@ -197,19 +191,18 @@ describe('Migration System Integration', () => {
             lastName: 'User',
             active: true
           })
-          
           expect(user).to.exist
-          expect(user.id).to.equal('migration-user')
+          expect((user as any).id).to.equal('migration-user')
           
           // Find user
           const foundUser = await userRepo.findById('migration-user')
           expect(foundUser).to.exist
-          expect(foundUser!.email).to.equal('migration@example.com')
+          expect((foundUser as any)!.email).to.equal('migration@example.com')
           
           // Update user
-          foundUser!.firstName = 'Updated'
+          (foundUser as any)!.firstName = 'Updated'
           const updatedUser = await userRepo.update(foundUser!)
-          expect(updatedUser.firstName).to.equal('Updated')
+          expect((updatedUser as any).firstName).to.equal('Updated')
           
           // Delete user
           const deleted = await userRepo.delete('migration-user')
@@ -217,8 +210,8 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should handle relationships after migration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -227,7 +220,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize and run migrations
           await migrationManager.initialize()
           await migrationManager.migrate()
@@ -244,29 +236,27 @@ describe('Migration System Integration', () => {
             lastName: 'User',
             active: true
           })
-          
           const post = await postRepo.create({
             id: 'rel-migration-post',
-            userId: user.id,
+            userId: (user as any).id,
             title: 'Rel Migration Post',
             content: 'Rel Migration Content',
             published: true
           })
-          
           // Load user with posts
-          const userWithPosts = await userRepo.findWithRelations(user.id, ['posts'])
+          const userWithPosts = await userRepo.findWithRelations((user as any).id, ['posts'])
           
           expect(userWithPosts).to.exist
-          expect(userWithPosts!.posts).to.exist
-          expect(userWithPosts!.posts.length).to.equal(1)
-          expect(userWithPosts!.posts[0].id).to.equal('rel-migration-post')
+          expect((userWithPosts as any)!.posts).to.exist
+          expect((userWithPosts as any)!.posts.length).to.equal(1)
+          expect((userWithPosts as any)!.posts[0].id).to.equal('rel-migration-post')
           
           // Clean up
           await postRepo.delete('rel-migration-post')
           await userRepo.delete('rel-migration-user')
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should handle transactions after migration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -275,7 +265,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize and run migrations
           await migrationManager.initialize()
           await migrationManager.migrate()
@@ -299,23 +288,22 @@ describe('Migration System Integration', () => {
             
             return user
           })
-          
           expect(result).to.exist
           expect(result.id).to.equal('tx-migration-user')
           
           // Verify user exists
           const user = await userRepo.findById('tx-migration-user')
           expect(user).to.exist
-          expect(user!.email).to.equal('txmigration@example.com')
+          expect((user as any)!.email).to.equal('txmigration@example.com')
           
           // Clean up
           await userRepo.delete('tx-migration-user')
           await migrationManager.cleanup()
-        })
+        }))
       })
     }
   })
-
+  
   describe('Migration Performance', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -327,19 +315,17 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Test initialization performance
           const duration = await performanceHelper.measure('migration-initialization', async () => {
             await migrationManager.initialize()
           })
-          
           // Should be efficient
           expect(duration).to.be.lessThan(5000) // 5 seconds max
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should execute migrations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -348,7 +334,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -357,14 +342,13 @@ describe('Migration System Integration', () => {
             const result = await migrationManager.migrate()
             return result
           })
-          
           // Should be efficient
           expect(duration).to.be.lessThan(10000) // 10 seconds max
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should get status efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -373,7 +357,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -382,14 +365,13 @@ describe('Migration System Integration', () => {
             const status = await migrationManager.getStatus()
             return status
           })
-          
           // Should be very fast
           expect(duration).to.be.lessThan(1000) // 1 second max
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should handle concurrent migration operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -398,13 +380,12 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize migration system
           await migrationManager.initialize()
           
           // Test concurrent operations
           const start = performance.now()
-          const promises = []
+          const promises: Promise<any>[] = []
           
           // Concurrent status checks
           for (let i = 0; i < 10; i++) {
@@ -420,11 +401,11 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        })
+        }))
       })
     }
   })
-
+  
   describe('Migration Error Handling', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -436,15 +417,14 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: '/invalid/path/that/does/not/exist'
           })
-          
           try {
             await migrationManager.initialize()
           } catch (error) {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        })
-
+        }))
+        
         it('should handle migration execution errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -453,7 +433,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           try {
             await migrationManager.initialize()
             
@@ -463,8 +442,8 @@ describe('Migration System Integration', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        })
-
+        }))
+        
         it('should handle database connection errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -473,7 +452,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -487,11 +465,11 @@ describe('Migration System Integration', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        })
+        }))
       })
     }
   })
-
+  
   describe('Migration Configuration', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -510,8 +488,8 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should override default configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -540,8 +518,8 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should handle partial configuration updates', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -550,13 +528,11 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Update only some configuration
           migrationManager.updateConfig({
             migrationTimeout: 45000,
             logLevel: 'WARN'
           })
-          
           const config = migrationManager.getConfig()
           expect(config.migrationTimeout).to.equal(45000)
           expect(config.logLevel).to.equal('WARN')
@@ -567,11 +543,11 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        })
+        }))
       })
     }
   })
-
+  
   describe('Migration with NOORMME Configuration', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -583,7 +559,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -594,7 +569,6 @@ describe('Migration System Integration', () => {
               enabled: true
             }
           })
-          
           // Migration manager should still work
           const status = await migrationManager.getStatus()
           expect(status).to.exist
@@ -602,8 +576,8 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should handle NOORMME cache configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -612,7 +586,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -623,15 +596,14 @@ describe('Migration System Integration', () => {
               maxSize: 2000
             }
           })
-          
           // Migration manager should still work
           const status = await migrationManager.getStatus()
           expect(status).to.exist
           
           // Clean up
           await migrationManager.cleanup()
-        })
-
+        }))
+        
         it('should handle NOORMME performance configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -640,7 +612,6 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
-          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -652,14 +623,13 @@ describe('Migration System Integration', () => {
               maxBatchSize: 200
             }
           })
-          
           // Migration manager should still work
           const status = await migrationManager.getStatus()
           expect(status).to.exist
           
           // Clean up
           await migrationManager.cleanup()
-        })
+        }))
       })
     }
   })

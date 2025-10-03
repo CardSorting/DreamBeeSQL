@@ -2,7 +2,8 @@
  * Stress tests for NOORM system
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { withTestDatabase, performanceHelper, memoryHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 
@@ -36,7 +37,7 @@ describe('Stress Tests', () => {
                 firstName: `Stress${i}`,
                 lastName: 'User',
                 active: true
-              })
+              }))
             )
           }
           
@@ -51,8 +52,7 @@ describe('Stress Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should handle memory efficiently with large datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -71,7 +71,7 @@ describe('Stress Tests', () => {
                 firstName: `MemoryStress${i}`,
                 lastName: 'User',
                 active: true
-              })
+              }))
               users.push(user)
             }
             
@@ -83,12 +83,10 @@ describe('Stress Tests', () => {
             for (const user of users) {
               await userRepo.delete(user.id)
             }
-          })
-          
+          }))
           // Memory usage should be reasonable
           expect(delta.heapUsed).to.be.lessThan(200) // 200MB limit
-        })
-
+        }))
         it('should handle rapid CRUD operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -107,7 +105,7 @@ describe('Stress Tests', () => {
                 firstName: `Rapid${i}`,
                 lastName: 'User',
                 active: true
-              })
+              }))
               users.push(user)
             }
             
@@ -126,12 +124,10 @@ describe('Stress Tests', () => {
             for (const user of users) {
               await userRepo.delete(user.id)
             }
-          })
-          
+          }))
           // Should handle rapid operations efficiently
           expect(duration).to.be.lessThan(15000) // 15 seconds max
-        })
-
+        }))
         it('should handle long-running operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -153,7 +149,7 @@ describe('Stress Tests', () => {
                   firstName: `Long${batch}${i}`,
                   lastName: 'User',
                   active: true
-                })
+                }))
                 batchUsers.push(user)
               }
               
@@ -167,15 +163,13 @@ describe('Stress Tests', () => {
             for (const user of users) {
               await userRepo.delete(user.id)
             }
-          })
-          
+          }))
           // Should handle long-running operations efficiently
           expect(duration).to.be.lessThan(30000) // 30 seconds max
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Relationship Stress Tests', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -200,7 +194,7 @@ describe('Stress Tests', () => {
               firstName: `Graph${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
           }
           
@@ -212,7 +206,7 @@ describe('Stress Tests', () => {
               title: `Graph Post ${i}`,
               content: `Graph Content ${i}`,
               published: true
-            })
+            }))
             posts.push(post)
           }
           
@@ -223,7 +217,7 @@ describe('Stress Tests', () => {
               postId: posts[i % 200].id,
               userId: users[i % 50].id,
               content: `Graph Comment ${i}`
-            })
+            }))
             comments.push(comment)
           }
           
@@ -234,8 +228,7 @@ describe('Stress Tests', () => {
             
             // Load posts with comments
             await postRepo.loadRelationships(posts, ['comments'])
-          })
-          
+          }))
           // Should handle large relationship graphs efficiently
           expect(duration).to.be.lessThan(10000) // 10 seconds max
           
@@ -260,8 +253,7 @@ describe('Stress Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should handle deep relationship chains', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -277,8 +269,7 @@ describe('Stress Tests', () => {
             firstName: 'Deep',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           const posts = []
           const comments = []
           
@@ -290,7 +281,7 @@ describe('Stress Tests', () => {
               title: `Deep Post ${i}`,
               content: `Deep Content ${i}`,
               published: true
-            })
+            }))
             posts.push(post)
             
             // Create 10 comments per post
@@ -300,7 +291,7 @@ describe('Stress Tests', () => {
                 postId: post.id,
                 userId: user.id,
                 content: `Deep Comment ${i}-${j}`
-              })
+              }))
               comments.push(comment)
             }
           }
@@ -314,8 +305,7 @@ describe('Stress Tests', () => {
             for (const post of userWithPosts!.posts) {
               await postRepo.findWithRelations(post.id, ['comments'])
             }
-          })
-          
+          }))
           // Should handle deep relationship chains efficiently
           expect(duration).to.be.lessThan(5000) // 5 seconds max
           
@@ -327,11 +317,10 @@ describe('Stress Tests', () => {
             await postRepo.delete(post.id)
           }
           await userRepo.delete(user.id)
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Transaction Stress Tests', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -354,12 +343,12 @@ describe('Stress Tests', () => {
                     firstName: `ConcurrentTx${i}`,
                     lastName: 'User',
                     active: true
-                  })
+                  }))
                   .returningAll()
                   .executeTakeFirstOrThrow()
                 
                 return user
-              })
+              }))
             )
           }
           
@@ -375,8 +364,7 @@ describe('Stress Tests', () => {
           for (const result of results) {
             await userRepo.delete(result.id)
           }
-        })
-
+        }))
         it('should handle large transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -397,7 +385,7 @@ describe('Stress Tests', () => {
                     firstName: `LargeTx${i}`,
                     lastName: 'User',
                     active: true
-                  })
+                  }))
                   .returningAll()
                   .executeTakeFirstOrThrow()
                 users.push(user)
@@ -413,18 +401,16 @@ describe('Stress Tests', () => {
                     title: `Large Tx Post ${i}`,
                     content: `Large Tx Content ${i}`,
                     published: true
-                  })
+                  }))
                   .returningAll()
                   .executeTakeFirstOrThrow()
                 posts.push(post)
               }
               
               return { users, posts }
-            })
-            
+            }))
             return result
-          })
-          
+          }))
           // Should handle large transactions efficiently
           expect(duration).to.be.lessThan(15000) // 15 seconds max
           
@@ -438,8 +424,7 @@ describe('Stress Tests', () => {
           for (let i = 0; i < 100; i++) {
             await userRepo.delete(`large-tx-user-${i}`)
           }
-        })
-
+        }))
         it('should handle transaction rollbacks efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -461,20 +446,19 @@ describe('Stress Tests', () => {
                       firstName: `Rollback${i}`,
                       lastName: 'User',
                       active: true
-                    })
+                    }))
                     .execute()
                   
                   // Force rollback
                   throw new Error(`Rollback test ${i}`)
                 }).catch(() => {
                   // Expected error
-                })
+                }))
               )
             }
             
             await Promise.all(promises)
-          })
-          
+          }))
           // Should handle transaction rollbacks efficiently
           expect(duration).to.be.lessThan(10000) // 10 seconds max
           
@@ -484,16 +468,14 @@ describe('Stress Tests', () => {
             const user = await userRepo.findById(`rollback-user-${i}`)
             expect(user).to.be.null
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Cache Stress Tests', () => {
     it('should handle cache stress efficiently', async () => {
       const { CacheManager } = await import('../../src/cache/cache-manager.js')
-      const cache = new CacheManager({ maxSize: 10000 })
-      
+      const cache = new CacheManager({ maxSize: 10000 }))
       // Test cache stress
       const duration = await performanceHelper.measure('cache-stress', async () => {
         const promises = []
@@ -512,19 +494,16 @@ describe('Stress Tests', () => {
         }
         
         await Promise.all(readPromises)
-      })
-      
+      }))
       // Should handle cache stress efficiently
       expect(duration).to.be.lessThan(2000) // 2 seconds max
       
       // Verify cache state
       expect(cache.size()).to.equal(1000)
-    })
-
+    }))
     it('should handle cache memory stress efficiently', async () => {
       const { CacheManager } = await import('../../src/cache/cache-manager.js')
-      const cache = new CacheManager({ maxSize: 5000 })
-      
+      const cache = new CacheManager({ maxSize: 5000 }))
       // Test cache memory stress
       const { delta } = await memoryHelper.measureMemory(async () => {
         // Add large values to cache
@@ -537,13 +516,11 @@ describe('Stress Tests', () => {
         for (let i = 0; i < 1000; i++) {
           cache.get(`memory-stress-key-${i}`)
         }
-      })
-      
+      }))
       // Memory usage should be reasonable
       expect(delta.heapUsed).to.be.lessThan(100) // 100MB limit
-    })
-  })
-
+    }))
+  }))
   describe('System Resource Stress Tests', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -566,7 +543,7 @@ describe('Stress Tests', () => {
                   firstName: `Resource${i}`,
                   lastName: 'User',
                   active: true
-                })
+                }))
               )
             }
             
@@ -584,12 +561,10 @@ describe('Stress Tests', () => {
             for (const user of users) {
               await userRepo.delete(user.id)
             }
-          })
-          
+          }))
           // Should handle system resource constraints efficiently
           expect(duration).to.be.lessThan(20000) // 20 seconds max
-        })
-
+        }))
         it('should handle memory pressure efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -611,7 +586,7 @@ describe('Stress Tests', () => {
                   firstName: `Pressure${batch}${i}`,
                   lastName: 'User',
                   active: true
-                })
+                }))
                 batchUsers.push(user)
               }
               
@@ -626,12 +601,11 @@ describe('Stress Tests', () => {
             for (const user of users) {
               await userRepo.delete(user.id)
             }
-          })
-          
+          }))
           // Memory usage should be reasonable even under pressure
           expect(delta.heapUsed).to.be.lessThan(300) // 300MB limit
-        })
-      })
+        }))
+      }))
     }
-  })
-})
+  }))
+}))

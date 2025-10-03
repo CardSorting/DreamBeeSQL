@@ -2,7 +2,8 @@
  * Comprehensive integration tests for transaction handling
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { withTestDatabase, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 
@@ -35,7 +36,7 @@ describe('Transaction Handling Integration', () => {
                 firstName: 'Tx',
                 lastName: 'User',
                 active: true
-              })
+              }))
               .returningAll()
               .executeTakeFirstOrThrow()
             
@@ -48,13 +49,12 @@ describe('Transaction Handling Integration', () => {
                 title: 'Transaction Post',
                 content: 'Transaction Content',
                 published: true
-              })
+              }))
               .returningAll()
               .executeTakeFirstOrThrow()
             
             return { user, post }
-          })
-          
+          }))
           expect(result).to.exist
           expect(result.user.id).to.equal('tx-user')
           expect(result.post.id).to.equal('tx-post')
@@ -71,8 +71,7 @@ describe('Transaction Handling Integration', () => {
           // Clean up
           await postRepo.delete('tx-post')
           await userRepo.delete('tx-user')
-        })
-
+        }))
         it('should rollback failed transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -91,7 +90,7 @@ describe('Transaction Handling Integration', () => {
                   firstName: 'Rollback',
                   lastName: 'User',
                   active: true
-                })
+                }))
                 .execute()
               
               // Create post
@@ -103,12 +102,12 @@ describe('Transaction Handling Integration', () => {
                   title: 'Rollback Post',
                   content: 'Rollback Content',
                   published: true
-                })
+                }))
                 .execute()
               
               // Force an error
               throw new Error('Transaction rollback test')
-            })
+            }))
           } catch (error) {
             // Expected error
             expect(error).to.be.instanceOf(Error)
@@ -121,8 +120,7 @@ describe('Transaction Handling Integration', () => {
           
           expect(user).to.be.null
           expect(post).to.be.null
-        })
-
+        }))
         it('should handle transaction with multiple operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -142,7 +140,7 @@ describe('Transaction Handling Integration', () => {
                 firstName: 'Complex',
                 lastName: 'User',
                 active: true
-              })
+              }))
               .returningAll()
               .executeTakeFirstOrThrow()
             
@@ -155,7 +153,7 @@ describe('Transaction Handling Integration', () => {
                 title: 'Complex Post',
                 content: 'Complex Content',
                 published: true
-              })
+              }))
               .returningAll()
               .executeTakeFirstOrThrow()
             
@@ -169,15 +167,14 @@ describe('Transaction Handling Integration', () => {
                   postId: post.id,
                   userId: user.id,
                   content: `Comment ${i}`
-                })
+                }))
                 .returningAll()
                 .executeTakeFirstOrThrow()
               comments.push(comment)
             }
             
             return { user, post, comments }
-          })
-          
+          }))
           expect(result).to.exist
           expect(result.user.id).to.equal('complex-user')
           expect(result.post.id).to.equal('complex-post')
@@ -199,11 +196,10 @@ describe('Transaction Handling Integration', () => {
           }
           await postRepo.delete('complex-post')
           await userRepo.delete('complex-user')
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Nested Transactions', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -224,7 +220,7 @@ describe('Transaction Handling Integration', () => {
                 firstName: 'Nested',
                 lastName: 'User',
                 active: true
-              })
+              }))
               .returningAll()
               .executeTakeFirstOrThrow()
             
@@ -233,17 +229,15 @@ describe('Transaction Handling Integration', () => {
               // Update user in inner transaction
               const updatedUser = await innerTrx
                 .updateTable('users')
-                .set({ firstName: 'Updated' })
+                .set({ firstName: 'Updated' }))
                 .where('id', '=', user.id)
                 .returningAll()
                 .executeTakeFirstOrThrow()
               
               return updatedUser
-            })
-            
+            }))
             return { user, innerResult }
-          })
-          
+          }))
           expect(result).to.exist
           expect(result.user.id).to.equal('nested-user')
           expect(result.innerResult.firstName).to.equal('Updated')
@@ -255,8 +249,7 @@ describe('Transaction Handling Integration', () => {
           
           // Clean up
           await userRepo.delete('nested-user')
-        })
-
+        }))
         it('should rollback nested transactions on error', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -275,7 +268,7 @@ describe('Transaction Handling Integration', () => {
                   firstName: 'NestedRollback',
                   lastName: 'User',
                   active: true
-                })
+                }))
                 .execute()
               
               // Execute inner transaction that fails
@@ -289,13 +282,13 @@ describe('Transaction Handling Integration', () => {
                     title: 'Nested Rollback Post',
                     content: 'Nested Rollback Content',
                     published: true
-                  })
+                  }))
                   .execute()
                 
                 // Force an error in inner transaction
                 throw new Error('Inner transaction error')
-              })
-            })
+              }))
+            }))
           } catch (error) {
             // Expected error
             expect(error).to.be.instanceOf(Error)
@@ -308,8 +301,7 @@ describe('Transaction Handling Integration', () => {
           
           expect(user).to.be.null
           expect(post).to.be.null
-        })
-
+        }))
         it('should handle complex nested transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -329,7 +321,7 @@ describe('Transaction Handling Integration', () => {
                 firstName: 'ComplexNested',
                 lastName: 'User',
                 active: true
-              })
+              }))
               .returningAll()
               .executeTakeFirstOrThrow()
             
@@ -345,14 +337,13 @@ describe('Transaction Handling Integration', () => {
                     title: `Complex Nested Post ${i}`,
                     content: `Complex Nested Content ${i}`,
                     published: true
-                  })
+                  }))
                   .returningAll()
                   .executeTakeFirstOrThrow()
                 posts.push(post)
               }
               return posts
-            })
-            
+            }))
             // Execute another inner transaction for comments
             const commentResult = await db.transaction(async (innerTrx) => {
               const comments = []
@@ -365,18 +356,16 @@ describe('Transaction Handling Integration', () => {
                       postId: post.id,
                       userId: user.id,
                       content: `Comment ${i}`
-                    })
+                    }))
                     .returningAll()
                     .executeTakeFirstOrThrow()
                   comments.push(comment)
                 }
               }
               return comments
-            })
-            
+            }))
             return { user, posts: postResult, comments: commentResult }
-          })
-          
+          }))
           expect(result).to.exist
           expect(result.user.id).to.equal('complex-nested-user')
           expect(result.posts.length).to.equal(2)
@@ -401,11 +390,10 @@ describe('Transaction Handling Integration', () => {
             await postRepo.delete(post.id)
           }
           await userRepo.delete('complex-nested-user')
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Transaction with Repository Operations', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -425,8 +413,7 @@ describe('Transaction Handling Integration', () => {
               firstName: 'Repo',
               lastName: 'User',
               active: true
-            })
-            
+            }))
             // Create post using repository
             const post = await postRepo.create({
               id: 'repo-post',
@@ -434,11 +421,9 @@ describe('Transaction Handling Integration', () => {
               title: 'Repo Post',
               content: 'Repo Content',
               published: true
-            })
-            
+            }))
             return { user, post }
-          })
-          
+          }))
           expect(result).to.exist
           expect(result.user.id).to.equal('repo-user')
           expect(result.post.id).to.equal('repo-post')
@@ -453,8 +438,7 @@ describe('Transaction Handling Integration', () => {
           // Clean up
           await postRepo.delete('repo-post')
           await userRepo.delete('repo-user')
-        })
-
+        }))
         it('should handle repository operations with transaction rollback', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -471,8 +455,7 @@ describe('Transaction Handling Integration', () => {
                 firstName: 'RepoRollback',
                 lastName: 'User',
                 active: true
-              })
-              
+              }))
               // Create post using repository
               await postRepo.create({
                 id: 'repo-rollback-post',
@@ -480,11 +463,10 @@ describe('Transaction Handling Integration', () => {
                 title: 'Repo Rollback Post',
                 content: 'Repo Rollback Content',
                 published: true
-              })
-              
+              }))
               // Force an error
               throw new Error('Repository transaction rollback test')
-            })
+            }))
           } catch (error) {
             // Expected error
             expect(error).to.be.instanceOf(Error)
@@ -497,8 +479,7 @@ describe('Transaction Handling Integration', () => {
           
           expect(user).to.be.null
           expect(post).to.be.null
-        })
-
+        }))
         it('should handle repository updates within transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -512,8 +493,7 @@ describe('Transaction Handling Integration', () => {
             firstName: 'Update',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           // Execute transaction with repository updates
           const result = await db.transaction(async (trx) => {
             // Update user using repository
@@ -522,8 +502,7 @@ describe('Transaction Handling Integration', () => {
             const updatedUser = await userRepo.update(user)
             
             return updatedUser
-          })
-          
+          }))
           expect(result).to.exist
           expect(result.firstName).to.equal('Updated')
           expect(result.lastName).to.equal('Name')
@@ -535,11 +514,10 @@ describe('Transaction Handling Integration', () => {
           
           // Clean up
           await userRepo.delete('update-user')
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Transaction Performance', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -561,31 +539,28 @@ describe('Transaction Handling Integration', () => {
                   firstName: 'Perf',
                   lastName: 'User',
                   active: true
-                })
+                }))
                 .returningAll()
                 .executeTakeFirstOrThrow()
               
               // Update user
               const updatedUser = await trx
                 .updateTable('users')
-                .set({ firstName: 'Updated' })
+                .set({ firstName: 'Updated' }))
                 .where('id', '=', user.id)
                 .returningAll()
                 .executeTakeFirstOrThrow()
               
               return updatedUser
-            })
-            
+            }))
             return result
-          })
-          
+          }))
           // Should be efficient
           expect(duration).to.be.lessThan(1000) // 1 second max
           
           // Clean up
           await userRepo.delete('perf-user')
-        })
-
+        }))
         it('should handle concurrent transactions efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -607,12 +582,12 @@ describe('Transaction Handling Integration', () => {
                     firstName: `Concurrent${i}`,
                     lastName: 'User',
                     active: true
-                  })
+                  }))
                   .returningAll()
                   .executeTakeFirstOrThrow()
                 
                 return user
-              })
+              }))
             )
           }
           
@@ -634,8 +609,7 @@ describe('Transaction Handling Integration', () => {
           for (let i = 0; i < 5; i++) {
             await userRepo.delete(`concurrent-user-${i}`)
           }
-        })
-
+        }))
         it('should handle large transactions efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -659,7 +633,7 @@ describe('Transaction Handling Integration', () => {
                     firstName: `Large${i}`,
                     lastName: 'User',
                     active: true
-                  })
+                  }))
                   .returningAll()
                   .executeTakeFirstOrThrow()
                 users.push(user)
@@ -672,18 +646,16 @@ describe('Transaction Handling Integration', () => {
                     title: `Large Post ${i}`,
                     content: `Large Content ${i}`,
                     published: true
-                  })
+                  }))
                   .returningAll()
                   .executeTakeFirstOrThrow()
                 posts.push(post)
               }
               
               return { users, posts }
-            })
-            
+            }))
             return result
-          })
-          
+          }))
           // Should be efficient even for large transactions
           expect(duration).to.be.lessThan(3000) // 3 seconds max
           
@@ -697,11 +669,10 @@ describe('Transaction Handling Integration', () => {
             await postRepo.delete(`large-post-${i}`)
             await userRepo.delete(`large-user-${i}`)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Transaction Error Handling', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -722,9 +693,9 @@ describe('Transaction Handling Integration', () => {
                   firstName: 'Duplicate',
                   lastName: 'User',
                   active: true
-                })
+                }))
                 .execute()
-            })
+            }))
           } catch (error) {
             // Expected constraint error
             expect(error).to.be.instanceOf(Error)
@@ -734,8 +705,7 @@ describe('Transaction Handling Integration', () => {
           const originalUser = await userRepo.findById('user-1')
           expect(originalUser).to.exist
           expect(originalUser!.email).to.equal('john@example.com')
-        })
-
+        }))
         it('should handle invalid SQL in transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -747,13 +717,12 @@ describe('Transaction Handling Integration', () => {
                 sql: 'INVALID SQL QUERY',
                 parameters: []
               } as any)
-            })
+            }))
           } catch (error) {
             // Expected SQL error
             expect(error).to.be.instanceOf(Error)
           }
-        })
-
+        }))
         it('should handle connection errors in transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -772,18 +741,17 @@ describe('Transaction Handling Integration', () => {
                   firstName: 'ConnectionError',
                   lastName: 'User',
                   active: true
-                })
+                }))
                 .execute()
-            })
+            }))
           } catch (error) {
             // Expected connection error
             expect(error).to.be.instanceOf(Error)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Transaction Isolation', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -804,7 +772,7 @@ describe('Transaction Handling Integration', () => {
                 firstName: 'Isolation1',
                 lastName: 'User',
                 active: true
-              })
+              }))
               .returningAll()
               .executeTakeFirstOrThrow()
             
@@ -812,8 +780,7 @@ describe('Transaction Handling Integration', () => {
             await new Promise(resolve => setTimeout(resolve, 100))
             
             return user
-          })
-          
+          }))
           // Start second transaction
           const transaction2 = db.transaction(async (trx2) => {
             // Create user in transaction 2
@@ -825,13 +792,12 @@ describe('Transaction Handling Integration', () => {
                 firstName: 'Isolation2',
                 lastName: 'User',
                 active: true
-              })
+              }))
               .returningAll()
               .executeTakeFirstOrThrow()
             
             return user
-          })
-          
+          }))
           // Execute both transactions concurrently
           const [result1, result2] = await Promise.all([transaction1, transaction2])
           
@@ -850,8 +816,7 @@ describe('Transaction Handling Integration', () => {
           // Clean up
           await userRepo.delete('isolation-user-1')
           await userRepo.delete('isolation-user-2')
-        })
-
+        }))
         it('should handle transaction conflicts gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -865,14 +830,13 @@ describe('Transaction Handling Integration', () => {
             firstName: 'Conflict',
             lastName: 'User',
             active: true
-          })
-          
+          }))
           // Start two transactions that try to update the same user
           const transaction1 = db.transaction(async (trx1) => {
             // Update user in transaction 1
             const updatedUser = await trx1
               .updateTable('users')
-              .set({ firstName: 'Updated1' })
+              .set({ firstName: 'Updated1' }))
               .where('id', '=', user.id)
               .returningAll()
               .executeTakeFirstOrThrow()
@@ -881,20 +845,18 @@ describe('Transaction Handling Integration', () => {
             await new Promise(resolve => setTimeout(resolve, 100))
             
             return updatedUser
-          })
-          
+          }))
           const transaction2 = db.transaction(async (trx2) => {
             // Update user in transaction 2
             const updatedUser = await trx2
               .updateTable('users')
-              .set({ firstName: 'Updated2' })
+              .set({ firstName: 'Updated2' }))
               .where('id', '=', user.id)
               .returningAll()
               .executeTakeFirstOrThrow()
             
             return updatedUser
-          })
-          
+          }))
           // Execute both transactions
           const [result1, result2] = await Promise.all([transaction1, transaction2])
           
@@ -908,8 +870,8 @@ describe('Transaction Handling Integration', () => {
           
           // Clean up
           await userRepo.delete('conflict-user')
-        })
-      })
+        }))
+      }))
     }
-  })
-})
+  }))
+}))

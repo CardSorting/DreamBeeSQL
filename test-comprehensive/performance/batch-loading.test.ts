@@ -2,7 +2,8 @@
  * Performance tests for batch loading functionality
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { withTestDatabase, performanceHelper, memoryHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 
@@ -35,7 +36,7 @@ describe('Batch Loading Performance', () => {
               firstName: `Batch${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
             
             // Create 2 posts per user
@@ -46,7 +47,7 @@ describe('Batch Loading Performance', () => {
                 title: `Batch Post ${i}-${j}`,
                 content: `Batch Content ${i}-${j}`,
                 published: true
-              })
+              }))
               posts.push(post)
             }
           }
@@ -54,8 +55,7 @@ describe('Batch Loading Performance', () => {
           // Test batch loading performance
           const duration = await performanceHelper.measure('batch-loading-small', async () => {
             await userRepo.loadRelationships(users, ['posts'])
-          })
-          
+          }))
           // Should be efficient for small datasets
           expect(duration).to.be.lessThan(1000) // 1 second max
           
@@ -73,8 +73,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should batch load relationships efficiently for medium datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -93,7 +92,7 @@ describe('Batch Loading Performance', () => {
               firstName: `BatchMed${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
             
             // Create 3 posts per user
@@ -104,7 +103,7 @@ describe('Batch Loading Performance', () => {
                 title: `Batch Med Post ${i}-${j}`,
                 content: `Batch Med Content ${i}-${j}`,
                 published: true
-              })
+              }))
               posts.push(post)
             }
           }
@@ -112,8 +111,7 @@ describe('Batch Loading Performance', () => {
           // Test batch loading performance
           const duration = await performanceHelper.measure('batch-loading-medium', async () => {
             await userRepo.loadRelationships(users, ['posts'])
-          })
-          
+          }))
           // Should be efficient for medium datasets
           expect(duration).to.be.lessThan(2000) // 2 seconds max
           
@@ -131,8 +129,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should batch load relationships efficiently for large datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -151,7 +148,7 @@ describe('Batch Loading Performance', () => {
               firstName: `BatchLarge${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
             
             // Create 2 posts per user
@@ -162,7 +159,7 @@ describe('Batch Loading Performance', () => {
                 title: `Batch Large Post ${i}-${j}`,
                 content: `Batch Large Content ${i}-${j}`,
                 published: true
-              })
+              }))
               posts.push(post)
             }
           }
@@ -170,8 +167,7 @@ describe('Batch Loading Performance', () => {
           // Test batch loading performance
           const duration = await performanceHelper.measure('batch-loading-large', async () => {
             await userRepo.loadRelationships(users, ['posts'])
-          })
-          
+          }))
           // Should be efficient for large datasets
           expect(duration).to.be.lessThan(3000) // 3 seconds max
           
@@ -189,8 +185,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should handle memory efficiently during batch loading', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -209,7 +204,7 @@ describe('Batch Loading Performance', () => {
               firstName: `Memory${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
             
             // Create 2 posts per user
@@ -220,7 +215,7 @@ describe('Batch Loading Performance', () => {
                 title: `Memory Post ${i}-${j}`,
                 content: `Memory Content ${i}-${j}`,
                 published: true
-              })
+              }))
               posts.push(post)
             }
           }
@@ -228,8 +223,7 @@ describe('Batch Loading Performance', () => {
           // Test memory usage during batch loading
           const { delta } = await memoryHelper.measureMemory(async () => {
             await userRepo.loadRelationships(users, ['posts'])
-          })
-          
+          }))
           // Memory usage should be reasonable
           expect(delta.heapUsed).to.be.lessThan(100) // 100MB limit
           
@@ -240,11 +234,10 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Batch Size Configuration', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -258,8 +251,7 @@ describe('Batch Loading Performance', () => {
               enableBatchLoading: true,
               maxBatchSize: 10
             }
-          })
-          
+          }))
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
           
@@ -274,7 +266,7 @@ describe('Batch Loading Performance', () => {
               firstName: `BatchSize${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
             
             // Create 1 post per user
@@ -284,15 +276,14 @@ describe('Batch Loading Performance', () => {
               title: `Batch Size Post ${i}`,
               content: `Batch Size Content ${i}`,
               published: true
-            })
+            }))
             posts.push(post)
           }
           
           // Test batch loading with configured batch size
           const duration = await performanceHelper.measure('batch-loading-configured', async () => {
             await userRepo.loadRelationships(users, ['posts'])
-          })
-          
+          }))
           // Should be efficient even with smaller batch size
           expect(duration).to.be.lessThan(2000) // 2 seconds max
           
@@ -310,8 +301,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should handle batch loading with different batch sizes', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -330,7 +320,7 @@ describe('Batch Loading Performance', () => {
               firstName: `BatchVary${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
             
             // Create 1 post per user
@@ -340,7 +330,7 @@ describe('Batch Loading Performance', () => {
               title: `Batch Vary Post ${i}`,
               content: `Batch Vary Content ${i}`,
               published: true
-            })
+            }))
             posts.push(post)
           }
           
@@ -355,8 +345,7 @@ describe('Batch Loading Performance', () => {
                 enableBatchLoading: true,
                 maxBatchSize: batchSize
               }
-            })
-            
+            }))
             // Reset users (remove loaded relationships)
             for (const user of users) {
               delete (user as any).posts
@@ -364,9 +353,8 @@ describe('Batch Loading Performance', () => {
             
             const duration = await performanceHelper.measure(`batch-loading-${batchSize}`, async () => {
               await userRepo.loadRelationships(users, ['posts'])
-            })
-            
-            results.push({ batchSize, duration })
+            }))
+            results.push({ batchSize, duration }))
           }
           
           // All batch sizes should be efficient
@@ -381,11 +369,10 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Concurrent Batch Loading', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -407,7 +394,7 @@ describe('Batch Loading Performance', () => {
               firstName: `ConcurrentBatch${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
             
             // Create 2 posts per user
@@ -418,7 +405,7 @@ describe('Batch Loading Performance', () => {
                 title: `Concurrent Batch Post ${i}-${j}`,
                 content: `Concurrent Batch Content ${i}-${j}`,
                 published: true
-              })
+              }))
               posts.push(post)
             }
           }
@@ -455,8 +442,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should handle concurrent batch loading with different relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -477,7 +463,7 @@ describe('Batch Loading Performance', () => {
               firstName: `ConcurrentRel${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
             
             // Create 1 post per user
@@ -487,7 +473,7 @@ describe('Batch Loading Performance', () => {
               title: `Concurrent Rel Post ${i}`,
               content: `Concurrent Rel Content ${i}`,
               published: true
-            })
+            }))
             posts.push(post)
             
             // Create 2 comments per post
@@ -497,7 +483,7 @@ describe('Batch Loading Performance', () => {
                 postId: post.id,
                 userId: user.id,
                 content: `Concurrent Rel Comment ${i}-${j}`
-              })
+              }))
               comments.push(comment)
             }
           }
@@ -540,11 +526,10 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Batch Loading vs Individual Loading', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -566,7 +551,7 @@ describe('Batch Loading Performance', () => {
               firstName: `Compare${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
             
             // Create 1 post per user
@@ -576,7 +561,7 @@ describe('Batch Loading Performance', () => {
               title: `Compare Post ${i}`,
               content: `Compare Content ${i}`,
               published: true
-            })
+            }))
             posts.push(post)
           }
           
@@ -585,8 +570,7 @@ describe('Batch Loading Performance', () => {
             for (const user of users) {
               await userRepo.findWithRelations(user.id, ['posts'])
             }
-          })
-          
+          }))
           // Reset users (remove loaded relationships)
           for (const user of users) {
             delete (user as any).posts
@@ -595,8 +579,7 @@ describe('Batch Loading Performance', () => {
           // Test batch loading
           const batchDuration = await performanceHelper.measure('batch-loading', async () => {
             await userRepo.loadRelationships(users, ['posts'])
-          })
-          
+          }))
           // Batch loading should be more efficient
           expect(batchDuration).to.be.lessThan(individualDuration)
           
@@ -614,8 +597,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-
+        }))
         it('should scale better with larger datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -634,7 +616,7 @@ describe('Batch Loading Performance', () => {
               firstName: `Scale${i}`,
               lastName: 'User',
               active: true
-            })
+            }))
             users.push(user)
             
             // Create 1 post per user
@@ -644,7 +626,7 @@ describe('Batch Loading Performance', () => {
               title: `Scale Post ${i}`,
               content: `Scale Content ${i}`,
               published: true
-            })
+            }))
             posts.push(post)
           }
           
@@ -653,8 +635,7 @@ describe('Batch Loading Performance', () => {
             for (const user of users) {
               await userRepo.findWithRelations(user.id, ['posts'])
             }
-          })
-          
+          }))
           // Reset users (remove loaded relationships)
           for (const user of users) {
             delete (user as any).posts
@@ -663,8 +644,7 @@ describe('Batch Loading Performance', () => {
           // Test batch loading
           const batchDuration = await performanceHelper.measure('batch-loading-large', async () => {
             await userRepo.loadRelationships(users, ['posts'])
-          })
-          
+          }))
           // Batch loading should be significantly more efficient for larger datasets
           expect(batchDuration).to.be.lessThan(individualDuration * 0.5) // At least 50% faster
           
@@ -682,8 +662,8 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-})
+  }))
+}))

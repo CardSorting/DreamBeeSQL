@@ -2,7 +2,8 @@
  * End-to-end tests for real-world scenarios
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { withTestDatabase, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 
@@ -33,8 +34,7 @@ describe('Real-World Scenarios E2E Tests', () => {
             firstName: 'John',
             lastName: 'Doe',
             active: true
-          })
-          
+          }))
           // 2. Product Catalog (using posts as products)
           const products = []
           const productData = [
@@ -52,7 +52,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               title: productData[i].name,
               content: `High-quality ${productData[i].name} for ${productData[i].category} category. Price: $${productData[i].price}`,
               published: true
-            })
+            }))
             products.push(product)
           }
           
@@ -64,7 +64,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               id: `category-${i}`,
               name: categoryNames[i],
               color: `#${i}${i}${i}${i}${i}${i}`
-            })
+            }))
             categories.push(category)
           }
           
@@ -78,7 +78,7 @@ describe('Real-World Scenarios E2E Tests', () => {
                 .values({
                   postId: products[i].id,
                   tagId: categories[categoryIndex].id
-                })
+                }))
                 .execute()
             }
           }
@@ -99,7 +99,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               postId: products[reviewData[i].productId].id,
               userId: customer.id,
               content: `${reviewData[i].rating}/5 stars - ${reviewData[i].text}`
-            })
+            }))
             reviews.push(review)
           }
           
@@ -163,8 +163,7 @@ describe('Real-World Scenarios E2E Tests', () => {
           }
           
           await userRepo.delete(customer.id)
-        })
-
+        }))
         it('should handle inventory management scenario', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -190,7 +189,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               title: inventoryData[i].name,
               content: `Stock: ${inventoryData[i].stock} units, Price: $${inventoryData[i].price}`,
               published: true
-            })
+            }))
             inventoryItems.push(item)
           }
           
@@ -210,7 +209,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               postId: inventoryItems[transactionData[i].itemId].id,
               userId: transactionData[i].customerId,
               content: `Sold ${transactionData[i].quantity} units`
-            })
+            }))
             transactions.push(transaction)
           }
           
@@ -287,11 +286,10 @@ describe('Real-World Scenarios E2E Tests', () => {
           for (const item of inventoryItems) {
             await postRepo.delete(item.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Social Media Platform Scenario', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -321,7 +319,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               firstName: userData[i].name.split(' ')[0],
               lastName: userData[i].name.split(' ')[1],
               active: true
-            })
+            }))
             users.push(user)
           }
           
@@ -333,7 +331,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               id: `hashtag-${i}`,
               name: hashtagNames[i],
               color: `#${i}${i}${i}${i}${i}${i}`
-            })
+            }))
             hashtags.push(hashtag)
           }
           
@@ -354,7 +352,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               title: `Post ${i}`,
               content: postData[i].content,
               published: true
-            })
+            }))
             posts.push(post)
           }
           
@@ -367,7 +365,7 @@ describe('Real-World Scenarios E2E Tests', () => {
                 .values({
                   postId: posts[i].id,
                   tagId: hashtags[hashtagIndex].id
-                })
+                }))
                 .execute()
             }
           }
@@ -390,7 +388,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               postId: posts[commentData[i].postId].id,
               userId: users[commentData[i].userId].id,
               content: commentData[i].content
-            })
+            }))
             comments.push(comment)
           }
           
@@ -455,8 +453,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               // Check for common hashtags
               const commonHashtags = new Set([...userHashtags].filter(x => otherUserHashtags.has(x)))
               return commonHashtags.size > 0
-            })
-            
+            }))
             userRecommendations.set(user.id, similarUsers.slice(0, 2)) // Top 2 recommendations
           }
           
@@ -482,11 +479,10 @@ describe('Real-World Scenarios E2E Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Content Management System Scenario', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -515,7 +511,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               firstName: teamData[i].name.split(' ')[0],
               lastName: teamData[i].name.split(' ')[1],
               active: true
-            })
+            }))
             teamMembers.push(member)
           }
           
@@ -527,7 +523,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               id: `category-${i}`,
               name: categoryNames[i],
               color: `#${i}${i}${i}${i}${i}${i}`
-            })
+            }))
             categories.push(category)
           }
           
@@ -548,7 +544,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               title: articleData[i].title,
               content: `This is a comprehensive article about ${articleData[i].title}. It covers various aspects and provides detailed information.`,
               published: articleData[i].status === 'published'
-            })
+            }))
             articles.push(article)
           }
           
@@ -562,7 +558,7 @@ describe('Real-World Scenarios E2E Tests', () => {
                 .values({
                   postId: articles[i].id,
                   tagId: categories[categoryIndex].id
-                })
+                }))
                 .execute()
             }
           }
@@ -583,7 +579,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               postId: articles[commentData[i].articleId].id,
               userId: teamMembers[commentData[i].userId].id,
               content: commentData[i].content
-            })
+            }))
             editorialComments.push(comment)
           }
           
@@ -680,11 +676,10 @@ describe('Real-World Scenarios E2E Tests', () => {
           for (const member of teamMembers) {
             await userRepo.delete(member.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-
+  }))
   describe('Analytics and Reporting Scenario', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -711,7 +706,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               firstName: `User${i}`,
               lastName: 'Analytics',
               active: i % 10 !== 0 // 90% active users
-            })
+            }))
             users.push(user)
           }
           
@@ -723,7 +718,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               title: `Analytics Post ${i}`,
               content: `This is analytics post ${i} for testing purposes.`,
               published: i % 5 !== 0 // 80% published posts
-            })
+            }))
             posts.push(post)
           }
           
@@ -734,7 +729,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               postId: posts[i % posts.length].id,
               userId: users[i % users.length].id,
               content: `Analytics comment ${i}`
-            })
+            }))
             comments.push(comment)
           }
           
@@ -744,7 +739,7 @@ describe('Real-World Scenarios E2E Tests', () => {
               id: `analytics-tag-${i}`,
               name: `Tag${i}`,
               color: `#${i}${i}${i}${i}${i}${i}`
-            })
+            }))
             tags.push(tag)
           }
           
@@ -904,8 +899,8 @@ describe('Real-World Scenarios E2E Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        })
-      })
+        }))
+      }))
     }
-  })
-})
+  }))
+}))

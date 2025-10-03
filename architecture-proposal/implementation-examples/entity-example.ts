@@ -1,7 +1,13 @@
 // Entity Example Implementation
-// This file demonstrates how to use the Entity Manager system
+// This file demonstrates how to use the Entity Manager system with DreamBeeSQL
+// 
+// Key Concepts:
+// - Entities are auto-generated from your database schema
+// - No manual entity definitions required
+// - Full TypeScript type safety with decorators
+// - Automatic relationship mapping
 
-import { Entity, Table, PrimaryKey, Column, HasMany, HasOne } from '../src/entity/entity'
+import { Entity, Table, PrimaryKey, Column, HasMany, HasOne, BelongsTo } from '../src/entity/entity'
 import { EntityManager } from '../src/entity/entity-manager'
 
 // User Entity
@@ -216,49 +222,103 @@ export interface ProfileRow {
   avatar: string | null
 }
 
-// Usage Example
-export function demonstrateEntityUsage() {
-  const entityManager = EntityManager.getInstance()
-  
-  // Create entities
-  const user = entityManager.createEntity(User)
-  user.email = 'john@example.com'
-  user.firstName = 'John'
-  user.lastName = 'Doe'
-  
-  const post = entityManager.createEntity(Post)
-  post.title = 'My First Post'
-  post.content = 'This is my first post content'
-  post.user_id = user.id
-  
-  const comment = entityManager.createEntity(Comment)
-  comment.content = 'Great post!'
-  comment.post_id = post.id
-  comment.user_id = user.id
-  
-  const profile = entityManager.createEntity(Profile)
-  profile.user_id = user.id
-  profile.bio = 'Software developer'
-  
-  // Convert to rows
-  const userRow = user.toRow()
-  const postRow = post.toRow()
-  const commentRow = comment.toRow()
-  const profileRow = profile.toRow()
-  
-  console.log('User row:', userRow)
-  console.log('Post row:', postRow)
-  console.log('Comment row:', commentRow)
-  console.log('Profile row:', profileRow)
-  
-  // Convert from rows
-  const userFromRow = new User().fromRow(userRow)
-  const postFromRow = new Post().fromRow(postRow)
-  const commentFromRow = new Comment().fromRow(commentRow)
-  const profileFromRow = new Profile().fromRow(profileRow)
-  
-  console.log('User from row:', userFromRow)
-  console.log('Post from row:', postFromRow)
-  console.log('Comment from row:', commentFromRow)
-  console.log('Profile from row:', profileFromRow)
+// Usage Example with Error Handling
+export async function demonstrateEntityUsage() {
+  try {
+    const entityManager = EntityManager.getInstance()
+    
+    // Create entities with validation
+    const user = entityManager.createEntity(User)
+    user.email = 'john@example.com'
+    user.firstName = 'John'
+    user.lastName = 'Doe'
+    
+    // Validate required fields
+    if (!user.email) {
+      throw new Error('Email is required')
+    }
+    
+    const post = entityManager.createEntity(Post)
+    post.title = 'My First Post'
+    post.content = 'This is my first post content'
+    post.user_id = user.id
+    
+    // Validate required fields
+    if (!post.title || !post.user_id) {
+      throw new Error('Title and user_id are required for posts')
+    }
+    
+    const comment = entityManager.createEntity(Comment)
+    comment.content = 'Great post!'
+    comment.post_id = post.id
+    comment.user_id = user.id
+    
+    // Validate required fields
+    if (!comment.content || !comment.post_id || !comment.user_id) {
+      throw new Error('Content, post_id, and user_id are required for comments')
+    }
+    
+    const profile = entityManager.createEntity(Profile)
+    profile.user_id = user.id
+    profile.bio = 'Software developer'
+    
+    // Validate required fields
+    if (!profile.user_id) {
+      throw new Error('user_id is required for profiles')
+    }
+    
+    // Convert to rows (for database insertion)
+    const userRow = user.toRow()
+    const postRow = post.toRow()
+    const commentRow = comment.toRow()
+    const profileRow = profile.toRow()
+    
+    console.log('✅ Entity to Row conversion successful:')
+    console.log('User row:', userRow)
+    console.log('Post row:', postRow)
+    console.log('Comment row:', commentRow)
+    console.log('Profile row:', profileRow)
+    
+    // Convert from rows (for database retrieval)
+    const userFromRow = new User().fromRow(userRow)
+    const postFromRow = new Post().fromRow(postRow)
+    const commentFromRow = new Comment().fromRow(commentRow)
+    const profileFromRow = new Profile().fromRow(profileRow)
+    
+    console.log('✅ Row to Entity conversion successful:')
+    console.log('User from row:', userFromRow)
+    console.log('Post from row:', postFromRow)
+    console.log('Comment from row:', commentFromRow)
+    console.log('Profile from row:', profileFromRow)
+    
+    // Demonstrate relationship access
+    console.log('✅ Relationship access:')
+    console.log('User posts:', user.posts?.length || 0)
+    console.log('User profile:', user.profile ? 'Yes' : 'No')
+    console.log('Post comments:', post.comments?.length || 0)
+    console.log('Comment post:', comment.post ? 'Yes' : 'No')
+    
+  } catch (error) {
+    console.error('❌ Entity usage error:', error.message)
+    throw error
+  }
+}
+
+// Alternative: Using DreamBeeSQL auto-generated entities
+export async function demonstrateAutoGeneratedEntities() {
+  try {
+    // With DreamBeeSQL, entities are auto-generated
+    // This is just for demonstration - in real usage, you'd use:
+    // const db = new DreamBeeSQL(config)
+    // await db.initialize()
+    // const userRepo = db.getRepository('users')
+    
+    console.log('📝 Note: With DreamBeeSQL, entities are auto-generated from your database schema')
+    console.log('📝 No manual entity definitions required!')
+    console.log('📝 Use: const userRepo = db.getRepository("users")')
+    
+  } catch (error) {
+    console.error('❌ Auto-generated entity demonstration error:', error.message)
+    throw error
+  }
 }

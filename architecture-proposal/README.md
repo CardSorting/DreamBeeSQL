@@ -1,41 +1,41 @@
-# DreamBeeSQL Architecture Proposal - Optimized Structure
+# DreamBeeSQL Architecture Proposal
 
-## 📁 File Organization
+## 🎯 What is DreamBeeSQL?
 
-This directory contains the complete architecture proposal for DreamBeeSQL, organized for optimal navigation and understanding.
+DreamBeeSQL is a **zero-configuration pseudo-ORM** built on Kysely that automatically discovers your database schema and generates TypeScript types, entities, and repositories. No manual entity definitions required!
 
-## 🎯 Quick Start
+## 🚀 Quick Start
 
-### 🚀 Get Started Immediately
-1. **[QUICK_START.md](./QUICK_START.md)** - Get up and running in 5 minutes
-2. **[USAGE_EXAMPLES.md](./USAGE_EXAMPLES.md)** - Comprehensive usage examples
+### Get Started in 2 Minutes
+1. **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Complete developer guide with examples
+2. **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick reference card for common operations
 
-### 📚 For New Developers
-1. Start with **[QUICK_START.md](./QUICK_START.md)** - Quick setup and basic usage
-2. Read **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - High-level vision and principles
-3. Study **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - Simplified component structure
-4. Follow **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation
-5. Reference **[ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md)** - Visual system overview
+### 📚 Documentation Navigation
 
-### 🔧 For Experienced Developers
-1. Review **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - System vision
-2. Study **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - Core components
-3. Examine **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Implementation details
-4. Check **[ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams
-5. Reference **[COMPONENT_MAPPING.md](./COMPONENT_MAPPING.md)** - Migration from old architecture
+#### For New Developers
+1. **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Start here! Complete guide with examples
+2. **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick reference for common operations
+3. **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migrate from other ORMs
+
+#### For Experienced Developers
+1. **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - System design and vision
+2. **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - 5-component architecture
+3. **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Build your own implementation
+4. **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns and types
 
 ## 📚 Documentation Structure
 
 ### 🏗️ Core Architecture
-- **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - Complete system overview
-- **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - Simplified 5-component architecture
+- **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - System design and vision
+- **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - 5-component architecture
 - **[ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams and flow charts
 
 ### 🚀 Implementation & Usage
-- **[QUICK_START.md](./QUICK_START.md)** - Get started in 5 minutes
+- **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Complete developer guide with examples
+- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick reference card for common operations
 - **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation guide
-- **[USAGE_EXAMPLES.md](./USAGE_EXAMPLES.md)** - Comprehensive usage examples
-- **[implementation-examples/](./implementation-examples/)** - Code examples and patterns
+- **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migrate from other ORMs
+- **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns and types
 
 ### 📖 Legacy Components (Reference Only)
 *Note: The original 18 components have been moved to the `legacy-components/` directory for reference.*
@@ -47,79 +47,21 @@ This directory contains the complete architecture proposal for DreamBeeSQL, orga
 
 ## 🎯 Recommended Reading Order
 
-### 1. **Quick Start (5 minutes)**
-```
-QUICK_START.md
-├── Installation
-├── Basic usage
-├── Simple examples
-└── Configuration options
-```
+### For New Developers
+1. **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Start here! Complete guide with examples
+2. **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick reference for common operations
+3. **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - If migrating from another ORM
 
-### 2. **Understanding the Vision**
-```
-ARCHITECTURE_OVERVIEW.md
-├── System vision and principles
-├── Key features and benefits
-├── Implementation phases
-└── Success metrics
-```
+### For Experienced Developers
+1. **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - System design and vision
+2. **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - 5-component architecture
+3. **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Build your own implementation
+4. **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns and types
 
-### 3. **Understanding the Architecture**
-```
-SIMPLIFIED_ARCHITECTURE.md
-├── 5 core components
-├── Component responsibilities
-├── Data flow
-└── API design
-```
-
-### 4. **Visual Understanding**
-```
-ARCHITECTURE_DIAGRAMS.md
-├── System overview diagrams
-├── Component architecture
-├── Data flow diagrams
-├── Relationship detection
-└── Performance monitoring
-```
-
-### 5. **Implementation Details**
-```
-IMPLEMENTATION_GUIDE.md
-├── Phase 1: Core Foundation
-├── Step-by-step implementation
-├── Code examples
-└── Testing strategy
-```
-
-### 6. **Advanced Usage**
-```
-USAGE_EXAMPLES.md
-├── Complex examples
-├── Production patterns
-├── Performance optimization
-└── Error handling
-```
-
-### 7. **Code Examples**
-```
-implementation-examples/
-├── entity-example.ts
-├── repository-example.ts
-├── relationship-example.ts
-└── configuration-example.ts
-```
-
-### 8. **Legacy Reference**
-```
-legacy-components/
-├── README.md (legacy overview)
-├── 01-entity-manager.md
-├── 02-repository-registry.md
-├── ... (18 original components)
-└── README_ORIGINAL.md
-```
+### For Implementation
+1. **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation
+2. **[implementation-examples/](./implementation-examples/)** - Code examples and patterns
+3. **[ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams and flow charts
 
 ## 🔄 Architecture Evolution
 
@@ -140,89 +82,90 @@ legacy-components/
 2. **Phase 2**: Add advanced features from original components
 3. **Phase 3**: Optimize and enhance based on usage
 
-## 🎨 Key Design Decisions
+## 🎨 Key Features
 
-### 1. **Zero Configuration First**
+### 1. **Zero Configuration**
 - Works with any existing database
 - No manual entity definitions
 - Automatic schema discovery
 
-### 2. **Type Safety Throughout**
+### 2. **Type Safety**
 - Full TypeScript support
 - Auto-generated types
 - Compile-time checking
 
-### 3. **Performance Optimized**
-- Singleton patterns
+### 3. **Performance**
 - Smart caching
 - Lazy loading
+- Query optimization
 
-### 4. **Graceful Degradation**
-- Fallback systems
-- Error handling
-- Incremental adoption
+### 4. **Developer Experience**
+- IntelliSense support
+- Clear error messages
+- Comprehensive documentation
 
-## 🚀 Implementation Strategy
+## 🚀 Getting Started
 
-### Phase 1: Core Foundation (Weeks 1-2)
-- Basic database connection
-- Schema discovery engine
-- Simple type generation
-- Basic entity and repository generation
+### Installation
+```bash
+npm install dreambeesql
+```
 
-### Phase 2: Runtime Operations (Weeks 3-4)
-- Entity and repository management
-- Basic CRUD operations
-- Relationship loading
-- Caching system
+### Basic Usage
+```typescript
+import { DreamBeeSQL } from 'dreambeesql'
 
-### Phase 3: Advanced Features (Weeks 5-6)
-- Schema evolution
-- Advanced relationship types
-- Performance optimization
-- Error handling and fallbacks
+const db = new DreamBeeSQL({
+  dialect: 'postgresql',
+  connection: {
+    host: 'localhost',
+    port: 5432,
+    database: 'myapp',
+    username: 'user',
+    password: 'password'
+  }
+})
 
-### Phase 4: Production Ready (Weeks 7-8)
-- Comprehensive testing
-- Documentation
-- Performance tuning
-- Migration tools
+await db.initialize()
+const userRepo = db.getRepository('users')
+const users = await userRepo.findAll()
+```
 
-## 📊 Success Metrics
+## 📊 Benefits
 
 ### Developer Experience
-- **Setup Time**: < 5 minutes from zero to working
-- **Type Safety**: 100% TypeScript coverage
-- **IntelliSense**: Full autocomplete support
-- **Error Messages**: Clear, actionable feedback
+- **Zero Configuration** - Works with any existing database
+- **Type Safety** - Full TypeScript support with auto-generated types
+- **IntelliSense** - Complete autocomplete support
+- **Clear Errors** - Actionable error messages
 
 ### Performance
-- **Initial Discovery**: < 2 seconds for 100 tables
-- **Type Generation**: < 1 second for full schema
-- **Runtime Overhead**: < 5% compared to raw Kysely
-- **Memory Usage**: < 50MB for large schemas
+- **Fast Discovery** - Quick schema introspection
+- **Smart Caching** - Optimized query performance
+- **Lazy Loading** - Load relationships on demand
+- **Query Optimization** - Built on Kysely for optimal SQL
 
 ### Reliability
-- **Schema Evolution**: 100% automatic updates
-- **Error Recovery**: Graceful degradation
-- **Cache Hit Rate**: > 90% for repeated operations
-- **Test Coverage**: > 95% for core components
+- **Schema Evolution** - Automatic adaptation to database changes
+- **Error Recovery** - Graceful degradation
+- **Type Safety** - Compile-time checking
+- **Comprehensive Testing** - Full test coverage
 
-## 🔮 Future Enhancements
+## 🔮 Roadmap
 
-### Short Term (3-6 months)
+### Short Term
 - Advanced relationship types (many-to-many)
 - Custom validation rules
 - Performance monitoring
 - Migration tools
 
-### Medium Term (6-12 months)
+### Medium Term
 - GraphQL integration
 - Real-time subscriptions
 - Advanced caching strategies
 - Multi-tenant support
 
-### Long Term (12+ months)
+### Long Term
 - Cloud-native features
 - Advanced analytics
 - Machine learning integration
@@ -236,13 +179,13 @@ legacy-components/
 3. Run tests
 4. Start development
 
-### Contribution Guidelines
+### Guidelines
 - Follow TypeScript best practices
 - Maintain test coverage
 - Update documentation
 - Follow semantic versioning
 
-### Code Review Process
+### Code Review
 - Automated testing
 - Manual review
 - Performance testing
@@ -251,10 +194,10 @@ legacy-components/
 ## 📞 Support
 
 ### Documentation
-- Architecture overview and diagrams
-- Implementation guide
-- Code examples
-- API reference
+- **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Complete developer guide
+- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick reference card
+- **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migration from other ORMs
+- **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns
 
 ### Community
 - GitHub issues for bugs and features
@@ -264,4 +207,4 @@ legacy-components/
 
 ---
 
-This optimized structure provides a clear path for understanding and implementing the DreamBeeSQL pseudo-ORM system, from high-level vision to detailed implementation.
+**Ready to get started?** Check out the **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** for a complete walkthrough!

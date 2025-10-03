@@ -1,0 +1,21 @@
+{
+  "name": "noorm-comprehensive-tests",
+  "version": "1.0.0",
+  "description": "Comprehensive test suite for NOORM",
+  "type": "module",
+  "scripts": {
+    "test": "mocha --timeout 30000 e2e/**/*.test.ts",
+    "test:unit": "mocha --timeout 15000 unit/**/*.test.ts",
+    "test:integration": "mocha --timeout 30000 integration/**/*.test.ts",
+    "test:performance": "mocha --timeout 60000 performance/**/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/chai": "^5.0.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.5.2",
+    "chai": "^6.2.0",
+    "mocha": "^11.7.2",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.2"
+  }
+}

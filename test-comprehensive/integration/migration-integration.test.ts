@@ -30,6 +30,7 @@ describe('Migration System Integration', () => {
             migrationTimeout: 30000,
             maxConcurrentMigrations: 3
           })
+          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -61,6 +62,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -91,6 +93,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -123,6 +126,7 @@ describe('Migration System Integration', () => {
             migrationTimeout: 30000,
             maxConcurrentMigrations: 3
           })
+          
           // Get initial configuration
           const initialConfig = migrationManager.getConfig()
           expect(initialConfig.migrationTimeout).to.equal(30000)
@@ -133,6 +137,7 @@ describe('Migration System Integration', () => {
             migrationTimeout: 60000,
             maxConcurrentMigrations: 5
           })
+          
           // Get updated configuration
           const updatedConfig = migrationManager.getConfig()
           expect(updatedConfig.migrationTimeout).to.equal(60000)
@@ -150,6 +155,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Get components
           const components = migrationManager.getComponents()
           
@@ -176,6 +182,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize and run migrations
           await migrationManager.initialize()
           await migrationManager.migrate()
@@ -191,6 +198,7 @@ describe('Migration System Integration', () => {
             lastName: 'User',
             active: true
           })
+          
           expect(user).to.exist
           expect((user as any).id).to.equal('migration-user')
           
@@ -200,7 +208,7 @@ describe('Migration System Integration', () => {
           expect((foundUser as any)!.email).to.equal('migration@example.com')
           
           // Update user
-          (foundUser as any)!.firstName = 'Updated'
+          ;(foundUser as any)!.firstName = 'Updated'
           const updatedUser = await userRepo.update(foundUser!)
           expect((updatedUser as any).firstName).to.equal('Updated')
           
@@ -220,6 +228,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize and run migrations
           await migrationManager.initialize()
           await migrationManager.migrate()
@@ -236,6 +245,7 @@ describe('Migration System Integration', () => {
             lastName: 'User',
             active: true
           })
+          
           const post = await postRepo.create({
             id: 'rel-migration-post',
             userId: (user as any).id,
@@ -243,6 +253,7 @@ describe('Migration System Integration', () => {
             content: 'Rel Migration Content',
             published: true
           })
+          
           // Load user with posts
           const userWithPosts = await userRepo.findWithRelations((user as any).id, ['posts'])
           
@@ -265,6 +276,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize and run migrations
           await migrationManager.initialize()
           await migrationManager.migrate()
@@ -288,6 +300,7 @@ describe('Migration System Integration', () => {
             
             return user
           })
+          
           expect(result).to.exist
           expect(result.id).to.equal('tx-migration-user')
           
@@ -315,10 +328,12 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Test initialization performance
           const duration = await performanceHelper.measure('migration-initialization', async () => {
             await migrationManager.initialize()
           })
+          
           // Should be efficient
           expect(duration).to.be.lessThan(5000) // 5 seconds max
           
@@ -334,6 +349,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -342,6 +358,7 @@ describe('Migration System Integration', () => {
             const result = await migrationManager.migrate()
             return result
           })
+          
           // Should be efficient
           expect(duration).to.be.lessThan(10000) // 10 seconds max
           
@@ -357,6 +374,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -365,6 +383,7 @@ describe('Migration System Integration', () => {
             const status = await migrationManager.getStatus()
             return status
           })
+          
           // Should be very fast
           expect(duration).to.be.lessThan(1000) // 1 second max
           
@@ -380,6 +399,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -417,6 +437,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: '/invalid/path/that/does/not/exist'
           })
+          
           try {
             await migrationManager.initialize()
           } catch (error) {
@@ -433,6 +454,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           try {
             await migrationManager.initialize()
             
@@ -452,6 +474,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -528,11 +551,13 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Update only some configuration
           migrationManager.updateConfig({
             migrationTimeout: 45000,
             logLevel: 'WARN'
           })
+          
           const config = migrationManager.getConfig()
           expect(config.migrationTimeout).to.equal(45000)
           expect(config.logLevel).to.equal('WARN')
@@ -559,6 +584,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -569,6 +595,7 @@ describe('Migration System Integration', () => {
               enabled: true
             }
           })
+          
           // Migration manager should still work
           const status = await migrationManager.getStatus()
           expect(status).to.exist
@@ -586,6 +613,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -596,6 +624,7 @@ describe('Migration System Integration', () => {
               maxSize: 2000
             }
           })
+          
           // Migration manager should still work
           const status = await migrationManager.getStatus()
           expect(status).to.exist
@@ -612,6 +641,7 @@ describe('Migration System Integration', () => {
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
           })
+          
           // Initialize migration system
           await migrationManager.initialize()
           
@@ -623,6 +653,7 @@ describe('Migration System Integration', () => {
               maxBatchSize: 200
             }
           })
+          
           // Migration manager should still work
           const status = await migrationManager.getStatus()
           expect(status).to.exist

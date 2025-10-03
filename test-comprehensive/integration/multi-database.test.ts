@@ -43,14 +43,16 @@ describe('Multi-Database Integration', () => {
         firstName: 'SQLite',
         lastName: 'User',
         active: true
-      }))
+      })
+      
       const postgresUser = await postgresUserRepo.create({
         id: 'multi-postgres-user',
         email: 'postgres@example.com',
         firstName: 'PostgreSQL',
         lastName: 'User',
         active: true
-      }))
+      })
+      
       // Verify users exist in respective databases
       const foundSqliteUser = await sqliteUserRepo.findById('multi-sqlite-user')
       const foundPostgresUser = await postgresUserRepo.findById('multi-postgres-user')
@@ -71,7 +73,8 @@ describe('Multi-Database Integration', () => {
       // Clean up
       await sqliteUserRepo.delete('multi-sqlite-user')
       await postgresUserRepo.delete('multi-postgres-user')
-        }))
+    }))
+    
     it('should handle relationships across different databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
         console.warn('Required databases not available for multi-database test')
@@ -101,28 +104,32 @@ describe('Multi-Database Integration', () => {
         firstName: 'SQLiteRel',
         lastName: 'User',
         active: true
-      }))
+      })
+      
       const sqlitePost = await sqlitePostRepo.create({
         id: 'sqlite-rel-post',
         userId: sqliteUser.id,
         title: 'SQLite Post',
         content: 'SQLite Content',
         published: true
-      }))
+      })
+      
       const postgresUser = await postgresUserRepo.create({
         id: 'postgres-rel-user',
         email: 'postgresrel@example.com',
         firstName: 'PostgresRel',
         lastName: 'User',
         active: true
-      }))
+      })
+      
       const postgresPost = await postgresPostRepo.create({
         id: 'postgres-rel-post',
         userId: postgresUser.id,
         title: 'PostgreSQL Post',
         content: 'PostgreSQL Content',
         published: true
-      }))
+      })
+      
       // Load relationships in respective databases
       const sqliteUserWithPosts = await sqliteUserRepo.findWithRelations(sqliteUser.id, ['posts'])
       const postgresUserWithPosts = await postgresUserRepo.findWithRelations(postgresUser.id, ['posts'])
@@ -142,7 +149,8 @@ describe('Multi-Database Integration', () => {
       await sqliteUserRepo.delete('sqlite-rel-user')
       await postgresPostRepo.delete('postgres-rel-post')
       await postgresUserRepo.delete('postgres-rel-user')
-        }))
+    }))
+    
     it('should handle transactions across different databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
         console.warn('Required databases not available for multi-database test')
@@ -170,12 +178,13 @@ describe('Multi-Database Integration', () => {
             firstName: 'SQLiteTx',
             lastName: 'User',
             active: true
-          }))
+          })
           .returningAll()
           .executeTakeFirstOrThrow()
         
         return user
-      }))
+      })
+      
       const postgresResult = await postgresDb.db.transaction(async (trx) => {
         const user = await trx
           .insertInto('users')
@@ -185,12 +194,13 @@ describe('Multi-Database Integration', () => {
             firstName: 'PostgresTx',
             lastName: 'User',
             active: true
-          }))
+          })
           .returningAll()
           .executeTakeFirstOrThrow()
         
         return user
-      }))
+      })
+      
       expect(sqliteResult).to.exist
       expect(sqliteResult.id).to.equal('sqlite-tx-user')
       expect(sqliteResult.email).to.equal('sqlitetx@example.com')
@@ -212,8 +222,9 @@ describe('Multi-Database Integration', () => {
       // Clean up
       await sqliteUserRepo.delete('sqlite-tx-user')
       await postgresUserRepo.delete('postgres-tx-user')
-        }))
-  }))
+    }))
+  })
+  
   describe('Performance Across Databases', () => {
     it('should maintain performance across different databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
@@ -245,11 +256,12 @@ describe('Multi-Database Integration', () => {
             firstName: `SQLitePerf${i}`,
             lastName: 'User',
             active: true
-          }))
+          })
           users.push(user)
         }
         return users
-      }))
+      })
+      
       const postgresDuration = await performanceHelper.measure('postgres-operations', async () => {
         const users = []
         for (let i = 0; i < 10; i++) {
@@ -259,11 +271,12 @@ describe('Multi-Database Integration', () => {
             firstName: `PostgresPerf${i}`,
             lastName: 'User',
             active: true
-          }))
+          })
           users.push(user)
         }
         return users
-      }))
+      })
+      
       // Both should be reasonably fast
       expect(sqliteDuration).to.be.lessThan(2000) // 2 seconds max
       expect(postgresDuration).to.be.lessThan(2000) // 2 seconds max
@@ -273,7 +286,8 @@ describe('Multi-Database Integration', () => {
         await sqliteUserRepo.delete(`sqlite-perf-user-${i}`)
         await postgresUserRepo.delete(`postgres-perf-user-${i}`)
       }
-        }))
+    }))
+    
     it('should handle concurrent operations across databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
         console.warn('Required databases not available for multi-database test')
@@ -307,7 +321,7 @@ describe('Multi-Database Integration', () => {
             firstName: `SQLiteConcurrent${i}`,
             lastName: 'User',
             active: true
-          }))
+          })
         )
       }
       
@@ -320,7 +334,7 @@ describe('Multi-Database Integration', () => {
             firstName: `PostgresConcurrent${i}`,
             lastName: 'User',
             active: true
-          }))
+          })
         )
       }
       
@@ -335,8 +349,9 @@ describe('Multi-Database Integration', () => {
         await sqliteUserRepo.delete(`sqlite-concurrent-user-${i}`)
         await postgresUserRepo.delete(`postgres-concurrent-user-${i}`)
       }
-        }))
-  }))
+    }))
+  })
+  
   describe('Schema Consistency', () => {
     it('should maintain schema consistency across databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
@@ -370,7 +385,8 @@ describe('Multi-Database Integration', () => {
       const postgresRelationshipNames = postgresSchema.relationships.map(r => r.name).sort()
       
       expect(sqliteRelationshipNames).to.deep.equal(postgresRelationshipNames)
-        }))
+    }))
+    
     it('should handle different column types across databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
         console.warn('Required databases not available for multi-database test')
@@ -399,7 +415,8 @@ describe('Multi-Database Integration', () => {
         lastName: 'User',
         age: 30,
         active: true
-      }))
+      })
+      
       const postgresUser = await postgresUserRepo.create({
         id: 'postgres-types-user',
         email: 'postgretypes@example.com',
@@ -407,7 +424,8 @@ describe('Multi-Database Integration', () => {
         lastName: 'User',
         age: 25,
         active: false
-      }))
+      })
+      
       // Verify data types are handled correctly
       expect(sqliteUser.age).to.equal(30)
       expect(sqliteUser.active).to.be.true
@@ -418,8 +436,9 @@ describe('Multi-Database Integration', () => {
       // Clean up
       await sqliteUserRepo.delete('sqlite-types-user')
       await postgresUserRepo.delete('postgres-types-user')
-        }))
-  }))
+    }))
+  })
+  
   describe('Error Handling Across Databases', () => {
     it('should handle errors independently across databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
@@ -448,7 +467,8 @@ describe('Multi-Database Integration', () => {
         firstName: 'SQLiteError',
         lastName: 'User',
         active: true
-      }))
+      })
+      
       // Try to create user with duplicate ID in PostgreSQL (should work)
       const postgresUser = await postgresUserRepo.create({
         id: 'sqlite-error-user', // Same ID, different database
@@ -456,7 +476,8 @@ describe('Multi-Database Integration', () => {
         firstName: 'PostgresError',
         lastName: 'User',
         active: true
-      }))
+      })
+      
       // Both should exist in their respective databases
       const foundSqliteUser = await sqliteUserRepo.findById('sqlite-error-user')
       const foundPostgresUser = await postgresUserRepo.findById('sqlite-error-user')
@@ -469,7 +490,8 @@ describe('Multi-Database Integration', () => {
       // Clean up
       await sqliteUserRepo.delete('sqlite-error-user')
       await postgresUserRepo.delete('sqlite-error-user')
-        }))
+    }))
+    
     it('should handle connection errors independently', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
         console.warn('Required databases not available for multi-database test')
@@ -497,14 +519,16 @@ describe('Multi-Database Integration', () => {
         firstName: 'SQLiteConn',
         lastName: 'User',
         active: true
-      }))
+      })
+      
       const postgresUser = await postgresUserRepo.create({
         id: 'postgres-conn-user',
         email: 'postgresconn@example.com',
         firstName: 'PostgresConn',
         lastName: 'User',
         active: true
-      }))
+      })
+      
       // Close SQLite connection
       await sqliteDb.db.close()
       
@@ -522,8 +546,9 @@ describe('Multi-Database Integration', () => {
       
       // Clean up PostgreSQL
       await postgresUserRepo.delete('postgres-conn-user')
-        }))
-  }))
+    }))
+  })
+  
   describe('Migration System Across Databases', () => {
     it('should handle migrations independently across databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
@@ -548,10 +573,12 @@ describe('Multi-Database Integration', () => {
       // Create migration managers for both databases
       const sqliteMigrationManager = await createNodeMigrationManager(sqliteDb.db.getKysely(), {
         migrationsDirectory: './test-migrations'
-      }))
+      })
+      
       const postgresMigrationManager = await createNodeMigrationManager(postgresDb.db.getKysely(), {
         migrationsDirectory: './test-migrations'
-      }))
+      })
+      
       // Initialize both migration systems
       await sqliteMigrationManager.initialize()
       await postgresMigrationManager.initialize()
@@ -568,6 +595,6 @@ describe('Multi-Database Integration', () => {
       // Clean up
       await sqliteMigrationManager.cleanup()
       await postgresMigrationManager.cleanup()
-        }))
-  }))
-}))
+    }))
+  })
+})

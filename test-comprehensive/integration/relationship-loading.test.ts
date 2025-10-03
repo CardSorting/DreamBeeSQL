@@ -32,7 +32,8 @@ describe('Relationship Loading Integration', () => {
             firstName: 'User',
             lastName: 'WithPosts',
             active: true
-          }))
+          })
+          
           const posts = []
           for (let i = 0; i < 5; i++) {
             const post = await postRepo.create({
@@ -41,7 +42,7 @@ describe('Relationship Loading Integration', () => {
               title: `Post ${i}`,
               content: `Content ${i}`,
               published: i % 2 === 0
-            }))
+            })
             posts.push(post)
           }
           
@@ -67,6 +68,7 @@ describe('Relationship Loading Integration', () => {
           }
           await userRepo.delete(user.id)
         }))
+        
         it('should load users with their comments', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -82,14 +84,16 @@ describe('Relationship Loading Integration', () => {
             firstName: 'User',
             lastName: 'WithComments',
             active: true
-          }))
+          })
+          
           const post = await postRepo.create({
             id: 'comment-post',
             userId: user.id,
             title: 'Comment Post',
             content: 'Comment Content',
             published: true
-          }))
+          })
+          
           const comments = []
           for (let i = 0; i < 3; i++) {
             const comment = await commentRepo.create({
@@ -97,7 +101,7 @@ describe('Relationship Loading Integration', () => {
               postId: post.id,
               userId: user.id,
               content: `Comment ${i}`
-            }))
+            })
             comments.push(comment)
           }
           
@@ -124,6 +128,7 @@ describe('Relationship Loading Integration', () => {
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
         }))
+        
         it('should load users with their profiles', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -138,14 +143,16 @@ describe('Relationship Loading Integration', () => {
             firstName: 'User',
             lastName: 'WithProfile',
             active: true
-          }))
+          })
+          
           const profile = await profileRepo.create({
             id: 'user-profile',
             userId: user.id,
             bio: 'Test bio',
             avatar: 'https://example.com/avatar.jpg',
             website: 'https://example.com'
-          }))
+          })
+          
           // Load user with profile
           const userWithProfile = await userRepo.findWithRelations(user.id, ['profiles'])
           
@@ -161,9 +168,10 @@ describe('Relationship Loading Integration', () => {
           await profileRepo.delete(profile.id)
           await userRepo.delete(user.id)
         }))
-      }))
+      })
     }
-  }))
+  })
+  
   describe('Many-to-One Relationships', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -181,14 +189,16 @@ describe('Relationship Loading Integration', () => {
             firstName: 'Post',
             lastName: 'User',
             active: true
-          }))
+          })
+          
           const post = await postRepo.create({
             id: 'post-with-user',
             userId: user.id,
             title: 'Post With User',
             content: 'Post Content',
             published: true
-          }))
+          })
+          
           // Load post with user
           const postWithUser = await postRepo.findWithRelations(post.id, ['users'])
           
@@ -205,6 +215,7 @@ describe('Relationship Loading Integration', () => {
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
         }))
+        
         it('should load comments with their users', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -220,20 +231,23 @@ describe('Relationship Loading Integration', () => {
             firstName: 'Comment',
             lastName: 'User',
             active: true
-          }))
+          })
+          
           const post = await postRepo.create({
             id: 'comment-post',
             userId: user.id,
             title: 'Comment Post',
             content: 'Comment Content',
             published: true
-          }))
+          })
+          
           const comment = await commentRepo.create({
             id: 'comment-with-user',
             postId: post.id,
             userId: user.id,
             content: 'Comment Content'
-          }))
+          })
+          
           // Load comment with user
           const commentWithUser = await commentRepo.findWithRelations(comment.id, ['users'])
           
@@ -249,6 +263,7 @@ describe('Relationship Loading Integration', () => {
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
         }))
+        
         it('should load comments with their posts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -264,20 +279,23 @@ describe('Relationship Loading Integration', () => {
             firstName: 'CommentPost',
             lastName: 'User',
             active: true
-          }))
+          })
+          
           const post = await postRepo.create({
             id: 'comment-post-ref',
             userId: user.id,
             title: 'Comment Post Ref',
             content: 'Comment Post Content',
             published: true
-          }))
+          })
+          
           const comment = await commentRepo.create({
             id: 'comment-with-post',
             postId: post.id,
             userId: user.id,
             content: 'Comment Content'
-          }))
+          })
+          
           // Load comment with post
           const commentWithPost = await commentRepo.findWithRelations(comment.id, ['posts'])
           
@@ -294,9 +312,10 @@ describe('Relationship Loading Integration', () => {
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
         }))
-      }))
+      })
     }
-  }))
+  })
+  
   describe('Many-to-Many Relationships', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -315,21 +334,23 @@ describe('Relationship Loading Integration', () => {
             firstName: 'Tag',
             lastName: 'User',
             active: true
-          }))
+          })
+          
           const post = await postRepo.create({
             id: 'post-with-tags',
             userId: user.id,
             title: 'Post With Tags',
             content: 'Post Content',
             published: true
-          }))
+          })
+          
           const tags = []
           for (let i = 0; i < 3; i++) {
             const tag = await tagRepo.create({
               id: `post-tag-${i}`,
               name: `Tag ${i}`,
               color: `#${i}${i}${i}${i}${i}${i}`
-            }))
+            })
             tags.push(tag)
           }
           
@@ -341,7 +362,7 @@ describe('Relationship Loading Integration', () => {
               .values({
                 postId: post.id,
                 tagId: tag.id
-              }))
+              })
               .execute()
           }
           
@@ -372,6 +393,7 @@ describe('Relationship Loading Integration', () => {
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
         }))
+        
         it('should load tags with their posts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -387,7 +409,8 @@ describe('Relationship Loading Integration', () => {
             firstName: 'TagPosts',
             lastName: 'User',
             active: true
-          }))
+          })
+          
           const posts = []
           for (let i = 0; i < 2; i++) {
             const post = await postRepo.create({
@@ -396,7 +419,7 @@ describe('Relationship Loading Integration', () => {
               title: `Tag Post ${i}`,
               content: `Tag Post Content ${i}`,
               published: true
-            }))
+            })
             posts.push(post)
           }
           
@@ -404,7 +427,8 @@ describe('Relationship Loading Integration', () => {
             id: 'tag-with-posts',
             name: 'Tag With Posts',
             color: '#123456'
-          }))
+          })
+          
           // Create post-tag relationships
           const kysely = db.getKysely()
           for (const post of posts) {
@@ -413,7 +437,7 @@ describe('Relationship Loading Integration', () => {
               .values({
                 postId: post.id,
                 tagId: tag.id
-              }))
+              })
               .execute()
           }
           
@@ -444,9 +468,10 @@ describe('Relationship Loading Integration', () => {
           await tagRepo.delete(tag.id)
           await userRepo.delete(user.id)
         }))
-      }))
+      })
     }
-  }))
+  })
+  
   describe('Nested Relationships', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -465,7 +490,8 @@ describe('Relationship Loading Integration', () => {
             firstName: 'Nested',
             lastName: 'User',
             active: true
-          }))
+          })
+          
           const posts = []
           for (let i = 0; i < 2; i++) {
             const post = await postRepo.create({
@@ -474,7 +500,7 @@ describe('Relationship Loading Integration', () => {
               title: `Nested Post ${i}`,
               content: `Nested Content ${i}`,
               published: true
-            }))
+            })
             posts.push(post)
             
             // Create comments for each post
@@ -484,7 +510,7 @@ describe('Relationship Loading Integration', () => {
                 postId: post.id,
                 userId: user.id,
                 content: `Comment ${i}-${j}`
-              }))
+              })
             }
           }
           
@@ -518,6 +544,7 @@ describe('Relationship Loading Integration', () => {
           }
           await userRepo.delete(user.id)
         }))
+        
         it('should load posts with users and comments', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -533,14 +560,16 @@ describe('Relationship Loading Integration', () => {
             firstName: 'NestedPost',
             lastName: 'User',
             active: true
-          }))
+          })
+          
           const post = await postRepo.create({
             id: 'nested-post',
             userId: user.id,
             title: 'Nested Post',
             content: 'Nested Content',
             published: true
-          }))
+          })
+          
           const comments = []
           for (let i = 0; i < 3; i++) {
             const comment = await commentRepo.create({
@@ -548,7 +577,7 @@ describe('Relationship Loading Integration', () => {
               postId: post.id,
               userId: user.id,
               content: `Comment ${i}`
-            }))
+            })
             comments.push(comment)
           }
           
@@ -576,9 +605,10 @@ describe('Relationship Loading Integration', () => {
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
         }))
-      }))
+      })
     }
-  }))
+  })
+  
   describe('Batch Loading', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -600,7 +630,7 @@ describe('Relationship Loading Integration', () => {
               firstName: `Batch${i}`,
               lastName: 'User',
               active: true
-            }))
+            })
             users.push(user)
             
             // Create 2 posts per user
@@ -611,7 +641,7 @@ describe('Relationship Loading Integration', () => {
                 title: `Batch Post ${i}-${j}`,
                 content: `Batch Content ${i}-${j}`,
                 published: true
-              }))
+              })
               posts.push(post)
             }
           }
@@ -644,6 +674,7 @@ describe('Relationship Loading Integration', () => {
             await userRepo.delete(user.id)
           }
         }))
+        
         it('should batch load relationships for multiple posts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -658,7 +689,8 @@ describe('Relationship Loading Integration', () => {
             firstName: 'BatchPosts',
             lastName: 'User',
             active: true
-          }))
+          })
+          
           const posts = []
           for (let i = 0; i < 10; i++) {
             const post = await postRepo.create({
@@ -667,7 +699,7 @@ describe('Relationship Loading Integration', () => {
               title: `Batch Post ${i}`,
               content: `Batch Content ${i}`,
               published: true
-            }))
+            })
             posts.push(post)
           }
           
@@ -693,6 +725,7 @@ describe('Relationship Loading Integration', () => {
           }
           await userRepo.delete(user.id)
         }))
+        
         it('should handle large batch sizes efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -711,7 +744,7 @@ describe('Relationship Loading Integration', () => {
               firstName: `LargeBatch${i}`,
               lastName: 'User',
               active: true
-            }))
+            })
             users.push(user)
             
             // Create 1 post per user
@@ -721,7 +754,7 @@ describe('Relationship Loading Integration', () => {
               title: `Large Batch Post ${i}`,
               content: `Large Batch Content ${i}`,
               published: true
-            }))
+            })
             posts.push(post)
           }
           
@@ -749,9 +782,10 @@ describe('Relationship Loading Integration', () => {
             await userRepo.delete(user.id)
           }
         }))
-      }))
+      })
     }
-  }))
+  })
+  
   describe('Performance', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -769,7 +803,8 @@ describe('Relationship Loading Integration', () => {
             firstName: 'Perf',
             lastName: 'User',
             active: true
-          }))
+          })
+          
           const posts = []
           for (let i = 0; i < 10; i++) {
             const post = await postRepo.create({
@@ -778,7 +813,7 @@ describe('Relationship Loading Integration', () => {
               title: `Perf Post ${i}`,
               content: `Perf Content ${i}`,
               published: true
-            }))
+            })
             posts.push(post)
           }
           
@@ -786,7 +821,8 @@ describe('Relationship Loading Integration', () => {
           const duration = await performanceHelper.measure('relationship-loading', async () => {
             const userWithPosts = await userRepo.findWithRelations(user.id, ['posts'])
             return userWithPosts
-          }))
+          })
+          
           // Should be efficient
           expect(duration).to.be.lessThan(1000) // 1 second max
           
@@ -796,6 +832,7 @@ describe('Relationship Loading Integration', () => {
           }
           await userRepo.delete(user.id)
         }))
+        
         it('should handle concurrent relationship loading', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -814,7 +851,7 @@ describe('Relationship Loading Integration', () => {
               firstName: `Concurrent${i}`,
               lastName: 'User',
               active: true
-            }))
+            })
             users.push(user)
             
             const post = await postRepo.create({
@@ -823,7 +860,7 @@ describe('Relationship Loading Integration', () => {
               title: `Concurrent Post ${i}`,
               content: `Concurrent Content ${i}`,
               published: true
-            }))
+            })
             posts.push(post)
           }
           
@@ -857,7 +894,7 @@ describe('Relationship Loading Integration', () => {
             await userRepo.delete(user.id)
           }
         }))
-      }))
+      })
     }
-  }))
-}))
+  })
+})

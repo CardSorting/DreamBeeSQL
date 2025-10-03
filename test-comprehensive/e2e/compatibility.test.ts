@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 /**
  * End-to-end tests for cross-platform and compatibility features
  */

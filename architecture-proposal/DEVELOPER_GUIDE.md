@@ -1,16 +1,39 @@
-# NOORM Developer Guide
+# NOORMME Developer Guide
 
-## 🎯 What is NOORM?
+> **Complete guide to building applications with NOORMME**
 
-NOORM is a **zero-configuration pseudo-ORM** that automatically discovers your database schema and generates TypeScript types, entities, and repositories. No manual entity definitions required!
+This comprehensive guide covers everything you need to know about NOORMME, from basic setup to advanced patterns.
 
-## 🚀 Quick Start (2 minutes)
+## 🎯 What You'll Learn
+
+- **Basic Operations** - CRUD operations and simple queries
+- **Relationships** - Loading related data efficiently
+- **Configuration** - Customizing NOORMME for your needs
+- **Advanced Patterns** - Real-world usage examples
+- **Performance** - Optimization techniques
+- **Best Practices** - Production-ready patterns
+
+## 📚 Guide Structure
+
+| Section | Description | Time |
+|---------|-------------|------|
+| [Quick Start](#quick-start) | Get running in 2 minutes | 2 min |
+| [Basic Operations](#basic-operations) | CRUD operations and queries | 10 min |
+| [Relationships](#relationships) | Loading related data | 15 min |
+| [Configuration](#configuration) | Customizing NOORMME | 10 min |
+| [Real-world Examples](#real-world-examples) | Complete application patterns | 20 min |
+| [Performance & Optimization](#performance--optimization) | Making it fast | 15 min |
+| [API Reference](#api-reference) | Complete API documentation | Reference |
+
+## 🚀 Quick Start
+
+If you're new to NOORMME, start here:
 
 ```typescript
-import { NOORM } from 'noorm'
+import { NOORMME } from 'noormme'
 
 // 1. Connect to your existing database
-const db = new NOORM({
+const db = new NOORMME({
   dialect: 'postgresql',
   connection: {
     host: 'localhost',
@@ -29,64 +52,102 @@ const userRepo = db.getRepository('users')
 const users = await userRepo.findAll()
 ```
 
-**That's it!** NOORM automatically:
+**That's it!** NOORMME automatically:
 - ✅ Discovers all tables and relationships
 - ✅ Generates TypeScript types
 - ✅ Creates repository classes with CRUD operations
 - ✅ Provides full IntelliSense support
 
-## 📚 Guide Structure
+> **New to NOORMME?** Check out [GETTING_STARTED.md](./GETTING_STARTED.md) for a step-by-step setup guide.
 
-1. **[Basic Usage](#basic-usage)** - CRUD operations and relationships
-2. **[Configuration](#configuration)** - Setup options
-3. **[Examples](#examples)** - Real-world patterns
-4. **[API Reference](#api-reference)** - Complete API docs
-5. **[Migration Guide](#migration-guide)** - From other ORMs
-6. **[Troubleshooting](#troubleshooting)** - Common issues
-
-## 🔧 Basic Usage
+## 🔧 Basic Operations
 
 ### CRUD Operations
 
+The foundation of any application is Create, Read, Update, and Delete operations:
+
 ```typescript
-// Create
+// Create a new user
 const user = await userRepo.create({
   email: 'john@example.com',
   firstName: 'John',
   lastName: 'Doe'
 })
+console.log('Created user:', user.id)
 
-// Read
+// Read operations
 const foundUser = await userRepo.findById(user.id)
 const allUsers = await userRepo.findAll()
+const recentUsers = await userRepo.findRecent(10) // Custom method
 
-// Update
+// Update the user
 user.firstName = 'Johnny'
 const updatedUser = await userRepo.update(user)
 
-// Delete
+// Delete the user
 await userRepo.delete(user.id)
 ```
 
-### Relationships
+### Finding Data
 
 ```typescript
-// Load user with posts
-const userWithPosts = await userRepo.findWithRelations(user.id, ['posts'])
+// Find by ID
+const user = await userRepo.findById('123')
 
-// Load nested relationships
-const userWithNested = await userRepo.findWithRelations(user.id, ['posts.comments'])
-```
+// Find by email (custom method)
+const user = await userRepo.findByEmail('john@example.com')
 
-### Custom Queries
-
-```typescript
-// Using Kysely for complex queries
+// Find with conditions
 const activeUsers = await db
   .selectFrom('users')
   .where('active', '=', true)
   .selectAll()
   .execute()
+
+// Pagination
+const users = await db
+  .selectFrom('users')
+  .selectAll()
+  .limit(10)
+  .offset(0)
+  .execute()
+```
+
+### Working with Relationships
+
+```typescript
+// Load user with their posts
+const userWithPosts = await userRepo.findWithRelations(user.id, ['posts'])
+
+// Load nested relationships (posts with comments)
+const userWithNested = await userRepo.findWithRelations(user.id, ['posts.comments'])
+
+// Batch loading for performance
+const users = await userRepo.findAll()
+await userRepo.loadRelationships(users, ['posts', 'profile'])
+```
+
+### Custom Queries
+
+For complex queries, use the built-in Kysely query builder:
+
+```typescript
+// Complex query with joins
+const usersWithPostCounts = await db
+  .selectFrom('users')
+  .leftJoin('posts', 'posts.userId', 'users.id')
+  .select([
+    'users.id',
+    'users.email',
+    'users.firstName',
+    'users.lastName',
+    db.fn.count('posts.id').as('postCount')
+  ])
+  .groupBy(['users.id', 'users.email', 'users.firstName', 'users.lastName'])
+  .execute()
+
+// Raw SQL when needed
+const result = await db.execute('SELECT * FROM users WHERE active = ?', [true])
 ```
 
 ## ⚙️ Configuration
@@ -94,8 +155,8 @@ const activeUsers = await db
 ### Basic Configuration
 
 ```typescript
-const db = new NOORM({
-  dialect: 'postgresql',
+const db = new NOORMME({
+  dialect: 'postgresql', // or 'mysql', 'sqlite', 'mssql'
   connection: {
     host: 'localhost',
     port: 5432,
@@ -106,34 +167,12 @@ const db = new NOORM({
 })
 ```
 
-### Advanced Configuration
-
-```typescript
-const db = new NOORM({
-  dialect: 'postgresql',
-  connection: { /* connection config */ },
-  introspection: {
-    includeViews: true,
-    excludeTables: ['migrations', 'sessions'],
-    customTypeMappings: {
-      'jsonb': 'Record<string, any>'
-    }
-  },
-  cache: {
-    ttl: 300000, // 5 minutes
-    maxSize: 1000
-  },
-  logging: {
-    level: 'info',
-    enabled: true
-  }
-})
-```
-
 ### Environment Configuration
 
+For production applications, use environment variables:
+
 ```typescript
-const db = new NOORM({
+const db = new NOORMME({
   dialect: 'postgresql',
   connection: {
     host: process.env.DB_HOST,
@@ -145,13 +184,130 @@ const db = new NOORM({
 })
 ```
 
-## 📖 Examples
+### Advanced Configuration
+
+```typescript
+const db = new NOORMME({
+  dialect: 'postgresql',
+  connection: {
+    host: 'localhost',
+    port: 5432,
+    database: 'myapp',
+    username: 'user',
+    password: 'password',
+    // Connection pooling
+    pool: {
+      min: 5,
+      max: 20,
+      idleTimeoutMillis: 30000
+    }
+  },
+  // Schema discovery options
+  introspection: {
+    includeViews: true,
+    excludeTables: ['migrations', 'sessions'],
+    customTypeMappings: {
+      'jsonb': 'Record<string, any>',
+      'custom_type': 'CustomTypeInterface'
+    }
+  },
+  // Caching configuration
+  cache: {
+    ttl: 300000, // 5 minutes
+    maxSize: 1000,
+    strategy: 'lru'
+  },
+  // Logging configuration
+  logging: {
+    level: 'info',
+    enabled: true,
+    file: './noorm.log'
+  },
+  // Performance options
+  performance: {
+    enableQueryOptimization: true,
+    enableBatchLoading: true,
+    maxBatchSize: 100
+  }
+})
+```
+
+### Configuration Examples
+
+#### Development Configuration
+
+```typescript
+const db = new NOORMME({
+  dialect: 'postgresql',
+  connection: {
+    host: 'localhost',
+    port: 5432,
+    database: 'myapp_dev',
+    username: 'dev_user',
+    password: 'dev_password'
+  },
+  logging: {
+    level: 'debug',
+    enabled: true
+  }
+})
+```
+
+#### Production Configuration
+
+```typescript
+const db = new NOORMME({
+  dialect: 'postgresql',
+  connection: {
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT || '5432'),
+    database: process.env.DB_NAME,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    ssl: true,
+    pool: {
+      min: 10,
+      max: 50,
+      idleTimeoutMillis: 30000
+    }
+  },
+  cache: {
+    ttl: 600000, // 10 minutes
+    maxSize: 5000
+  },
+  logging: {
+    level: 'warn',
+    enabled: true
+  },
+  performance: {
+    enableQueryOptimization: true,
+    enableBatchLoading: true,
+    maxBatchSize: 200
+  }
+})
+```
+
+## 📖 Real-world Examples
 
 ### Blog Application
 
+Let's build a complete blog application with NOORMME:
+
 ```typescript
-// Initialize
-const db = new NOORM({ /* config */ })
+import { NOORMME } from 'noormme'
+
+// Initialize NOORMME
+const db = new NOORMME({
+  dialect: 'postgresql',
+  connection: {
+    host: 'localhost',
+    port: 5432,
+    database: 'blog_app',
+    username: 'user',
+    password: 'password'
+  }
+})
+
 await db.initialize()
 
 // Get repositories
@@ -159,32 +315,192 @@ const userRepo = db.getRepository('users')
 const postRepo = db.getRepository('posts')
 const commentRepo = db.getRepository('comments')
 
-// Create blog post
+// Create a new user
 const user = await userRepo.create({
   email: 'author@example.com',
   firstName: 'John',
   lastName: 'Doe'
 })
 
+// Create a blog post
 const post = await postRepo.create({
-  title: 'My First Post',
-  content: 'Hello world!',
-  userId: user.id
+  title: 'Getting Started with NOORM',
+  content: 'NOORM makes database operations simple...',
+  userId: user.id,
+  published: true
 })
 
-// Add comment
+// Add a comment
 const comment = await commentRepo.create({
-  content: 'Great post!',
+  content: 'Great post! Very helpful.',
   postId: post.id,
   userId: user.id
 })
 
-// Load with relationships
-const postWithComments = await postRepo.findWithRelations(post.id, ['comments.user'])
-console.log(`Post "${postWithComments.title}" has ${postWithComments.comments?.length} comments`)
+// Load post with all relationships
+const postWithRelations = await postRepo.findWithRelations(post.id, [
+  'user',
+  'comments.user'
+])
+
+console.log(`Post "${postWithRelations.title}" by ${postWithRelations.user.firstName}`)
+console.log(`Comments: ${postWithRelations.comments?.length}`)
 ```
 
-## 🔄 Migration Guide
+### E-commerce Application
+
+```typescript
+// E-commerce example
+const productRepo = db.getRepository('products')
+const orderRepo = db.getRepository('orders')
+const orderItemRepo = db.getRepository('order_items')
+
+// Create a product
+const product = await productRepo.create({
+  name: 'Laptop',
+  price: 999.99,
+  description: 'High-performance laptop',
+  stock: 10
+})
+
+// Create an order
+const order = await orderRepo.create({
+  userId: user.id,
+  total: 999.99,
+  status: 'pending'
+})
+
+// Add items to order
+await orderItemRepo.create({
+  orderId: order.id,
+  productId: product.id,
+  quantity: 1,
+  price: product.price
+})
+
+// Load order with all details
+const orderWithDetails = await orderRepo.findWithRelations(order.id, [
+  'user',
+  'orderItems.product'
+])
+
+console.log(`Order ${orderWithDetails.id} for ${orderWithDetails.user.email}`)
+console.log(`Items: ${orderWithDetails.orderItems?.length}`)
+```
+
+### Social Media Application
+
+```typescript
+// Social media example
+const postRepo = db.getRepository('posts')
+const likeRepo = db.getRepository('likes')
+const followRepo = db.getRepository('follows')
+
+// Create a post
+const post = await postRepo.create({
+  content: 'Just learned about NOORM!',
+  userId: user.id,
+  createdAt: new Date()
+})
+
+// Like the post
+await likeRepo.create({
+  postId: post.id,
+  userId: user.id
+})
+
+// Follow a user
+await followRepo.create({
+  followerId: user.id,
+  followingId: 'other-user-id'
+})
+
+// Get user's feed (posts from followed users)
+const feed = await db
+  .selectFrom('posts')
+  .innerJoin('follows', 'follows.followingId', 'posts.userId')
+  .where('follows.followerId', '=', user.id)
+  .selectAll()
+  .orderBy('posts.createdAt', 'desc')
+  .limit(20)
+  .execute()
+
+console.log(`Feed has ${feed.length} posts`)
+```
+
+## 🚀 Performance & Optimization
+
+### Batch Loading
+
+Avoid N+1 queries by using batch loading:
+
+```typescript
+// ❌ N+1 queries (slow)
+const users = await userRepo.findAll()
+for (const user of users) {
+  await userRepo.loadRelationships(user, ['posts'])
+}
+
+// ✅ Batch loading (fast)
+const users = await userRepo.findAll()
+await userRepo.loadRelationships(users, ['posts'])
+```
+
+### Caching
+
+Configure caching for better performance:
+
+```typescript
+const db = new NOORMME({
+  // ... config
+  cache: {
+    ttl: 300000, // 5 minutes
+    maxSize: 1000,
+    strategy: 'lru'
+  }
+})
+
+// Preload frequently accessed data
+await db.preloadSchema()
+```
+
+### Query Optimization
+
+```typescript
+// Enable query optimization
+db.updateConfig({
+  performance: {
+    enableQueryOptimization: true,
+    enableBatchLoading: true,
+    maxBatchSize: 100
+  }
+})
+
+// Monitor slow queries
+db.onQuery((query, duration) => {
+  if (duration > 1000) {
+    console.warn(`Slow query: ${duration}ms`, query)
+  }
+})
+```
+
+### Connection Pooling
+
+```typescript
+const db = new NOORMME({
+  // ... config
+  connection: {
+    // ... connection config
+    pool: {
+      min: 5,
+      max: 20,
+      idleTimeoutMillis: 30000
+    }
+  }
+})
+```
+
+## 🔄 Migration from Other ORMs
 
 ### From TypeORM
 
@@ -202,11 +518,15 @@ export class User {
   posts: Post[]
 }
 
+const user = await userRepository.findOne({
+  where: { id },
+  relations: ['posts']
+})
+
 // After (NOORM)
 // No entity definition needed!
 const userRepo = db.getRepository('users')
-const user = await userRepo.findById(id)
-const userWithPosts = await userRepo.findWithRelations(id, ['posts'])
+const user = await userRepo.findWithRelations(id, ['posts'])
 ```
 
 ### From Prisma
@@ -235,6 +555,8 @@ const user = await User.findByPk(id, {
 const userRepo = db.getRepository('users')
 const user = await userRepo.findWithRelations(id, ['posts'])
 ```
+
+> **Need more migration help?** Check out the [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for detailed migration steps.
 
 ## 🐛 Troubleshooting
 
@@ -271,7 +593,7 @@ const user = await userRepo.findWithRelations(id, ['posts'])
 ### Debug Mode
 
 ```typescript
-const db = new NOORM({
+const db = new NOORMME({
   // ... config
   logging: {
     level: 'debug',
@@ -294,42 +616,83 @@ console.log('Relationships:', schemaInfo.relationships)
 await db.refreshSchema()
 ```
 
-## ⚡ Performance Tips
+> **Need more troubleshooting help?** Check out the [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) guide for comprehensive solutions.
 
-### 1. Use Batch Loading
+## 🎯 Best Practices
+
+### 1. Always Initialize
 
 ```typescript
-// ❌ N+1 queries
-const users = await userRepo.findAll()
-for (const user of users) {
-  await userRepo.loadRelationships(user, ['posts'])
+// ✅ Good
+const db = new NOORMME(config)
+await db.initialize()
+
+// ❌ Bad
+const db = new NOORMME(config)
+// Forgot to initialize!
+```
+
+### 2. Use Type Safety
+
+```typescript
+// ✅ Good
+const user: User = await userRepo.findById(id)
+
+// ❌ Bad
+const user: any = await userRepo.findById(id)
+```
+
+### 3. Handle Errors
+
+```typescript
+// ✅ Good
+try {
+  const user = await userRepo.findById(id)
+  if (!user) {
+    throw new Error('User not found')
+  }
+  return user
+} catch (error) {
+  console.error('Error:', error)
+  throw error
 }
 
-// ✅ Batch loading
-const users = await userRepo.findAll()
-await userRepo.loadRelationships(users, ['posts'])
+// ❌ Bad
+const user = await userRepo.findById(id) // What if this fails?
 ```
 
-### 2. Configure Caching
+### 4. Configure for Production
 
 ```typescript
-const db = new NOORM({
-  // ... config
+// ✅ Good
+const db = new NOORMME({
+  dialect: 'postgresql',
+  connection: {
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT || '5432'),
+    database: process.env.DB_NAME,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD
+  },
   cache: {
-    ttl: 300000, // 5 minutes
-    maxSize: 1000
+    ttl: 600000,
+    maxSize: 5000
+  },
+  logging: {
+    level: 'info',
+    enabled: true
   }
 })
-```
 
-### 3. Use Query Optimization
-
-```typescript
-// Enable query optimization
-db.updateConfig({
-  performance: {
-    enableQueryOptimization: true,
-    enableBatchLoading: true
+// ❌ Bad
+const db = new NOORMME({
+  dialect: 'postgresql',
+  connection: {
+    host: 'localhost',
+    port: 5432,
+    database: 'myapp',
+    username: 'user',
+    password: 'password'
   }
 })
 ```
@@ -379,43 +742,6 @@ interface NOORMConfig {
   logging?: LoggingConfig
   performance?: PerformanceConfig
 }
-
-interface ConnectionConfig {
-  host: string
-  port: number
-  database: string
-  username: string
-  password: string
-  ssl?: boolean
-  pool?: PoolConfig
-}
-
-interface IntrospectionConfig {
-  includeViews?: boolean
-  includeSystemTables?: boolean
-  excludeTables?: string[]
-  customTypeMappings?: Record<string, string>
-  relationshipDepth?: number
-}
-
-interface CacheConfig {
-  ttl: number
-  maxSize: number
-  strategy?: 'lru' | 'fifo' | 'ttl'
-  preload?: string[]
-}
-
-interface LoggingConfig {
-  level: 'debug' | 'info' | 'warn' | 'error'
-  enabled: boolean
-  file?: string
-}
-
-interface PerformanceConfig {
-  enableQueryOptimization?: boolean
-  enableBatchLoading?: boolean
-  maxBatchSize?: number
-}
 ```
 
 ## 🚀 Advanced Features
@@ -431,20 +757,6 @@ db.onSchemaChange((changes) => {
 
 // Start monitoring
 await db.startSchemaMonitoring()
-```
-
-### Custom Type Mappings
-
-```typescript
-const db = new NOORM({
-  // ... config
-  introspection: {
-    customTypeMappings: {
-      'jsonb': 'Record<string, any>',
-      'custom_type': 'CustomTypeInterface'
-    }
-  }
-})
 ```
 
 ### Performance Monitoring
@@ -465,128 +777,22 @@ console.log('Query count:', metrics.queryCount)
 console.log('Average time:', metrics.averageQueryTime)
 ```
 
-## 🎯 Best Practices
-
-### 1. Always Initialize
-
-```typescript
-// ✅ Good
-const db = new NOORM(config)
-await db.initialize()
-
-// ❌ Bad
-const db = new NOORM(config)
-// Forgot to initialize!
-```
-
-### 2. Use Type Safety
-
-```typescript
-// ✅ Good
-const user: User = await userRepo.findById(id)
-
-// ❌ Bad
-const user: any = await userRepo.findById(id)
-```
-
-### 3. Handle Errors
-
-```typescript
-// ✅ Good
-try {
-  const user = await userRepo.findById(id)
-  if (!user) {
-    throw new Error('User not found')
-  }
-  return user
-} catch (error) {
-  console.error('Error:', error)
-  throw error
-}
-
-// ❌ Bad
-const user = await userRepo.findById(id) // What if this fails?
-```
-
-### 4. Configure for Production
-
-```typescript
-// ✅ Good
-const db = new NOORM({
-  dialect: 'postgresql',
-  connection: {
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT || '5432'),
-    database: process.env.DB_NAME,
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD
-  },
-  cache: {
-    ttl: 600000,
-    maxSize: 5000
-  },
-  logging: {
-    level: 'info',
-    enabled: true
-  }
-})
-
-// ❌ Bad
-const db = new NOORM({
-  dialect: 'postgresql',
-  connection: {
-    host: 'localhost',
-    port: 5432,
-    database: 'myapp',
-    username: 'user',
-    password: 'password'
-  }
-})
-```
-
 ## 🤝 Contributing
 
-### Development Setup
+We welcome contributions! Here's how to get started:
 
-```bash
-# Clone repository
-git clone https://github.com/your-org/noorm.git
-cd noorm
+1. **Read the docs** - Start with [GETTING_STARTED.md](./GETTING_STARTED.md)
+2. **Check issues** - Look for "good first issue" labels
+3. **Follow guidelines** - TypeScript best practices, test coverage
+4. **Submit PR** - Include tests and documentation updates
 
-# Install dependencies
-npm install
+## 📞 Need Help?
 
-# Run tests
-npm test
-
-# Start development
-npm run dev
-```
-
-### Contribution Guidelines
-
-1. Follow TypeScript best practices
-2. Maintain test coverage > 95%
-3. Update documentation
-4. Follow semantic versioning
-5. Add examples for new features
-
-## 📞 Support
-
-### Getting Help
-
-- **Documentation** - This guide and related docs
-- **GitHub Issues** - Report bugs and request features
-- **Discussions** - Ask questions and share ideas
-- **Examples** - Working code examples and patterns
-
-### Community
-
-- Join our Discord server
-- Follow us on Twitter
-- Star us on GitHub
-- Contribute to the project
+- **📖 Documentation** - Comprehensive guides in this directory
+- **🐛 Issues** - [GitHub Issues](https://github.com/your-org/noorm/issues) for bugs
+- **💬 Discussions** - [GitHub Discussions](https://github.com/your-org/noorm/discussions) for questions
+- **💡 Ideas** - [Feature Requests](https://github.com/your-org/noorm/discussions/categories/ideas)
 
 ---
 
-**Ready to get started?** Jump to the [Quick Start](#quick-start-2-minutes) section and have NOORM running in 2 minutes!
+**Ready to get started?** Jump to [GETTING_STARTED.md](./GETTING_STARTED.md) for a 5-minute setup guide!

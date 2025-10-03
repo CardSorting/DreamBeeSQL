@@ -1,4 +1,17 @@
-# NOORM Architecture Diagram
+# NOORMME Architecture Diagram
+
+> **Visual guide to NOORMME's system architecture**
+
+This document provides visual diagrams and explanations of how NOORMME works internally.
+
+## 📚 Navigation
+
+- **[GETTING_STARTED.md](./GETTING_STARTED.md)** - 5-minute setup guide
+- **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Comprehensive documentation
+- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Common operations
+- **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migration from other ORMs
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
+- **[examples/](./examples/)** - Real-world usage patterns
 
 ## 🏗️ System Architecture Overview
 
@@ -9,8 +22,8 @@ graph TB
         API[API Layer]
     end
     
-    subgraph "NOORM Core"
-        NOORM[NOORM Instance]
+    subgraph "NOORMME Core"
+        NOORM[NOORMME Instance]
         REPO[Repository Factory]
         REL[Relationship Engine]
         QB[Query Builder]
@@ -54,13 +67,13 @@ graph TB
 ```mermaid
 sequenceDiagram
     participant App as Application
-    participant NOORM as NOORM Instance
+    participant NOORM as NOORMME Instance
     participant SD as Schema Discovery
     participant TG as Type Generation
     participant REPO as Repository
     participant DB as Database
     
-    App->>NOORM: new NOORM(config)
+    App->>NOORM: new NOORMME(config)
     NOORM->>SD: discoverSchema()
     SD->>DB: introspect tables
     DB-->>SD: schema metadata

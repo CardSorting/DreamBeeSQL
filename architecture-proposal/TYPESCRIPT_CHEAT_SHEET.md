@@ -1,5 +1,18 @@
 # NOORM TypeScript Cheat Sheet
 
+> **Essential TypeScript patterns for NOORM**
+
+This cheat sheet covers the most important TypeScript patterns and types you'll use with NOORM.
+
+## 📚 Navigation
+
+- **[GETTING_STARTED.md](./GETTING_STARTED.md)** - 5-minute setup guide
+- **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Comprehensive documentation
+- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Common operations
+- **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migration from other ORMs
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
+- **[examples/](./examples/)** - Real-world usage patterns
+
 ## 🎯 Auto-Generated Types
 
 NOORM automatically generates TypeScript types from your database schema. No manual type definitions required!

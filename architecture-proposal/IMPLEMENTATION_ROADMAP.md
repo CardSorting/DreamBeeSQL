@@ -1,12 +1,25 @@
-# NOORM Implementation Roadmap
+# NOORMME Implementation Roadmap
+
+> **Step-by-step implementation plan for NOORMME**
+
+This roadmap outlines the implementation phases, priorities, and deliverables for building NOORMME.
+
+## 📚 Navigation
+
+- **[GETTING_STARTED.md](./GETTING_STARTED.md)** - 5-minute setup guide
+- **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Comprehensive documentation
+- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Common operations
+- **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migration from other ORMs
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
+- **[examples/](./examples/)** - Real-world usage patterns
 
 ## 🎯 Overview
 
-This roadmap outlines the step-by-step implementation of NOORM, a zero-configuration pseudo-ORM. The implementation is divided into clear phases with specific deliverables and priorities.
+This roadmap outlines the step-by-step implementation of NOORMME, a zero-configuration pseudo-ORM. The implementation is divided into clear phases with specific deliverables and priorities.
 
 ## 🏗️ Architecture Components
 
-NOORM consists of 5 core components:
+NOORMME consists of 5 core components:
 
 1. **Schema Discovery Engine** - Introspects database structure
 2. **Type Generation System** - Creates TypeScript types from schema

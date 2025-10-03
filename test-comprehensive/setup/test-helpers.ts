@@ -16,6 +16,12 @@ export class TestHelper {
    * Create and setup a test database
    */
   async createTestDatabase(dialect: 'sqlite' | 'postgresql' | 'mysql' | 'mssql'): Promise<TestDatabase> {
+    // Clean up existing database if it exists
+    const existing = this.testDatabases.get(dialect)
+    if (existing) {
+      await cleanupTestDatabase(existing)
+    }
+    
     const testDb = await createTestDatabase(dialect)
     await setupTestDatabase(testDb)
     this.testDatabases.set(dialect, testDb)

@@ -1,6 +1,10 @@
 import type { Kysely } from '../kysely.js'
 import { sql } from '../raw-builder/sql.js'
 
+export interface SchemaMetadata {
+  name: string
+}
+
 export interface TableMetadata {
   name: string
   schema?: string
@@ -31,6 +35,14 @@ export interface ForeignKeyMetadata {
   referencedColumn: string
   onDelete?: 'CASCADE' | 'SET NULL' | 'RESTRICT' | 'NO ACTION'
   onUpdate?: 'CASCADE' | 'SET NULL' | 'RESTRICT' | 'NO ACTION'
+}
+
+export interface DatabaseMetadataOptions {
+  withInternalKyselyTables?: boolean
+}
+
+export interface DatabaseMetadata {
+  tables: TableMetadata[]
 }
 
 /**

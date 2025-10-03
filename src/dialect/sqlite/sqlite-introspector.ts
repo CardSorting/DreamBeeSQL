@@ -4,6 +4,9 @@ import {
   DatabaseMetadataOptions,
   SchemaMetadata,
   TableMetadata,
+  ColumnMetadata,
+  IndexMetadata,
+  ForeignKeyMetadata,
 } from '../database-introspector.js'
 import { Kysely } from '../../kysely.js'
 import {
@@ -37,10 +40,11 @@ interface PragmaTableInfo {
   type: string
 }
 
-export class SqliteIntrospector implements DatabaseIntrospector {
+export class SqliteIntrospector extends DatabaseIntrospector {
   readonly #db: Kysely<SqliteSystemDatabase>
 
   constructor(db: Kysely<any>) {
+    super(db)
     this.#db = db
   }
 
@@ -145,5 +149,60 @@ export class SqliteIntrospector implements DatabaseIntrospector {
         })),
       }
     })
+  }
+
+  async getColumns(tableName: string): Promise<ColumnMetadata[]> {
+    try {
+      // SQLite - use raw SQL for pragma_table_info
+      const result = await sql`PRAGMA table_info(${sql.lit(tableName)})`.execute(this.#db)
+      const sqliteColumns = result.rows as any[]
+
+      return sqliteColumns.map((col: any) => ({
+        name: col.name,
+        type: col.type,
+        nullable: !col.notnull,
+        defaultValue: col.dflt_value,
+        isPrimaryKey: !!col.pk,
+        isAutoIncrement: col.type.toLowerCase().includes('integer') && col.pk
+      }))
+    } catch (error) {
+      console.warn('SQLite column discovery failed:', error)
+      return []
+    }
+  }
+
+  async getIndexes(tableName: string): Promise<IndexMetadata[]> {
+    try {
+      // SQLite - use raw SQL for pragma_index_list
+      const result = await sql`PRAGMA index_list(${sql.lit(tableName)})`.execute(this.#db)
+      const sqliteIndexes = result.rows as any[]
+
+      return sqliteIndexes.map((idx: any) => ({
+        name: idx.name,
+        columns: [], // Would need additional query to get column names
+        unique: !!idx.unique
+      }))
+    } catch (error) {
+      console.warn('SQLite index discovery failed:', error)
+      return []
+    }
+  }
+
+  async getForeignKeys(tableName: string): Promise<ForeignKeyMetadata[]> {
+    try {
+      // SQLite - use raw SQL for pragma_foreign_key_list
+      const result = await sql`PRAGMA foreign_key_list(${sql.lit(tableName)})`.execute(this.#db)
+      const sqliteFks = result.rows as any[]
+
+      return sqliteFks.map((fk: any) => ({
+        name: `fk_${tableName}_${fk.from}`,
+        column: fk.from,
+        referencedTable: fk.table,
+        referencedColumn: fk.to
+      }))
+    } catch (error) {
+      console.warn('SQLite foreign key discovery failed:', error)
+      return []
+    }
   }
 }

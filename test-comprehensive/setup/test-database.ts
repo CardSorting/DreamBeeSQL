@@ -86,11 +86,11 @@ export async function createTestDatabase(dialect: 'sqlite' | 'postgresql' | 'mys
 export async function setupTestDatabase(testDb: TestDatabase): Promise<void> {
   const { db } = testDb
   
-  // Initialize NOORMME
-  await db.initialize()
-  
-  // Create test schema
+  // Create test schema first (before initializing NOORMME)
   await createTestSchema(db)
+  
+  // Initialize NOORMME (this will discover the tables we just created)
+  await db.initialize()
   
   // Insert test data
   await insertTestData(db)
@@ -116,12 +116,12 @@ async function createTestSchema(db: NOORMME): Promise<void> {
     .addColumn('updatedAt', 'timestamp', (col) => col.notNull().defaultTo('now()'))
     .execute()
 
-  // Create profiles table
+  // Create profiles table with inline foreign key for SQLite compatibility
   await kysely.schema
     .createTable('profiles')
     .ifNotExists()
     .addColumn('id', 'text', (col) => col.primaryKey())
-    .addColumn('userId', 'text', (col) => col.notNull())
+    .addColumn('userId', 'text', (col) => col.notNull().references('users.id'))
     .addColumn('bio', 'text')
     .addColumn('avatar', 'text')
     .addColumn('website', 'text')
@@ -129,12 +129,12 @@ async function createTestSchema(db: NOORMME): Promise<void> {
     .addColumn('updatedAt', 'timestamp', (col) => col.notNull().defaultTo('now()'))
     .execute()
 
-  // Create posts table
+  // Create posts table with inline foreign key for SQLite compatibility
   await kysely.schema
     .createTable('posts')
     .ifNotExists()
     .addColumn('id', 'text', (col) => col.primaryKey())
-    .addColumn('userId', 'text', (col) => col.notNull())
+    .addColumn('userId', 'text', (col) => col.notNull().references('users.id'))
     .addColumn('title', 'text', (col) => col.notNull())
     .addColumn('content', 'text', (col) => col.notNull())
     .addColumn('published', 'boolean', (col) => col.notNull().defaultTo(false))
@@ -142,13 +142,13 @@ async function createTestSchema(db: NOORMME): Promise<void> {
     .addColumn('updatedAt', 'timestamp', (col) => col.notNull().defaultTo('now()'))
     .execute()
 
-  // Create comments table
+  // Create comments table with inline foreign keys for SQLite compatibility
   await kysely.schema
     .createTable('comments')
     .ifNotExists()
     .addColumn('id', 'text', (col) => col.primaryKey())
-    .addColumn('postId', 'text', (col) => col.notNull())
-    .addColumn('userId', 'text', (col) => col.notNull())
+    .addColumn('postId', 'text', (col) => col.notNull().references('posts.id'))
+    .addColumn('userId', 'text', (col) => col.notNull().references('users.id'))
     .addColumn('content', 'text', (col) => col.notNull())
     .addColumn('createdAt', 'timestamp', (col) => col.notNull().defaultTo('now()'))
     .addColumn('updatedAt', 'timestamp', (col) => col.notNull().defaultTo('now()'))
@@ -164,50 +164,16 @@ async function createTestSchema(db: NOORMME): Promise<void> {
     .addColumn('createdAt', 'timestamp', (col) => col.notNull().defaultTo('now()'))
     .execute()
 
-  // Create post_tags junction table for many-to-many relationship
+  // Create post_tags junction table with inline foreign keys for SQLite compatibility
   await kysely.schema
     .createTable('post_tags')
     .ifNotExists()
-    .addColumn('postId', 'text', (col) => col.notNull())
-    .addColumn('tagId', 'text', (col) => col.notNull())
+    .addColumn('postId', 'text', (col) => col.notNull().references('posts.id'))
+    .addColumn('tagId', 'text', (col) => col.notNull().references('tags.id'))
     .addPrimaryKeyConstraint('post_tags_pkey', ['postId', 'tagId'])
     .execute()
 
-  // Create foreign key constraints
-  try {
-    await kysely.schema
-      .alterTable('profiles')
-      .addForeignKeyConstraint('profiles_userId_fkey', ['userId'], 'users', ['id'])
-      .execute()
-
-    await kysely.schema
-      .alterTable('posts')
-      .addForeignKeyConstraint('posts_userId_fkey', ['userId'], 'users', ['id'])
-      .execute()
-
-    await kysely.schema
-      .alterTable('comments')
-      .addForeignKeyConstraint('comments_postId_fkey', ['postId'], 'posts', ['id'])
-      .execute()
-
-    await kysely.schema
-      .alterTable('comments')
-      .addForeignKeyConstraint('comments_userId_fkey', ['userId'], 'users', ['id'])
-      .execute()
-
-    await kysely.schema
-      .alterTable('post_tags')
-      .addForeignKeyConstraint('post_tags_postId_fkey', ['postId'], 'posts', ['id'])
-      .execute()
-
-    await kysely.schema
-      .alterTable('post_tags')
-      .addForeignKeyConstraint('post_tags_tagId_fkey', ['tagId'], 'tags', ['id'])
-      .execute()
-  } catch (error) {
-    // Some databases might not support foreign key constraints
-    console.warn('Could not create foreign key constraints:', error)
-  }
+  // Foreign key constraints are now defined inline in table creation for SQLite compatibility
 
   // Create indexes for performance
   try {
@@ -422,10 +388,19 @@ export async function cleanupTestDatabase(testDb: TestDatabase): Promise<void> {
   const { db } = testDb
   
   try {
+    // Drop all test tables first (before closing connection)
+    await dropTestTables(testDb)
+    
     // Close database connection
     await db.close()
   } catch (error) {
     console.warn('Error cleaning up test database:', error)
+    // Try to close the connection even if dropping tables failed
+    try {
+      await db.close()
+    } catch (closeError) {
+      console.warn('Error closing database connection:', closeError)
+    }
   }
 }
 

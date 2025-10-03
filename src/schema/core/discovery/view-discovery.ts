@@ -1,5 +1,5 @@
 import { DatabaseIntrospector } from '../../../dialect/database-introspector.js'
-import { ViewMetadata } from '../../types/schema-discovery-types.js'
+import { ViewMetadata } from '../types/schema-discovery-types.js'
 
 /**
  * Specialized service for discovering database views

@@ -2,7 +2,7 @@ import type { Kysely } from '../../../kysely.js'
 import { DatabaseIntrospector } from '../../../dialect/database-introspector.js'
 import { TableInfo } from '../../../types/index.js'
 import { TableMetadata, SchemaDiscoveryConfig } from '../../types/schema-discovery-types.js'
-import { TypeMapper } from '../../utils/type-mapper.js'
+import { TypeMapper } from '../utils/type-mapper.js'
 
 /**
  * Specialized service for discovering table metadata

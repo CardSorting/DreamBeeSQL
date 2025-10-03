@@ -1,12 +1,14 @@
-import type { Kysely } from '../../kysely.js'
-import type { Dialect } from '../../dialect/dialect.js'
-import { TableMetadataDiscovery } from '../discovery/table/table-metadata-discovery.js'
-import { RelationshipDiscovery } from '../discovery/relationship/relationship-discovery.js'
-import { ViewDiscovery } from '../discovery/view/view-discovery.js'
-import { PostgreSQLIndexDiscovery } from '../discovery/index/postgresql-index-discovery.js'
-import { SQLiteIndexDiscovery } from '../discovery/index/sqlite-index-discovery.js'
-import { PostgreSQLConstraintDiscovery } from '../discovery/constraint/postgresql-constraint-discovery.js'
-import { SQLiteConstraintDiscovery } from '../discovery/constraint/sqlite-constraint-discovery.js'
+import type { Kysely } from '../../../kysely.js'
+import type { Dialect } from '../../../dialect/dialect.js'
+import { TableMetadataDiscovery } from '../discovery/table-metadata-discovery.js'
+import { RelationshipDiscovery } from '../discovery/relationship-discovery.js'
+import { ViewDiscovery } from '../discovery/view-discovery.js'
+import { PostgreSQLDiscoveryCoordinator } from '../../dialects/postgresql/postgresql-discovery.coordinator.js'
+import { SQLiteDiscoveryCoordinator } from '../../dialects/sqlite/sqlite-discovery.coordinator.js'
+import { PostgreSQLIndexDiscovery } from '../../dialects/postgresql/discovery/postgresql-index-discovery.js'
+import { SQLiteIndexDiscovery } from '../../dialects/sqlite/discovery/sqlite-index-discovery.js'
+import { PostgreSQLConstraintDiscovery } from '../../dialects/postgresql/discovery/postgresql-constraint-discovery.js'
+import { SQLiteConstraintDiscovery } from '../../dialects/sqlite/discovery/sqlite-constraint-discovery.js'
 
 /**
  * Factory for creating database-specific discovery services
@@ -81,6 +83,27 @@ export class DiscoveryFactory {
         throw new Error('MSSQL constraint discovery not yet implemented')
       default:
         throw new Error(`Unsupported dialect for constraint discovery: ${dialect}`)
+    }
+  }
+
+  /**
+   * Create dialect-specific discovery coordinator
+   */
+  createDiscoveryCoordinator(dialect: string): PostgreSQLDiscoveryCoordinator | SQLiteDiscoveryCoordinator {
+    switch (dialect.toLowerCase()) {
+      case 'postgresql':
+      case 'postgres':
+        return PostgreSQLDiscoveryCoordinator.getInstance()
+      case 'sqlite':
+        return SQLiteDiscoveryCoordinator.getInstance()
+      case 'mysql':
+        // TODO: Implement MySQL discovery coordinator
+        throw new Error('MySQL discovery coordinator not yet implemented')
+      case 'mssql':
+        // TODO: Implement MSSQL discovery coordinator
+        throw new Error('MSSQL discovery coordinator not yet implemented')
+      default:
+        throw new Error(`Unsupported dialect for discovery coordinator: ${dialect}`)
     }
   }
 

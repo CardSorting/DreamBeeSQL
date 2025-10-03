@@ -1,7 +1,7 @@
 import type { Kysely } from '../kysely.js'
 import { SchemaInfo, IntrospectionConfig } from '../types'
 import type { Dialect } from '../dialect/dialect.js'
-import { SchemaDiscoveryCoordinator } from './schema-discovery.coordinator.js'
+import { SchemaDiscoveryCoordinator } from './core/coordinators/schema-discovery.coordinator.js'
 
 /**
  * Schema discovery engine that introspects database structure

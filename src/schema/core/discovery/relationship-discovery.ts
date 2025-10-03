@@ -1,5 +1,5 @@
 import { TableInfo, RelationshipInfo } from '../../../types/index.js'
-import { NameGenerator } from '../../utils/name-generator.js'
+import { NameGenerator } from '../utils/name-generator.js'
 
 /**
  * Specialized service for discovering relationships between tables

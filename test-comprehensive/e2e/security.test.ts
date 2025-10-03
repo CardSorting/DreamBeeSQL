@@ -31,7 +31,7 @@ describe('Security E2E Tests', () => {
             firstName: 'SQLInjection',
             lastName: 'User',
             active: true
-          }))
+          })
           // Test SQL injection attempts
           const maliciousInputs = [
             "'; DROP TABLE users; --",
@@ -53,14 +53,14 @@ describe('Security E2E Tests', () => {
             // Test findWhere with malicious input
             const whereResults = await userRepo.findWhere({
               email: maliciousInput
-            }))
+            })
             expect(whereResults).to.have.length(0)
           }
           
           // Verify original user still exists and is unchanged
           const originalUser = await userRepo.findById('sql-injection-user')
           expect(originalUser).to.exist
-          expect(originalUser!.email).to.equal('sqlinjection@example.com')
+          expect((originalUser as any).email).to.equal('sqlinjection@example.com')
           
           // Clean up
           await userRepo.delete('sql-injection-user')
@@ -78,7 +78,7 @@ describe('Security E2E Tests', () => {
             firstName: 'UpdateInjection',
             lastName: 'User',
             active: true
-          }))
+          })
           // Test SQL injection attempts in updates
           const maliciousInputs = [
             "'; DROP TABLE users; --",
@@ -88,23 +88,26 @@ describe('Security E2E Tests', () => {
           
           for (const maliciousInput of maliciousInputs) {
             // Test update with malicious input
-            const updated = await userRepo.update('update-injection-user', {
-              firstName: maliciousInput
-            }))
+            const userToUpdate = await userRepo.findById('update-injection-user')
+            expect(userToUpdate).to.exist
+            ;(userToUpdate as any).firstName = maliciousInput
+            
+            const updated = await userRepo.update(userToUpdate as any)
             // Should update safely (malicious input treated as literal string)
             expect(updated).to.exist
-            expect(updated!.firstName).to.equal(maliciousInput)
-            
+            expect((updated as any).firstName).to.equal(maliciousInput)
+
             // Reset for next test
-            await userRepo.update('update-injection-user', {
-              firstName: 'UpdateInjection'
-            }))
+            const userToReset = await userRepo.findById('update-injection-user')
+            expect(userToReset).to.exist
+            ;(userToReset as any).firstName = 'UpdateInjection'
+            await userRepo.update(userToReset as any)
           }
           
           // Verify user still exists and table structure is intact
           const finalUser = await userRepo.findById('update-injection-user')
           expect(finalUser).to.exist
-          expect(finalUser!.email).to.equal('updateinjection@example.com')
+          expect((finalUser as any).email).to.equal('updateinjection@example.com')
           
           // Clean up
           await userRepo.delete('update-injection-user')
@@ -122,14 +125,14 @@ describe('Security E2E Tests', () => {
             firstName: 'DeleteInjection1',
             lastName: 'User',
             active: true
-          }))
+          })
           const user2 = await userRepo.create({
             id: 'delete-injection-user2',
             email: 'deleteinjection2@example.com',
             firstName: 'DeleteInjection2',
             lastName: 'User',
             active: true
-          }))
+          })
           // Test SQL injection attempts in deletes
           const maliciousInputs = [
             "'; DROP TABLE users; --",
@@ -168,14 +171,14 @@ describe('Security E2E Tests', () => {
             firstName: 'ComplexInjection',
             lastName: 'User',
             active: true
-          }))
+          })
           const post = await postRepo.create({
             id: 'complex-injection-post',
-            userId: user.id,
+            userId: (user as any).id,
             title: 'Complex Injection Post',
             content: 'This post tests complex SQL injection',
             published: true
-          }))
+          })
           // Test SQL injection in relationship queries
           const maliciousInputs = [
             "'; DROP TABLE posts; --",
@@ -185,10 +188,10 @@ describe('Security E2E Tests', () => {
           
           for (const maliciousInput of maliciousInputs) {
             // Test relationship loading with malicious input
-            const userWithPosts = await userRepo.findWithRelations(user.id, ['posts'])
+            const userWithPosts = await userRepo.findWithRelations((user as any).id, ['posts'])
             expect(userWithPosts).to.exist
-            expect(userWithPosts!.posts).to.have.length(1)
-            expect(userWithPosts!.posts[0].id).to.equal('complex-injection-post')
+            expect((userWithPosts as any).posts).to.have.length(1)
+            expect((userWithPosts as any).posts[0].id).to.equal('complex-injection-post')
           }
           
           // Verify data integrity
@@ -202,9 +205,9 @@ describe('Security E2E Tests', () => {
           await postRepo.delete('complex-injection-post')
           await userRepo.delete('complex-injection-user')
         }))
-      }))
+      })
     }
-  }))
+  })
   describe('Data Validation and Sanitization', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -244,12 +247,12 @@ describe('Security E2E Tests', () => {
             expect(user).to.exist
             
             // Verify data is stored safely
-            const retrievedUser = await userRepo.findById(user.id)
+            const retrievedUser = await userRepo.findById((user as any).id)
             expect(retrievedUser).to.exist
             
             // Data should be stored as-is (sanitization happens at application level)
-            expect(retrievedUser!.firstName).to.equal(input.firstName)
-            expect(retrievedUser!.lastName).to.equal(input.lastName)
+            expect((retrievedUser as any).firstName).to.equal(input.firstName)
+            expect((retrievedUser as any).lastName).to.equal(input.lastName)
           }
           
           // Clean up
@@ -295,12 +298,12 @@ describe('Security E2E Tests', () => {
               // Verify the data was stored correctly
               const user = await userRepo.findById(input.id)
               if (user) {
-                expect(typeof user.id).to.equal('string')
-                expect(typeof user.email).to.equal('string')
-                expect(typeof user.active).to.equal('boolean')
+                expect(typeof (user as any).id).to.equal('string')
+                expect(typeof (user as any).email).to.equal('string')
+                expect(typeof (user as any).active).to.equal('boolean')
                 
                 // Clean up
-                await userRepo.delete(user.id)
+                await userRepo.delete((user as any).id)
               }
             } catch (error) {
               // Expected for some invalid inputs
@@ -324,7 +327,7 @@ describe('Security E2E Tests', () => {
               firstName: longString,
               lastName: 'User',
               active: true
-            }))
+            })
             // Should either succeed or fail gracefully
             if (user) {
               const retrievedUser = await userRepo.findById('long-string-user')
@@ -338,9 +341,9 @@ describe('Security E2E Tests', () => {
             expect(error).to.be.instanceOf(Error)
           }
         }))
-      }))
+      })
     }
-  }))
+  })
   describe('Access Control and Permissions', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -357,19 +360,21 @@ describe('Security E2E Tests', () => {
             firstName: 'Permission',
             lastName: 'User',
             active: true
-          }))
+          })
           expect(user).to.exist
-          
+
           // Test read operations
           const retrievedUser = await userRepo.findById('permission-user')
           expect(retrievedUser).to.exist
-          
+
           // Test update operations
-          const updatedUser = await userRepo.update('permission-user', {
-            firstName: 'UpdatedPermission'
-          }))
+          const userToUpdate = await userRepo.findById('permission-user')
+          expect(userToUpdate).to.exist
+          ;(userToUpdate as any).firstName = 'UpdatedPermission'
+          
+          const updatedUser = await userRepo.update(userToUpdate as any)
           expect(updatedUser).to.exist
-          expect(updatedUser!.firstName).to.equal('UpdatedPermission')
+          expect((updatedUser as any).firstName).to.equal('UpdatedPermission')
           
           // Test delete operations
           const deleted = await userRepo.delete('permission-user')
@@ -394,7 +399,7 @@ describe('Security E2E Tests', () => {
               firstName: 'Insufficient',
               lastName: 'Permission',
               active: true
-            }))
+            })
             expect(user).to.exist
             
             // Clean up
@@ -425,9 +430,9 @@ describe('Security E2E Tests', () => {
             expect(error).to.be.instanceOf(Error)
           }
         }))
-      }))
+      })
     }
-  }))
+  })
   describe('Connection Security', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -443,7 +448,7 @@ describe('Security E2E Tests', () => {
             firstName: 'Secure',
             lastName: 'Connection',
             active: true
-          }))
+          })
           expect(user).to.exist
           
           // Clean up
@@ -464,7 +469,7 @@ describe('Security E2E Tests', () => {
               firstName: 'Timeout',
               lastName: 'User',
               active: true
-            }))
+            })
             expect(user).to.exist
             
             // Clean up
@@ -488,18 +493,18 @@ describe('Security E2E Tests', () => {
             firstName: 'HijackTest',
             lastName: 'User',
             active: true
-          }))
+          })
           // Verify user was created by current connection
           const retrievedUser = await userRepo.findById('hijack-test-user')
           expect(retrievedUser).to.exist
-          expect(retrievedUser!.email).to.equal('hijacktest@example.com')
-          
+          expect((retrievedUser as any).email).to.equal('hijacktest@example.com')
+
           // Clean up
           await userRepo.delete('hijack-test-user')
         }))
-      }))
+      })
     }
-  }))
+  })
   describe('Data Encryption and Privacy', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -524,7 +529,7 @@ describe('Security E2E Tests', () => {
           // Verify data is stored and retrieved correctly
           const retrievedUser = await userRepo.findById('sensitive-user')
           expect(retrievedUser).to.exist
-          expect(retrievedUser!.email).to.equal('sensitive@example.com')
+          expect((retrievedUser as any).email).to.equal('sensitive@example.com')
           
           // Clean up
           await userRepo.delete('sensitive-user')
@@ -543,7 +548,7 @@ describe('Security E2E Tests', () => {
               firstName: 'LeakTest',
               lastName: 'User',
               active: true
-            }))
+            })
             // Force an error
             await userRepo.create({
               id: 'leak-test-user', // Duplicate ID
@@ -551,7 +556,7 @@ describe('Security E2E Tests', () => {
               firstName: 'LeakTest2',
               lastName: 'User2',
               active: true
-            }))
+            })
             expect.fail('Should have thrown an error')
           } catch (error) {
             // Verify error message doesn't contain sensitive data
@@ -576,23 +581,25 @@ describe('Security E2E Tests', () => {
             firstName: 'Anonymize',
             lastName: 'User',
             active: true
-          }))
+          })
           // Test anonymization by updating with generic data
-          const anonymizedUser = await userRepo.update('anonymize-user', {
-            email: 'anonymous@example.com',
-            firstName: 'Anonymous',
-            lastName: 'User'
-          }))
-          expect(anonymizedUser).to.exist
-          expect(anonymizedUser!.email).to.equal('anonymous@example.com')
-          expect(anonymizedUser!.firstName).to.equal('Anonymous')
+          const userToAnonymize = await userRepo.findById('anonymize-user')
+          expect(userToAnonymize).to.exist
+          ;(userToAnonymize as any).email = 'anonymous@example.com'
+          ;(userToAnonymize as any).firstName = 'Anonymous'
+          ;(userToAnonymize as any).lastName = 'User'
           
+          const anonymizedUser = await userRepo.update(userToAnonymize as any)
+          expect(anonymizedUser).to.exist
+          expect((anonymizedUser as any).email).to.equal('anonymous@example.com')
+          expect((anonymizedUser as any).firstName).to.equal('Anonymous')
+
           // Clean up
           await userRepo.delete('anonymize-user')
         }))
-      }))
+      })
     }
-  }))
+  })
   describe('Rate Limiting and DoS Protection', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -603,7 +610,7 @@ describe('Security E2E Tests', () => {
           const userRepo = db.getRepository('users')
           
           // Test high-frequency operations
-          const promises = []
+          const promises: Promise<any>[] = []
           for (let i = 0; i < 100; i++) {
             promises.push(
               userRepo.create({
@@ -612,7 +619,7 @@ describe('Security E2E Tests', () => {
                 firstName: `RateLimit${i}`,
                 lastName: 'User',
                 active: true
-              }))
+              })
             )
           }
           
@@ -622,7 +629,7 @@ describe('Security E2E Tests', () => {
             
             // Clean up
             for (const user of results) {
-              await userRepo.delete(user.id)
+              await userRepo.delete((user as any).id)
             }
           } catch (error) {
             // Might fail due to rate limiting
@@ -638,7 +645,7 @@ describe('Security E2E Tests', () => {
           // Test resource exhaustion scenarios
           try {
             // Create many users to test resource limits
-            const users = []
+            const users: any[] = []
             for (let i = 0; i < 1000; i++) {
               const user = await userRepo.create({
                 id: `exhaustion-user-${i}`,
@@ -646,7 +653,7 @@ describe('Security E2E Tests', () => {
                 firstName: `Exhaustion${i}`,
                 lastName: 'User',
                 active: true
-              }))
+              })
               users.push(user)
             }
             
@@ -655,7 +662,7 @@ describe('Security E2E Tests', () => {
             
             // Clean up
             for (const user of users) {
-              await userRepo.delete(user.id)
+              await userRepo.delete((user as any).id)
             }
           } catch (error) {
             // Might fail due to resource limits
@@ -669,7 +676,7 @@ describe('Security E2E Tests', () => {
           const userRepo = db.getRepository('users')
           
           // Test concurrent operations
-          const promises = []
+          const promises: Promise<any>[] = []
           for (let i = 0; i < 50; i++) {
             promises.push(
               userRepo.create({
@@ -678,7 +685,7 @@ describe('Security E2E Tests', () => {
                 firstName: `Concurrent${i}`,
                 lastName: 'User',
                 active: true
-              }))
+              })
             )
           }
           
@@ -688,16 +695,16 @@ describe('Security E2E Tests', () => {
             
             // Clean up
             for (const user of results) {
-              await userRepo.delete(user.id)
+              await userRepo.delete((user as any).id)
             }
           } catch (error) {
             // Might fail due to concurrency limits
             expect(error).to.be.instanceOf(Error)
           }
         }))
-      }))
+      })
     }
-  }))
+  })
   describe('Audit and Logging Security', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -714,13 +721,15 @@ describe('Security E2E Tests', () => {
             firstName: 'Audit',
             lastName: 'User',
             active: true
-          }))
+          })
           expect(user).to.exist
-          
+
           // Test update operation
-          const updatedUser = await userRepo.update('audit-user', {
-            firstName: 'UpdatedAudit'
-          }))
+          const userToUpdate = await userRepo.findById('audit-user')
+          expect(userToUpdate).to.exist
+          ;(userToUpdate as any).firstName = 'UpdatedAudit'
+          
+          const updatedUser = await userRepo.update(userToUpdate as any)
           expect(updatedUser).to.exist
           
           // Test delete operation
@@ -749,7 +758,7 @@ describe('Security E2E Tests', () => {
             // Verify data is stored correctly
             const retrievedUser = await userRepo.findById('log-injection-user')
             expect(retrievedUser).to.exist
-            expect(retrievedUser!.firstName).to.equal('Log\nInjection\nAttack')
+            expect((retrievedUser as any).firstName).to.equal('Log\nInjection\nAttack')
             
             // Clean up
             await userRepo.delete('log-injection-user')
@@ -775,11 +784,11 @@ describe('Security E2E Tests', () => {
           
           const user = await userRepo.create(sensitiveData)
           expect(user).to.exist
-          
+
           // Clean up
           await userRepo.delete('sensitive-log-user')
         }))
-      }))
+      })
     }
-  }))
-}))
+  })
+})

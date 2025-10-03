@@ -35,6 +35,10 @@ export class SqliteDriver implements Driver {
   }
 
   async acquireConnection(): Promise<DatabaseConnection> {
+    if (!this.#connection) {
+      throw new Error('driver has already been destroyed')
+    }
+    
     // SQLite only has one single connection. We use a mutex here to wait
     // until the single connection has been released.
     await this.#connectionMutex.lock()
@@ -97,7 +101,11 @@ export class SqliteDriver implements Driver {
   }
 
   async destroy(): Promise<void> {
-    this.#db?.close()
+    if (this.#db) {
+      this.#db.close()
+      this.#db = undefined
+      this.#connection = undefined
+    }
   }
 }
 

@@ -13,6 +13,9 @@ import { config as loadDotenv } from 'dotenv'
 import { SchemaWatcher, WatchOptions } from './watch/schema-watcher.js'
 import { QueryAnalyzer, QueryAnalyzerOptions } from './performance/query-analyzer.js'
 
+// Global initialization lock to prevent concurrent initialization
+const globalInitLock = new Map<string, Promise<void>>()
+
 /**
  * NOORMME - No ORM, just magic!
  * Zero-configuration pseudo-ORM that works with any existing database
@@ -31,6 +34,7 @@ export class NOORMME {
   private queryAnalyzer: QueryAnalyzer | null = null
   private initialized = false
   private repositories = new Map<string, Repository<any>>()
+  private instanceId: string
 
   constructor(configOrConnectionString?: NOORMConfig | string) {
     // Load .env if it exists
@@ -61,6 +65,9 @@ export class NOORMME {
     this.logger = new Logger(this.config.logging)
     this.cacheManager = new CacheManager(this.config.cache)
     
+    // Generate unique instance ID for this NOORMME instance
+    this.instanceId = `${this.config.dialect}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    
     // Initialize Kysely with the provided dialect
     this.dialect = this.createDialect()
     this.db = new (require('./kysely.js').Kysely)({
@@ -84,6 +91,32 @@ export class NOORMME {
       return
     }
 
+    // Check if another instance is already initializing the same database
+    const lockKey = `${this.config.dialect}-${this.config.connection.database || 'default'}`
+    if (globalInitLock.has(lockKey)) {
+      this.logger.info(`Waiting for another instance to finish initializing ${lockKey}...`)
+      await globalInitLock.get(lockKey)
+      
+      // Check again after waiting
+      if (this.initialized) {
+        this.logger.warn('NOORMME already initialized after waiting')
+        return
+      }
+    }
+
+    // Create initialization promise and store it
+    const initPromise = this._doInitialize()
+    globalInitLock.set(lockKey, initPromise)
+
+    try {
+      await initPromise
+    } finally {
+      // Clean up the lock
+      globalInitLock.delete(lockKey)
+    }
+  }
+
+  private async _doInitialize(): Promise<void> {
     try {
       this.logger.info('Initializing NOORMME...')
 
@@ -129,6 +162,13 @@ export class NOORMME {
       this.logger.error('Failed to initialize NOORMME:', error)
       throw error
     }
+  }
+
+  /**
+   * Check if NOORMME is initialized
+   */
+  isInitialized(): boolean {
+    return this.initialized
   }
 
   /**

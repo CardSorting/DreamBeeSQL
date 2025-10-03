@@ -90,7 +90,10 @@ export async function setupTestDatabase(testDb: TestDatabase): Promise<void> {
   await createTestSchema(db)
   
   // Initialize NOORMME (this will discover the tables we just created)
-  await db.initialize()
+  // Only initialize if not already initialized
+  if (!db.isInitialized()) {
+    await db.initialize()
+  }
   
   // Insert test data
   await insertTestData(db)
@@ -390,17 +393,15 @@ export async function cleanupTestDatabase(testDb: TestDatabase): Promise<void> {
   try {
     // Drop all test tables first (before closing connection)
     await dropTestTables(testDb)
-    
+  } catch (error) {
+    console.warn('Error dropping test tables:', error)
+  }
+  
+  try {
     // Close database connection
     await db.close()
   } catch (error) {
-    console.warn('Error cleaning up test database:', error)
-    // Try to close the connection even if dropping tables failed
-    try {
-      await db.close()
-    } catch (closeError) {
-      console.warn('Error closing database connection:', closeError)
-    }
+    console.warn('Error closing database connection:', error)
   }
 }
 

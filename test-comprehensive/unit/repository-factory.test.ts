@@ -20,7 +20,7 @@ describe('Repository Factory', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should create repository with all CRUD operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -38,7 +38,7 @@ describe('Repository Factory', () => {
         
         it('should create different repositories for different tables', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -50,7 +50,7 @@ describe('Repository Factory', () => {
         
         it('should cache repository instances', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const repo1 = db.getRepository('users')
           const repo2 = db.getRepository('users')
@@ -66,7 +66,7 @@ describe('Repository Factory', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should create new entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -87,7 +87,7 @@ describe('Repository Factory', () => {
         
         it('should find entities by ID', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -99,7 +99,7 @@ describe('Repository Factory', () => {
         
         it('should return null for non-existent entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -109,7 +109,7 @@ describe('Repository Factory', () => {
         
         it('should find all entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -126,7 +126,7 @@ describe('Repository Factory', () => {
         
         it('should update entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -152,7 +152,7 @@ describe('Repository Factory', () => {
         
         it('should delete entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -177,7 +177,7 @@ describe('Repository Factory', () => {
         
         it('should return false when deleting non-existent entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -193,7 +193,7 @@ describe('Repository Factory', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should generate findBy methods for unique columns', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -207,7 +207,7 @@ describe('Repository Factory', () => {
         
         it('should generate findManyBy methods for non-unique columns', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -225,7 +225,7 @@ describe('Repository Factory', () => {
         
         it('should generate count method', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -238,7 +238,7 @@ describe('Repository Factory', () => {
         
         it('should generate exists method', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -259,7 +259,7 @@ describe('Repository Factory', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should find entities with relations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -274,7 +274,7 @@ describe('Repository Factory', () => {
         
         it('should return null for non-existent entities with relations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -284,7 +284,7 @@ describe('Repository Factory', () => {
         
         it('should load relationships for multiple entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -303,7 +303,7 @@ describe('Repository Factory', () => {
         
         it('should handle empty relations array', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -314,7 +314,7 @@ describe('Repository Factory', () => {
         
         it('should handle non-existent relations gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -334,7 +334,7 @@ describe('Repository Factory', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should batch load relationships efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -373,7 +373,7 @@ describe('Repository Factory', () => {
         
         it('should handle large batches', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -418,7 +418,7 @@ describe('Repository Factory', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle database errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -439,7 +439,7 @@ describe('Repository Factory', () => {
         
         it('should handle connection errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -457,7 +457,7 @@ describe('Repository Factory', () => {
         
         it('should handle invalid entity data', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -484,7 +484,7 @@ describe('Repository Factory', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should create repositories efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const duration = await performanceHelper.measure('repository-creation', async () => {
             // Create multiple repositories
@@ -500,7 +500,7 @@ describe('Repository Factory', () => {
         
         it('should perform CRUD operations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -544,7 +544,7 @@ describe('Repository Factory', () => {
         
         it('should handle concurrent operations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           

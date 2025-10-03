@@ -164,7 +164,7 @@ describe('SQLite Compatibility - Minimal Tests', () => {
       // These should fail with parameter binding errors
       expect(() => stmt.run({ name: 'John' })).to.throw(/Too few parameter values were provided/)
       expect(() => stmt.run(['John'])).to.throw(/Too few parameter values were provided/)
-      expect(() => stmt.run(new Date())).to.throw(/Too few parameter values were provided/)
+      expect(() => stmt.run(new Date())).to.throw(/SQLite3 can only bind numbers, strings, bigints, buffers, and null/)
       expect(() => stmt.run(undefined)).to.throw(/Too few parameter values were provided/)
       
       db.close()

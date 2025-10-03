@@ -22,7 +22,7 @@ describe('Relationship Engine', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should initialize with relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())
@@ -36,7 +36,7 @@ describe('Relationship Engine', () => {
         
         it('should handle empty relationships array', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const relationshipEngine = new RelationshipEngine(db.getKysely())
           
@@ -49,7 +49,7 @@ describe('Relationship Engine', () => {
         
         it('should get relationships for specific table', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())
@@ -67,7 +67,7 @@ describe('Relationship Engine', () => {
         
         it('should add new relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const relationshipEngine = new RelationshipEngine(db.getKysely())
           
@@ -92,7 +92,7 @@ describe('Relationship Engine', () => {
         
         it('should remove relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const relationshipEngine = new RelationshipEngine(db.getKysely())
           
@@ -124,7 +124,7 @@ describe('Relationship Engine', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should load one-to-many relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())
@@ -148,7 +148,7 @@ describe('Relationship Engine', () => {
         
         it('should load many-to-one relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())
@@ -173,7 +173,7 @@ describe('Relationship Engine', () => {
         
         it('should load multiple relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())
@@ -198,7 +198,7 @@ describe('Relationship Engine', () => {
         
         it('should handle empty entities array', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())
@@ -211,7 +211,7 @@ describe('Relationship Engine', () => {
         
         it('should handle empty relations array', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())
@@ -227,7 +227,7 @@ describe('Relationship Engine', () => {
         
         it('should handle non-existent relationships gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())
@@ -249,7 +249,7 @@ describe('Relationship Engine', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should batch load relationships efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely(), {
@@ -295,7 +295,7 @@ describe('Relationship Engine', () => {
         
         it('should respect batch size configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely(), {
@@ -336,7 +336,7 @@ describe('Relationship Engine', () => {
         
         it('should handle batch loading with different relationship types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely(), {
@@ -407,7 +407,7 @@ describe('Relationship Engine', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should load relationships efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())
@@ -426,7 +426,7 @@ describe('Relationship Engine', () => {
         
         it('should handle large datasets efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely(), {
@@ -464,7 +464,7 @@ describe('Relationship Engine', () => {
         
         it('should handle concurrent relationship loading', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())
@@ -539,7 +539,7 @@ describe('Relationship Engine', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle database connection errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())
@@ -563,7 +563,7 @@ describe('Relationship Engine', () => {
         
         it('should handle invalid relationship configurations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const relationshipEngine = new RelationshipEngine(db.getKysely())
           
@@ -593,7 +593,7 @@ describe('Relationship Engine', () => {
         
         it('should handle entities with null foreign keys', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const relationshipEngine = new RelationshipEngine(db.getKysely())

@@ -20,7 +20,7 @@ describe('Security E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should prevent SQL injection in queries', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -67,7 +67,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should prevent SQL injection in updates', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -114,7 +114,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should prevent SQL injection in deletes', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -159,7 +159,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should prevent SQL injection in complex queries', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -213,7 +213,7 @@ describe('Security E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should sanitize input data properly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -262,7 +262,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should validate data types properly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -313,7 +313,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should enforce data length limits', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -349,7 +349,7 @@ describe('Security E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should respect database user permissions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -386,7 +386,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should handle insufficient permissions gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -411,7 +411,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should prevent unauthorized schema modifications', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const kysely = db.getKysely()
           
@@ -438,7 +438,7 @@ describe('Security E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should use secure connection parameters', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Test that connection is established securely
           const userRepo = db.getRepository('users')
@@ -456,7 +456,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should handle connection timeouts securely', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Test connection timeout handling
           const userRepo = db.getRepository('users')
@@ -481,7 +481,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should prevent connection hijacking', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Test that connection is not easily hijackable
           const userRepo = db.getRepository('users')
@@ -510,7 +510,7 @@ describe('Security E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle sensitive data appropriately', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -536,7 +536,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should prevent data leakage in error messages', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -570,7 +570,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should handle data anonymization', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -605,7 +605,7 @@ describe('Security E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle high-frequency requests gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -638,7 +638,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should prevent resource exhaustion attacks', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -671,7 +671,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should handle concurrent access securely', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -710,7 +710,7 @@ describe('Security E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should log security-relevant events appropriately', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -738,7 +738,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should prevent log injection attacks', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -769,7 +769,7 @@ describe('Security E2E Tests', () => {
         }))
         it('should handle sensitive data in logs appropriately', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           

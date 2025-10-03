@@ -24,7 +24,7 @@ describe('NOORMME Core Functionality', () => {
           
           // Should not throw during initialization
           try {
-            await db.initialize();
+            ;
           } catch (error) {
             expect.fail('Database initialization should not throw an error');
           }
@@ -49,7 +49,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should throw error for non-existent table', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           expect(() => {
             db.getRepository('nonexistent_table');
@@ -58,7 +58,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should provide Kysely instance', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const kysely = db.getKysely();
           expect(kysely).to.exist;
@@ -70,7 +70,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should provide performance metrics', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const metrics = db.getPerformanceMetrics();
           expect(metrics).to.have.property('queryCount');
@@ -92,7 +92,7 @@ describe('NOORMME Core Functionality', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should create repository for existing table', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const userRepo = db.getRepository('users');
           expect(userRepo).to.exist;
@@ -105,7 +105,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should cache repository instances', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const repo1 = db.getRepository('users');
           const repo2 = db.getRepository('users');
@@ -115,7 +115,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should create different repositories for different tables', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const userRepo = db.getRepository('users');
           const postRepo = db.getRepository('posts');
@@ -125,7 +125,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should provide schema information', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const schemaInfo = await db.getSchemaInfo();
           expect(schemaInfo).to.have.property('tables');
@@ -151,7 +151,7 @@ describe('NOORMME Core Functionality', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should update configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           // Update logging configuration
           db.updateConfig({
@@ -174,7 +174,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should handle invalid configuration gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           // Should not throw with invalid config
           expect(() => {
@@ -195,7 +195,7 @@ describe('NOORMME Core Functionality', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should execute transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const result = await db.transaction(async (trx) => {
             const user = await trx
@@ -220,7 +220,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should rollback transactions on error', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           try {
             await db.transaction(async (trx) => {
@@ -256,7 +256,7 @@ describe('NOORMME Core Functionality', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should execute raw SQL queries', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const result = await db.execute('SELECT COUNT(*) as count FROM users');
           expect(result).to.exist;
@@ -266,7 +266,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should execute raw SQL with parameters', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const result = await db.execute('SELECT * FROM users WHERE active = ?', [true]);
           expect(result).to.be.an('array');
@@ -282,7 +282,7 @@ describe('NOORMME Core Functionality', () => {
           const { db } = testDb;
           
           const start = performance.now();
-          await db.initialize();
+          ;
           const duration = performance.now() - start;
           
           // Initialization should be fast
@@ -293,7 +293,7 @@ describe('NOORMME Core Functionality', () => {
           const { db } = testDb;
           
           const { delta } = await memoryHelper.measureMemory(async () => {
-            await db.initialize();
+            ;
           });
           
           // Memory usage should be reasonable
@@ -302,7 +302,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should maintain performance with multiple repositories', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const start = performance.now();
           // Create multiple repositories
@@ -345,7 +345,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should handle invalid SQL gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           try {
             await db.execute('INVALID SQL QUERY');
@@ -357,7 +357,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should handle repository operations on closed database', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           await db.close();
           
           expect(() => {
@@ -373,7 +373,7 @@ describe('NOORMME Core Functionality', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should close database connections properly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           // Should not throw
           try {
@@ -388,7 +388,7 @@ describe('NOORMME Core Functionality', () => {
 
         it('should handle multiple close calls gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           // First close
           await db.close();

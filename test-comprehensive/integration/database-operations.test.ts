@@ -561,7 +561,7 @@ class DatabaseOperationsTestSuite {
     const results: Array<{ db: any; dialect: string; user: User }> = []
     
     for (const { db, dialect } of databases) {
-      await db.initialize()
+      
       
       const userRepo = db.getRepository('users')
       
@@ -598,61 +598,61 @@ class DatabaseOperationsTestSuite {
     describe(`${dialect.toUpperCase()}`, () => {
       it('should perform complete CRUD lifecycle', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testCrudLifecycle(db)
       }))
 
       it('should handle bulk operations', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testBulkOperations(db)
       }))
 
       it('should handle complex data types', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testComplexDataTypes(db)
       }))
 
       it('should load one-to-many relationships', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testOneToManyRelationships(db)
       }))
 
       it('should load many-to-one relationships', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testManyToOneRelationships(db)
       }))
 
       it('should handle complex relationships with comments', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testComplexRelationships(db)
       }))
 
       it('should handle performance with large datasets', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testPerformanceWithLargeDatasets(db)
       }))
 
       it('should handle transaction operations', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testTransactionHandling(db)
       }))
 
       it('should handle concurrent operations', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testConcurrentOperations(db)
       }))
 
       it('should handle error scenarios', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testErrorHandling(db)
       }))
     })

@@ -43,7 +43,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle database connection timeouts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Close the database connection
           await db.close()
@@ -61,7 +61,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle database connection recovery', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Perform some operations
           const userRepo = db.getRepository('users')
@@ -77,7 +77,7 @@ describe('Error Handling E2E Tests', () => {
           await db.close()
           
           // Reinitialize and verify data is still there
-          await db.initialize()
+          
           const recoveredUser = await userRepo.findById('recovery-user')
           
           expect(recoveredUser).to.exist
@@ -95,7 +95,7 @@ describe('Error Handling E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle invalid data types gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -116,7 +116,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle missing required fields gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -135,7 +135,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle data type mismatches gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -156,7 +156,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle duplicate key errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -189,7 +189,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle foreign key constraint errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const postRepo = db.getRepository('posts')
           
@@ -216,7 +216,7 @@ describe('Error Handling E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle transaction rollbacks correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -267,7 +267,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle nested transaction errors correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -311,7 +311,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle transaction timeout errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           try {
             await db.transaction(async (trx) => {
@@ -353,7 +353,7 @@ describe('Error Handling E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle non-existent relationship errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -380,7 +380,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle relationship loading with invalid data gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -426,7 +426,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle batch relationship loading errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -542,7 +542,7 @@ describe('Error Handling E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle migration errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const { createNodeMigrationManager } = await import('../../src/migration/node-migration-manager.js')
           
@@ -561,7 +561,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle migration execution errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const { createNodeMigrationManager } = await import('../../src/migration/node-migration-manager.js')
           
@@ -582,7 +582,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle migration configuration errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const { createNodeMigrationManager } = await import('../../src/migration/node-migration-manager.js')
           
@@ -612,7 +612,7 @@ describe('Error Handling E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle performance monitoring errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -631,7 +631,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle memory monitoring errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -650,7 +650,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle resource exhaustion gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -690,7 +690,7 @@ describe('Error Handling E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should recover from partial failures gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -741,7 +741,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should handle concurrent error scenarios gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -795,7 +795,7 @@ describe('Error Handling E2E Tests', () => {
 
         it('should maintain data consistency during errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')

@@ -41,7 +41,7 @@ describe('Compatibility E2E Tests', () => {
 
     it('should handle dialect-specific features gracefully', withTestDatabase('postgresql', async (testDb) => {
       const { db } = testDb
-      await db.initialize()
+      
       
       const userRepo = db.getRepository('users')
       
@@ -65,7 +65,7 @@ describe('Compatibility E2E Tests', () => {
 
     it('should handle MySQL-specific features gracefully', withTestDatabase('mysql', async (testDb) => {
       const { db } = testDb
-      await db.initialize()
+      
       
       const userRepo = db.getRepository('users')
       
@@ -89,7 +89,7 @@ describe('Compatibility E2E Tests', () => {
 
     it('should handle SQLite-specific features gracefully', withTestDatabase('sqlite', async (testDb) => {
       const { db } = testDb
-      await db.initialize()
+      
       
       const userRepo = db.getRepository('users')
       
@@ -269,7 +269,7 @@ describe('Compatibility E2E Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should work with different database drivers', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Test that database operations work with current driver
           const userRepo = db.getRepository('users')
@@ -289,7 +289,7 @@ describe('Compatibility E2E Tests', () => {
 
         it('should handle driver-specific connection options', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Test driver-specific features
           const kysely = db.getKysely()
@@ -306,7 +306,7 @@ describe('Compatibility E2E Tests', () => {
 
         it('should handle driver-specific data types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -599,7 +599,7 @@ describe('Compatibility E2E Tests', () => {
           }
         })
         
-        await db.initialize()
+        
         expect.fail('Should have thrown an error')
       } catch (error) {
         expect(error).to.be.instanceOf(Error)
@@ -622,7 +622,7 @@ describe('Compatibility E2E Tests', () => {
           }
         })
         
-        await db.initialize()
+        
         expect.fail('Should have thrown an error')
       } catch (error) {
         expect(error).to.be.instanceOf(Error)
@@ -647,7 +647,7 @@ describe('Compatibility E2E Tests', () => {
       })
       
       try {
-        await db.initialize()
+        
         expect.fail('Should have thrown an error')
       } catch (error) {
         expect(error).to.be.instanceOf(Error)

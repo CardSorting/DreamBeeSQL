@@ -881,31 +881,31 @@ class RealWorldScenariosTestSuite {
     describe(`${dialect.toUpperCase()}`, () => {
       it('should handle complete e-commerce customer journey', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testEcommerceCustomerJourney(db)
       }))
 
       it('should handle inventory management scenario', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testInventoryManagement(db)
       }))
 
       it('should handle social media platform scenario', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testSocialMediaPlatform(db)
       }))
 
       it('should handle content management system scenario', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testContentManagementSystem(db)
       }))
 
       it('should handle analytics and reporting scenario', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testAnalyticsAndReporting(db)
       }))
     })

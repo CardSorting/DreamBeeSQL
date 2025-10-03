@@ -59,7 +59,7 @@ describe('Relationship Loading Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should load users with their posts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -110,7 +110,7 @@ describe('Relationship Loading Integration', () => {
         
         it('should load users with their comments', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -170,7 +170,7 @@ describe('Relationship Loading Integration', () => {
         
         it('should load users with their profiles', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const profileRepo = db.getRepository('profiles')
@@ -216,7 +216,7 @@ describe('Relationship Loading Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should load posts with their users', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -257,7 +257,7 @@ describe('Relationship Loading Integration', () => {
         
         it('should load comments with their users', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -305,7 +305,7 @@ describe('Relationship Loading Integration', () => {
         
         it('should load comments with their posts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -360,7 +360,7 @@ describe('Relationship Loading Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should load posts with their tags', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -435,7 +435,7 @@ describe('Relationship Loading Integration', () => {
         
         it('should load tags with their posts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -516,7 +516,7 @@ describe('Relationship Loading Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should load users with posts and comments', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -586,7 +586,7 @@ describe('Relationship Loading Integration', () => {
         
         it('should load posts with users and comments', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -653,7 +653,7 @@ describe('Relationship Loading Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should batch load relationships for multiple users', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -717,7 +717,7 @@ describe('Relationship Loading Integration', () => {
         
         it('should batch load relationships for multiple posts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -769,7 +769,7 @@ describe('Relationship Loading Integration', () => {
         
         it('should handle large batch sizes efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -833,7 +833,7 @@ describe('Relationship Loading Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should load relationships efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -877,7 +877,7 @@ describe('Relationship Loading Integration', () => {
         
         it('should handle concurrent relationship loading', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')

@@ -53,7 +53,7 @@ describe('Stress Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle large number of concurrent operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository<User>('users')
           
@@ -89,7 +89,7 @@ describe('Stress Tests', () => {
 
         it('should handle memory efficiently with large datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository<User>('users')
           
@@ -125,7 +125,7 @@ describe('Stress Tests', () => {
 
         it('should handle rapid CRUD operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository<User>('users')
           
@@ -168,7 +168,7 @@ describe('Stress Tests', () => {
 
         it('should handle long-running operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository<User>('users')
           
@@ -215,7 +215,7 @@ describe('Stress Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle large relationship graphs', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository<User>('users')
           const postRepo = db.getRepository<Post>('posts')
@@ -298,7 +298,7 @@ describe('Stress Tests', () => {
 
         it('should handle deep relationship chains', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository<User>('users')
           const postRepo = db.getRepository<Post>('posts')
@@ -372,7 +372,7 @@ describe('Stress Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle concurrent transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Test concurrent transactions
           const start = performance.now()
@@ -414,7 +414,7 @@ describe('Stress Tests', () => {
 
         it('should handle large transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Test large transaction
           const duration = await performanceHelper.measure('large-transaction', async () => {
@@ -476,7 +476,7 @@ describe('Stress Tests', () => {
 
         it('should handle transaction rollbacks efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Test transaction rollback performance
           const duration = await performanceHelper.measure('transaction-rollbacks', async () => {
@@ -583,7 +583,7 @@ describe('Stress Tests', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle system resource constraints', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository<User>('users')
           
@@ -626,7 +626,7 @@ describe('Stress Tests', () => {
 
         it('should handle memory pressure efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository<User>('users')
           

@@ -20,7 +20,7 @@ describe('Transaction Handling Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should execute successful transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -76,7 +76,7 @@ describe('Transaction Handling Integration', () => {
         
         it('should rollback failed transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -126,7 +126,7 @@ describe('Transaction Handling Integration', () => {
         
         it('should handle transaction with multiple operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -210,7 +210,7 @@ describe('Transaction Handling Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle nested transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -260,7 +260,7 @@ describe('Transaction Handling Integration', () => {
         
         it('should rollback nested transactions on error', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -313,7 +313,7 @@ describe('Transaction Handling Integration', () => {
         
         it('should handle complex nested transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -412,7 +412,7 @@ describe('Transaction Handling Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should use repositories within transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -458,7 +458,7 @@ describe('Transaction Handling Integration', () => {
         
         it('should handle repository operations with transaction rollback', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -502,7 +502,7 @@ describe('Transaction Handling Integration', () => {
         
         it('should handle repository updates within transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -547,7 +547,7 @@ describe('Transaction Handling Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should execute transactions efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -589,7 +589,7 @@ describe('Transaction Handling Integration', () => {
         
         it('should handle concurrent transactions efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -639,7 +639,7 @@ describe('Transaction Handling Integration', () => {
         
         it('should handle large transactions efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -707,7 +707,7 @@ describe('Transaction Handling Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle database constraint errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -738,7 +738,7 @@ describe('Transaction Handling Integration', () => {
         
         it('should handle invalid SQL in transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           try {
             await db.transaction(async (trx) => {
@@ -756,7 +756,7 @@ describe('Transaction Handling Integration', () => {
         
         it('should handle connection errors in transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Close the database connection
           await db.close()
@@ -789,7 +789,7 @@ describe('Transaction Handling Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should maintain transaction isolation', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           
@@ -854,7 +854,7 @@ describe('Transaction Handling Integration', () => {
         
         it('should handle transaction conflicts gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           

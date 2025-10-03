@@ -611,31 +611,31 @@ class FullWorkflowTestSuite {
     describe(`${dialect.toUpperCase()}`, () => {
       it('should handle complete user management workflow', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testUserManagementWorkflow(db)
       }))
 
       it('should handle complete blog workflow', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testBlogWorkflow(db)
       }))
 
       it('should handle complete e-commerce workflow', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testEcommerceWorkflow(db)
       }))
 
       it('should handle high-performance data processing workflow', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testPerformanceWorkflow(db)
       }))
 
       it('should handle concurrent workflow operations', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb
-        await db.initialize()
+        
         await this.testConcurrentWorkflow(db)
       }))
     })

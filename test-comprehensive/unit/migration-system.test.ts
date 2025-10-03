@@ -22,7 +22,7 @@ describe('Migration System', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should create migration manager', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations',
@@ -38,7 +38,7 @@ describe('Migration System', () => {
 
         it('should initialize migration system', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -52,7 +52,7 @@ describe('Migration System', () => {
 
         it('should get migration status', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -75,7 +75,7 @@ describe('Migration System', () => {
 
         it('should check if migrations are up to date', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -88,7 +88,7 @@ describe('Migration System', () => {
 
         it('should get pending migrations count', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -102,7 +102,7 @@ describe('Migration System', () => {
 
         it('should get configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const config = {
             migrationsDirectory: './test-migrations',
@@ -121,7 +121,7 @@ describe('Migration System', () => {
 
         it('should update configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -140,7 +140,7 @@ describe('Migration System', () => {
 
         it('should get component instances', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -155,7 +155,7 @@ describe('Migration System', () => {
 
         it('should cleanup resources', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -178,7 +178,7 @@ describe('Migration System', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should execute migrations successfully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -202,7 +202,7 @@ describe('Migration System', () => {
 
         it('should handle no pending migrations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -222,7 +222,7 @@ describe('Migration System', () => {
 
         it('should handle migration errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           // Create migration manager with non-existent directory
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -249,7 +249,7 @@ describe('Migration System', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should create migration files', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -273,7 +273,7 @@ describe('Migration System', () => {
 
         it('should handle migration creation errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           // Create migration manager with invalid directory
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -296,7 +296,7 @@ describe('Migration System', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should initialize efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -310,7 +310,7 @@ describe('Migration System', () => {
 
         it('should get status efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -326,7 +326,7 @@ describe('Migration System', () => {
 
         it('should handle concurrent status checks', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -381,7 +381,7 @@ describe('Migration System', () => {
 
         it('should handle invalid migration directory', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: '/invalid/path/that/does/not/exist'
@@ -396,7 +396,7 @@ describe('Migration System', () => {
 
         it('should handle invalid migration content', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -420,7 +420,7 @@ describe('Migration System', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should use default configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely());
           
@@ -433,7 +433,7 @@ describe('Migration System', () => {
 
         it('should override default configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const customConfig = {
             migrationsDirectory: './custom-migrations',
@@ -459,7 +459,7 @@ describe('Migration System', () => {
 
         it('should handle partial configuration updates', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -486,7 +486,7 @@ describe('Migration System', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should work with NOORMME instance', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -507,7 +507,7 @@ describe('Migration System', () => {
 
         it('should handle NOORMME configuration changes', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb;
-          await db.initialize();
+          ;
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'

@@ -65,6 +65,8 @@ export function withTestDatabase<T>(
   return async () => {
     const testDb = await testHelper.createTestDatabase(dialect)
     try {
+      // Ensure database is initialized
+      await ensureInitialized(testDb.db)
       return await testFn(testDb)
     } finally {
       await cleanupTestDatabase(testDb)
@@ -88,6 +90,11 @@ export function withMultipleDatabases<T>(
       for (const dialect of dialects) {
         const testDb = await testHelper.createTestDatabase(dialect)
         testDatabases.set(dialect, testDb)
+      }
+      
+      // Ensure all databases are initialized
+      for (const testDb of testDatabases.values()) {
+        await ensureInitialized(testDb.db)
       }
       
       return await testFn(testDatabases)
@@ -230,6 +237,15 @@ export class MemoryHelper {
  * Global memory helper instance
  */
 export const memoryHelper = new MemoryHelper()
+
+/**
+ * Helper to ensure database is initialized without redundant calls
+ */
+export async function ensureInitialized(db: any): Promise<void> {
+  if (!db.isInitialized()) {
+    await db.initialize()
+  }
+}
 
 /**
  * Assertion helpers

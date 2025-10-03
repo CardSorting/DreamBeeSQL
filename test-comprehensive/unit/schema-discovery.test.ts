@@ -22,7 +22,7 @@ describe('Schema Discovery', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should discover all tables', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const tableNames = schemaInfo.tables.map(t => t.name)
@@ -39,7 +39,7 @@ describe('Schema Discovery', () => {
         }))
         it('should discover table columns correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const usersTable = schemaInfo.tables.find(t => t.name === 'users')
@@ -58,7 +58,7 @@ describe('Schema Discovery', () => {
         }))
         it('should discover primary keys', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const usersTable = schemaInfo.tables.find(t => t.name === 'users')
@@ -69,7 +69,7 @@ describe('Schema Discovery', () => {
         }))
         it('should discover column types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const usersTable = schemaInfo.tables.find(t => t.name === 'users')
@@ -94,7 +94,7 @@ describe('Schema Discovery', () => {
         }))
         it('should discover indexes', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const usersTable = schemaInfo.tables.find(t => t.name === 'users')
@@ -107,7 +107,7 @@ describe('Schema Discovery', () => {
         }))
         it('should discover foreign keys', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const profilesTable = schemaInfo.tables.find(t => t.name === 'profiles')
@@ -130,7 +130,7 @@ describe('Schema Discovery', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should discover relationships between tables', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           expect(schemaInfo.relationships).to.be.an('array')
@@ -138,7 +138,7 @@ describe('Schema Discovery', () => {
         }))
         it('should discover one-to-many relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const oneToManyRels = schemaInfo.relationships.filter(r => r.type === 'one-to-many')
@@ -153,7 +153,7 @@ describe('Schema Discovery', () => {
         }))
         it('should discover many-to-one relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const manyToOneRels = schemaInfo.relationships.filter(r => r.type === 'many-to-one')
@@ -168,7 +168,7 @@ describe('Schema Discovery', () => {
         }))
         it('should generate proper relationship names', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           
@@ -181,7 +181,7 @@ describe('Schema Discovery', () => {
         }))
         it('should discover reverse relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           
@@ -213,7 +213,7 @@ describe('Schema Discovery', () => {
               excludeTables: ['comments', 'tags']
             }
           })
-          await db.initialize()
+          
           const schemaInfo = await db.getSchemaInfo()
           
           const tableNames = schemaInfo.tables.map(t => t.name)
@@ -236,7 +236,7 @@ describe('Schema Discovery', () => {
               }
             }
           })
-          await db.initialize()
+          
           const schemaInfo = await db.getSchemaInfo()
           
           // Check that custom type mappings are applied
@@ -263,7 +263,7 @@ describe('Schema Discovery', () => {
               includeViews: false
             }
           })
-          await db.initialize()
+          
           const schemaInfo = await db.getSchemaInfo()
           
           expect(schemaInfo.views).to.be.an('array')
@@ -279,14 +279,14 @@ describe('Schema Discovery', () => {
           const { db } = testDb
           
           const duration = await performanceHelper.measure('schema-discovery', async () => {
-            await db.initialize()
+            
           })
           // Schema discovery should be reasonably fast
           expect(duration).to.be.lessThan(5000) // 5 seconds max
         }))
         it('should cache schema information', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // First call
           const start1 = performance.now()
@@ -303,7 +303,7 @@ describe('Schema Discovery', () => {
         }))
         it('should refresh schema efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const duration = await performanceHelper.measure('schema-refresh', async () => {
             await db.refreshSchema()
@@ -339,7 +339,7 @@ describe('Schema Discovery', () => {
           const { db } = testDb
           
           // Simulate introspection error by closing connection
-          await db.initialize()
+          
           await db.close()
           
           // Should handle gracefully
@@ -352,7 +352,7 @@ describe('Schema Discovery', () => {
         }))
         it('should handle invalid table names gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Try to get schema info for non-existent table
           const schemaInfo = await db.getSchemaInfo()
@@ -389,7 +389,7 @@ describe('Schema Discovery', () => {
         })
         it('should handle tables with no primary key', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create table without primary key
           const kysely = db.getKysely()
@@ -412,7 +412,7 @@ describe('Schema Discovery', () => {
         }))
         it('should handle tables with composite primary keys', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create table with composite primary key
           const kysely = db.getKysely()

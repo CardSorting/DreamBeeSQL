@@ -22,7 +22,7 @@ describe('Migration System Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should integrate with NOORMME instance', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -56,7 +56,7 @@ describe('Migration System Integration', () => {
         
         it('should handle migration execution', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -87,7 +87,7 @@ describe('Migration System Integration', () => {
         
         it('should create migration files', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -118,7 +118,7 @@ describe('Migration System Integration', () => {
         
         it('should handle configuration updates', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager with initial config
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -149,7 +149,7 @@ describe('Migration System Integration', () => {
         
         it('should provide component access', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -176,7 +176,7 @@ describe('Migration System Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should work with database operations after migration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -222,7 +222,7 @@ describe('Migration System Integration', () => {
         
         it('should handle relationships after migration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -270,7 +270,7 @@ describe('Migration System Integration', () => {
         
         it('should handle transactions after migration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -322,7 +322,7 @@ describe('Migration System Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should initialize migration system efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -343,7 +343,7 @@ describe('Migration System Integration', () => {
         
         it('should execute migrations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -368,7 +368,7 @@ describe('Migration System Integration', () => {
         
         it('should get status efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -393,7 +393,7 @@ describe('Migration System Integration', () => {
         
         it('should handle concurrent migration operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -431,7 +431,7 @@ describe('Migration System Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle invalid migration directory', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager with invalid directory
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -448,7 +448,7 @@ describe('Migration System Integration', () => {
         
         it('should handle migration execution errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -468,7 +468,7 @@ describe('Migration System Integration', () => {
         
         it('should handle database connection errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -498,7 +498,7 @@ describe('Migration System Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should use default configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager with default config
           const migrationManager = await createNodeMigrationManager(db.getKysely())
@@ -515,7 +515,7 @@ describe('Migration System Integration', () => {
         
         it('should override default configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager with custom config
           const customConfig = {
@@ -545,7 +545,7 @@ describe('Migration System Integration', () => {
         
         it('should handle partial configuration updates', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -578,7 +578,7 @@ describe('Migration System Integration', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should work with NOORMME configuration changes', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -607,7 +607,7 @@ describe('Migration System Integration', () => {
         
         it('should handle NOORMME cache configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
@@ -635,7 +635,7 @@ describe('Migration System Integration', () => {
         
         it('should handle NOORMME performance configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Create migration manager
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {

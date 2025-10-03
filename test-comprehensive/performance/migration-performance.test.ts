@@ -21,7 +21,7 @@ describe('Migration Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should initialize efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Test initialization performance
           const migrationManager = await performanceHelper.measure('migration-init', async () => {
@@ -42,7 +42,7 @@ describe('Migration Performance', () => {
 
         it('should handle memory efficiently during initialization', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Test memory usage during initialization
           const { delta } = await memoryHelper.measureMemory(async () => {
@@ -60,7 +60,7 @@ describe('Migration Performance', () => {
 
         it('should handle multiple initializations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Test multiple initialization performance
           const migrationManagers: any[] = await performanceHelper.measure('migration-multiple-init', async () => {
@@ -95,7 +95,7 @@ describe('Migration Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should get status efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -116,7 +116,7 @@ describe('Migration Performance', () => {
 
         it('should handle concurrent status requests efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -143,7 +143,7 @@ describe('Migration Performance', () => {
 
         it('should cache status information efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -176,7 +176,7 @@ describe('Migration Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should execute migrations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -197,7 +197,7 @@ describe('Migration Performance', () => {
 
         it('should handle memory efficiently during migration execution', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -217,7 +217,7 @@ describe('Migration Performance', () => {
 
         it('should handle multiple migration executions efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -247,7 +247,7 @@ describe('Migration Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should create migration files efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -276,7 +276,7 @@ describe('Migration Performance', () => {
 
         it('should handle multiple migration file creations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -318,7 +318,7 @@ describe('Migration Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should update configuration efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -344,7 +344,7 @@ describe('Migration Performance', () => {
 
         it('should retrieve configuration efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -373,7 +373,7 @@ describe('Migration Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should access components efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -402,7 +402,7 @@ describe('Migration Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should cleanup efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -421,7 +421,7 @@ describe('Migration Performance', () => {
 
         it('should handle multiple cleanups efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -448,7 +448,7 @@ describe('Migration Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should manage resources efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations',
@@ -477,7 +477,7 @@ describe('Migration Performance', () => {
 
         it('should handle resource constraints efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations',
@@ -512,7 +512,7 @@ describe('Migration Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should track performance metrics efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'
@@ -540,7 +540,7 @@ describe('Migration Performance', () => {
 
         it('should handle performance monitoring efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const migrationManager = await createNodeMigrationManager(db.getKysely(), {
             migrationsDirectory: './test-migrations'

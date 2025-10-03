@@ -21,7 +21,7 @@ describe('Type Generation', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should generate entity types for all tables', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -43,7 +43,7 @@ describe('Type Generation', () => {
         
         it('should generate correct entity interfaces', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -63,7 +63,7 @@ describe('Type Generation', () => {
         
         it('should generate insert types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -84,7 +84,7 @@ describe('Type Generation', () => {
         
         it('should generate update types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -103,7 +103,7 @@ describe('Type Generation', () => {
         
         it('should generate select types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -123,7 +123,7 @@ describe('Type Generation', () => {
         
         it('should handle nullable columns correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -146,7 +146,7 @@ describe('Type Generation', () => {
         
         it('should handle different column types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -173,7 +173,7 @@ describe('Type Generation', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should generate relationship types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -192,7 +192,7 @@ describe('Type Generation', () => {
         
         it('should generate correct relationship type structures', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -211,7 +211,7 @@ describe('Type Generation', () => {
         
         it('should handle many-to-many relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -231,7 +231,7 @@ describe('Type Generation', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should map common database types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -254,7 +254,7 @@ describe('Type Generation', () => {
         
         it('should handle custom type mappings', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator({
@@ -275,7 +275,7 @@ describe('Type Generation', () => {
         
         it('should handle parameterized types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -291,7 +291,7 @@ describe('Type Generation', () => {
         
         it('should default unknown types to any', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -312,7 +312,7 @@ describe('Type Generation', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should respect custom type mappings configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator({
@@ -330,7 +330,7 @@ describe('Type Generation', () => {
         
         it('should handle empty custom type mappings', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator({
@@ -344,7 +344,7 @@ describe('Type Generation', () => {
         
         it('should handle undefined custom type mappings', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -380,7 +380,7 @@ describe('Type Generation', () => {
         
         it('should handle schema with no relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const schemaWithoutRelationships = {
@@ -401,7 +401,7 @@ describe('Type Generation', () => {
         
         it('should handle tables with no columns', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const tableWithNoColumns = {
@@ -432,7 +432,7 @@ describe('Type Generation', () => {
         
         it('should handle tables with special characters in names', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const tableWithSpecialChars = {
@@ -482,7 +482,7 @@ describe('Type Generation', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should generate types efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator()
@@ -497,7 +497,7 @@ describe('Type Generation', () => {
         
         it('should handle large schemas efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const schemaInfo = await db.getSchemaInfo()
           

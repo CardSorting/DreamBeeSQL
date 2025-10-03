@@ -50,7 +50,7 @@ describe('Batch Loading Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should batch load relationships efficiently for small datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -107,7 +107,7 @@ describe('Batch Loading Performance', () => {
 
         it('should batch load relationships efficiently for medium datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -164,7 +164,7 @@ describe('Batch Loading Performance', () => {
 
         it('should batch load relationships efficiently for large datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -221,7 +221,7 @@ describe('Batch Loading Performance', () => {
 
         it('should handle memory efficiently during batch loading', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -277,7 +277,7 @@ describe('Batch Loading Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should respect batch size configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           // Update configuration for smaller batch size
           db.updateConfig({
@@ -339,7 +339,7 @@ describe('Batch Loading Performance', () => {
 
         it('should handle batch loading with different batch sizes', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -414,7 +414,7 @@ describe('Batch Loading Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should handle concurrent batch loading operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -482,7 +482,7 @@ describe('Batch Loading Performance', () => {
 
         it('should handle concurrent batch loading with different relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -573,7 +573,7 @@ describe('Batch Loading Performance', () => {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should be more efficient than individual loading', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')
@@ -639,7 +639,7 @@ describe('Batch Loading Performance', () => {
 
         it('should scale better with larger datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
-          await db.initialize()
+          
           
           const userRepo = db.getRepository('users')
           const postRepo = db.getRepository('posts')

@@ -106,8 +106,8 @@ export * from './dialect/mssql/mssql-query-compiler.js'
 export * from './query-compiler/default-query-compiler.js'
 export * from './query-compiler/query-compiler.js'
 
-export * from './migration/migrator.js'
-export * from './migration/file-migration-provider.js'
+// Migration System - Clean, Composable, Singleton-based
+export * from './migration/index.js'
 
 export * from './plugin/kysely-plugin.js'
 export * from './plugin/camel-case/camel-case-plugin.js'

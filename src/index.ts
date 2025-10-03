@@ -297,3 +297,7 @@ export {
   ExpressionOrFactory,
 } from './parser/expression-parser.js'
 export { Collation } from './parser/collate-parser.js'
+
+// NOORMME - No ORM, just magic!
+export { NOORMME } from './noormme.js'
+export * from './types/index.js'

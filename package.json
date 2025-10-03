@@ -1,7 +1,7 @@
 {
   "name": "noorm",
   "version": "1.0.0",
-  "description": "NOORM - No ORM, just magic! Zero-configuration pseudo-ORM built on Kysely",
+  "description": "NOORM - No ORM, just magic! Zero-configuration pseudo-ORM built on Kysely with NOORMME",
   "repository": {
     "type": "git",
     "url": "git://github.com/your-org/noorm.git"
@@ -9,6 +9,7 @@
   "homepage": "https://noorm.dev",
   "keywords": [
     "noorm",
+    "noormme",
     "no-orm",
     "pseudo-orm",
     "zero-config",
@@ -22,7 +23,9 @@
     "mssql",
     "type-safe",
     "auto-generated",
-    "schema-discovery"
+    "schema-discovery",
+    "repository-pattern",
+    "relationship-loading"
   ],
   "engines": {
     "node": ">=20.0.0"

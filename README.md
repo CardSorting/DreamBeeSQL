@@ -85,6 +85,13 @@ const users = await userRepo.findAll()
 - Simple, intuitive API
 - Works exactly how you'd expect
 
+### 🗃️ **Migration System**
+- Production-ready SQL migrations
+- Clean architecture with zero database spam
+- Automatic Node.js module loading
+- Transaction safety and rollback support
+- Performance optimized with minimal overhead
+
 ## 📚 Usage Examples
 
 ### Basic CRUD Operations
@@ -155,6 +162,37 @@ await db.transaction(async (trx) => {
     .values({ ...profileData, user_id: user.id })
     .execute()
 })
+```
+
+### Database Migrations
+
+```typescript
+import { createNodeMigrationManager } from 'noorm'
+
+// Create migration manager
+const migrationManager = await createNodeMigrationManager(db, {
+  migrationsDirectory: './migrations',
+  migrationTimeout: 30000,
+  maxConcurrentMigrations: 3
+})
+
+// Initialize and run migrations
+await migrationManager.initialize()
+const result = await migrationManager.migrate()
+
+console.log(`Migrations: ${result.executed} executed, ${result.failed} failed`)
+```
+
+```sql
+-- migrations/20241201120000_initial_schema.sql
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 ```
 
 ## ⚙️ Configuration
@@ -335,6 +373,15 @@ graph LR
 - **[Examples](./examples/)** - Real-world usage patterns
 - **[Migration Guide](./architecture-proposal/MIGRATION_GUIDE.md)** - Migrate from other ORMs
 - **[Getting Started](./architecture-proposal/GETTING_STARTED.md)** - 5-minute setup guide
+
+### 🗃️ Migration System
+
+NOORM includes a comprehensive, production-ready migration system:
+
+- **[Migration System Overview](./MIGRATION_SYSTEM_CLEAN.md)** - Clean architecture and design principles
+- **[Migration Usage Examples](./MIGRATION_USAGE_EXAMPLE.md)** - Complete usage patterns and best practices
+- **[Node.js Implementation](./MIGRATION_NODE_IMPLEMENTATION.md)** - Full Node.js integration details
+- **[Migration Files](./migrations/README.md)** - SQL migration file format and conventions
 
 ## 🤝 Contributing
 

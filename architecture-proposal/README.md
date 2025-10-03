@@ -1,168 +1,267 @@
-# DreamBeeSQL Pseudo-ORM Architecture Proposal
+# DreamBeeSQL Architecture Proposal - Optimized Structure
 
-## Overview
+## 📁 File Organization
 
-This document outlines the architectural design for transforming DreamBeeSQL into a production-ready pseudo-ORM with comprehensive schema discovery and automatic type generation capabilities. The architecture eliminates the need for manual entity definition by automatically discovering database structure and generating appropriate TypeScript types and entity classes.
+This directory contains the complete architecture proposal for DreamBeeSQL, organized for optimal navigation and understanding.
 
-## Design Principles
+## 🎯 Quick Start
 
-1. **Zero Configuration** - Works with any existing database without manual setup
-2. **Automatic Discovery** - Discovers all tables, columns, relationships, and constraints
-3. **Dynamic Type Generation** - Generates TypeScript types from discovered schema
-4. **Schema Evolution** - Handles database changes at runtime
-5. **Centralization** - Single source of truth for all components
-6. **Singleton Pattern** - Efficient resource usage and consistent state
-7. **Minimal Overhead** - No unnecessary queries or monitoring
-8. **Lazy Loading** - Initialize components only when needed
-9. **Fallback Support** - Graceful degradation when introspection fails
-10. **Type Safety** - Maintain TypeScript benefits throughout
+### 🚀 Get Started Immediately
+1. **[QUICK_START.md](./QUICK_START.md)** - Get up and running in 5 minutes
+2. **[USAGE_EXAMPLES.md](./USAGE_EXAMPLES.md)** - Comprehensive usage examples
 
-## Architecture Components
+### 📚 For New Developers
+1. Start with **[QUICK_START.md](./QUICK_START.md)** - Quick setup and basic usage
+2. Read **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - High-level vision and principles
+3. Study **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - Simplified component structure
+4. Follow **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation
+5. Reference **[ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md)** - Visual system overview
 
-### Schema Discovery & Introspection
-- [Schema Introspection Engine](./12-schema-introspection-engine.md) - **NEW** - Comprehensive database schema discovery
-- [Dynamic Type System](./13-dynamic-type-system.md) - **NEW** - Runtime type generation from discovered schemas
-- [Schema Change Detector](./14-schema-change-detector.md) - **NEW** - Minimal schema change detection
-- [Type Regenerator](./15-type-regenerator.md) - **NEW** - Type regeneration for schema changes
-- [Entity Updater](./16-entity-updater.md) - **NEW** - Entity class updates for schema changes
-- [Repository Updater](./17-repository-updater.md) - **NEW** - Repository updates for schema changes
-- [Fallback System](./18-fallback-system.md) - **NEW** - Graceful degradation when discovery fails
+### 🔧 For Experienced Developers
+1. Review **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - System vision
+2. Study **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - Core components
+3. Examine **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Implementation details
+4. Check **[ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams
+5. Reference **[COMPONENT_MAPPING.md](./COMPONENT_MAPPING.md)** - Migration from old architecture
 
-### Core Components
-- [Entity Manager](./01-entity-manager.md) - Centralized entity management
-- [Repository Registry](./02-repository-registry.md) - Singleton repository management
-- [Relationship Engine](./03-relationship-engine.md) - Centralized relationship handling
-- [Validation Core](./04-validation-core.md) - Minimal validation system
-- [Schema Registry](./05-schema-registry.md) - Centralized schema management
-- [Query Optimizer](./06-query-optimizer.md) - Lightweight query optimization
-- [Configuration Manager](./07-configuration-manager.md) - Centralized configuration
+## 📚 Documentation Structure
 
-### Supporting Components
-- [Type System](./08-type-system.md) - Type generation and management
-- [Migration Integration](./09-migration-integration.md) - Entity-aware migrations
-- [Error Handling](./10-error-handling.md) - Centralized error management
-- [Lifecycle Hooks](./11-lifecycle-hooks.md) - Minimal hook system
+### 🏗️ Core Architecture
+- **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - Complete system overview
+- **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - Simplified 5-component architecture
+- **[ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams and flow charts
 
-## Implementation Strategy
+### 🚀 Implementation & Usage
+- **[QUICK_START.md](./QUICK_START.md)** - Get started in 5 minutes
+- **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation guide
+- **[USAGE_EXAMPLES.md](./USAGE_EXAMPLES.md)** - Comprehensive usage examples
+- **[implementation-examples/](./implementation-examples/)** - Code examples and patterns
 
-### Phase 1: Schema Discovery & Auto-Generation
-1. **Schema Introspection Engine** - Discover database structure automatically
-2. **Dynamic Type System** - Generate TypeScript types from discovered schemas
-3. **Entity Class Generator** - Auto-generate entity classes from database tables
-4. **Repository Class Generator** - Auto-generate repository classes
+### 📖 Legacy Components (Reference Only)
+*Note: The original 18 components have been moved to the `legacy-components/` directory for reference.*
 
-### Phase 2: Schema Evolution & Updates
-1. **Schema Change Detector** - Detect database schema changes
-2. **Type Regenerator** - Update types when schema changes
-3. **Entity Updater** - Update entity classes for schema changes
-4. **Repository Updater** - Update repository classes for schema changes
+#### Legacy Components
+- **[legacy-components/](./legacy-components/)** - Original 18-component architecture
+- **[legacy-components/README.md](./legacy-components/README.md)** - Legacy components overview
+- **[COMPONENT_MAPPING.md](./COMPONENT_MAPPING.md)** - Mapping from old to new architecture
 
-### Phase 3: Core Infrastructure
-1. Entity Manager with singleton pattern
-2. Repository Registry for centralized access
-3. Basic validation system
-4. Configuration management
+## 🎯 Recommended Reading Order
 
-### Phase 4: Advanced Features
-1. Relationship engine
-2. Schema registry
-3. Query optimizer
-4. Type system integration
-
-### Phase 5: Integration & Reliability
-1. Migration integration
-2. Error handling
-3. Lifecycle hooks
-4. Fallback system for graceful degradation
-
-## Key Benefits
-
-### Production-Ready Features
-- **Zero Configuration** - Works with any existing database without manual setup
-- **Automatic Discovery** - No need to manually define entities or types
-- **Schema Evolution** - Automatically adapts to database changes
-- **Type Safety** - Full TypeScript support with auto-generated types
-- **Relationship Detection** - Automatically discovers foreign key relationships
-- **Fallback Support** - Graceful degradation when introspection fails
-
-### Architecture Benefits
-- **Centralized Control** - Single point of configuration and management
-- **Resource Efficiency** - Singleton pattern prevents resource duplication
-- **Minimal Overhead** - No unnecessary database queries or monitoring
-- **Incremental Adoption** - Can be adopted gradually
-- **Performance Focused** - Optimized for speed over features
-
-## File Structure
-
+### 1. **Quick Start (5 minutes)**
 ```
-architecture-proposal/
-├── README.md                           # This file
-├── 12-schema-introspection-engine.md  # **NEW** - Database schema discovery
-├── 13-dynamic-type-system.md          # **NEW** - Runtime type generation
-├── 14-schema-change-detector.md       # **NEW** - Schema change detection
-├── 15-type-regenerator.md             # **NEW** - Type regeneration
-├── 16-entity-updater.md               # **NEW** - Entity updates
-├── 17-repository-updater.md           # **NEW** - Repository updates
-├── 18-fallback-system.md              # **NEW** - Fallback handling
-├── 01-entity-manager.md               # Entity management architecture
-├── 02-repository-registry.md          # Repository pattern design
-├── 03-relationship-engine.md          # Relationship handling
-├── 04-validation-core.md              # Validation system
-├── 05-schema-registry.md              # Schema management
-├── 06-query-optimizer.md              # Query optimization
-├── 07-configuration-manager.md        # Configuration system
-├── 08-type-system.md                  # Type generation
-├── 09-migration-integration.md        # Migration system
-├── 10-error-handling.md               # Error management
-├── 11-lifecycle-hooks.md              # Lifecycle system
-└── implementation-examples/           # Code examples
-    ├── entity-example.ts
-    ├── repository-example.ts
-    ├── relationship-example.ts
-    └── configuration-example.ts
+QUICK_START.md
+├── Installation
+├── Basic usage
+├── Simple examples
+└── Configuration options
 ```
 
-## Next Steps
-
-1. **Review New Architecture** - Study the schema discovery and evolution components
-2. **Implement Schema Discovery** - Start with Schema Introspection Engine
-3. **Build Type Generation** - Implement Dynamic Type System
-4. **Add Schema Evolution** - Implement change detection and updates
-5. **Test with Real Databases** - Validate with existing database schemas
-6. **Add Fallback Handling** - Implement graceful degradation
-7. **Performance Optimization** - Optimize for large schemas
-8. **Documentation** - Create usage guides and examples
-
-## Usage Example
-
-```typescript
-// Zero-configuration usage - works with any existing database
-import { DreamBeeSQL } from 'dreambeesql'
-
-const db = new DreamBeeSQL({
-  dialect: 'postgresql',
-  connection: {
-    host: 'localhost',
-    port: 5432,
-    database: 'myapp',
-    username: 'user',
-    password: 'password'
-  }
-})
-
-// Automatically discover schema and generate types
-await db.initialize()
-
-// Use auto-generated entities and repositories
-const userRepo = db.getRepository('users')
-const users = await userRepo.findAll()
-
-// Type-safe operations with auto-generated types
-const newUser = await userRepo.create({
-  email: 'john@example.com',
-  firstName: 'John',
-  lastName: 'Doe'
-})
+### 2. **Understanding the Vision**
+```
+ARCHITECTURE_OVERVIEW.md
+├── System vision and principles
+├── Key features and benefits
+├── Implementation phases
+└── Success metrics
 ```
 
-This architecture eliminates the need for manual entity definition and makes DreamBeeSQL truly production-ready for any existing database.
+### 3. **Understanding the Architecture**
+```
+SIMPLIFIED_ARCHITECTURE.md
+├── 5 core components
+├── Component responsibilities
+├── Data flow
+└── API design
+```
+
+### 4. **Visual Understanding**
+```
+ARCHITECTURE_DIAGRAMS.md
+├── System overview diagrams
+├── Component architecture
+├── Data flow diagrams
+├── Relationship detection
+└── Performance monitoring
+```
+
+### 5. **Implementation Details**
+```
+IMPLEMENTATION_GUIDE.md
+├── Phase 1: Core Foundation
+├── Step-by-step implementation
+├── Code examples
+└── Testing strategy
+```
+
+### 6. **Advanced Usage**
+```
+USAGE_EXAMPLES.md
+├── Complex examples
+├── Production patterns
+├── Performance optimization
+└── Error handling
+```
+
+### 7. **Code Examples**
+```
+implementation-examples/
+├── entity-example.ts
+├── repository-example.ts
+├── relationship-example.ts
+└── configuration-example.ts
+```
+
+### 8. **Legacy Reference**
+```
+legacy-components/
+├── README.md (legacy overview)
+├── 01-entity-manager.md
+├── 02-repository-registry.md
+├── ... (18 original components)
+└── README_ORIGINAL.md
+```
+
+## 🔄 Architecture Evolution
+
+### Original Architecture (18 Components)
+- Complex but comprehensive
+- Detailed specifications
+- Good for understanding all aspects
+- Harder to implement and maintain
+
+### Simplified Architecture (5 Components)
+- Easier to understand and implement
+- Consolidated related functionality
+- Clearer responsibilities
+- Better developer experience
+
+### Migration Path
+1. **Phase 1**: Implement simplified architecture
+2. **Phase 2**: Add advanced features from original components
+3. **Phase 3**: Optimize and enhance based on usage
+
+## 🎨 Key Design Decisions
+
+### 1. **Zero Configuration First**
+- Works with any existing database
+- No manual entity definitions
+- Automatic schema discovery
+
+### 2. **Type Safety Throughout**
+- Full TypeScript support
+- Auto-generated types
+- Compile-time checking
+
+### 3. **Performance Optimized**
+- Singleton patterns
+- Smart caching
+- Lazy loading
+
+### 4. **Graceful Degradation**
+- Fallback systems
+- Error handling
+- Incremental adoption
+
+## 🚀 Implementation Strategy
+
+### Phase 1: Core Foundation (Weeks 1-2)
+- Basic database connection
+- Schema discovery engine
+- Simple type generation
+- Basic entity and repository generation
+
+### Phase 2: Runtime Operations (Weeks 3-4)
+- Entity and repository management
+- Basic CRUD operations
+- Relationship loading
+- Caching system
+
+### Phase 3: Advanced Features (Weeks 5-6)
+- Schema evolution
+- Advanced relationship types
+- Performance optimization
+- Error handling and fallbacks
+
+### Phase 4: Production Ready (Weeks 7-8)
+- Comprehensive testing
+- Documentation
+- Performance tuning
+- Migration tools
+
+## 📊 Success Metrics
+
+### Developer Experience
+- **Setup Time**: < 5 minutes from zero to working
+- **Type Safety**: 100% TypeScript coverage
+- **IntelliSense**: Full autocomplete support
+- **Error Messages**: Clear, actionable feedback
+
+### Performance
+- **Initial Discovery**: < 2 seconds for 100 tables
+- **Type Generation**: < 1 second for full schema
+- **Runtime Overhead**: < 5% compared to raw Kysely
+- **Memory Usage**: < 50MB for large schemas
+
+### Reliability
+- **Schema Evolution**: 100% automatic updates
+- **Error Recovery**: Graceful degradation
+- **Cache Hit Rate**: > 90% for repeated operations
+- **Test Coverage**: > 95% for core components
+
+## 🔮 Future Enhancements
+
+### Short Term (3-6 months)
+- Advanced relationship types (many-to-many)
+- Custom validation rules
+- Performance monitoring
+- Migration tools
+
+### Medium Term (6-12 months)
+- GraphQL integration
+- Real-time subscriptions
+- Advanced caching strategies
+- Multi-tenant support
+
+### Long Term (12+ months)
+- Cloud-native features
+- Advanced analytics
+- Machine learning integration
+- Enterprise features
+
+## 🤝 Contributing
+
+### Development Setup
+1. Clone repository
+2. Install dependencies
+3. Run tests
+4. Start development
+
+### Contribution Guidelines
+- Follow TypeScript best practices
+- Maintain test coverage
+- Update documentation
+- Follow semantic versioning
+
+### Code Review Process
+- Automated testing
+- Manual review
+- Performance testing
+- Documentation review
+
+## 📞 Support
+
+### Documentation
+- Architecture overview and diagrams
+- Implementation guide
+- Code examples
+- API reference
+
+### Community
+- GitHub issues for bugs and features
+- Discussions for questions and ideas
+- Pull requests for contributions
+- Documentation improvements
+
+---
+
+This optimized structure provides a clear path for understanding and implementing the DreamBeeSQL pseudo-ORM system, from high-level vision to detailed implementation.

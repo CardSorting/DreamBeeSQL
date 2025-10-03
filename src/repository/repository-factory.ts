@@ -251,7 +251,11 @@ export class RepositoryFactory {
             availableColumns: table.columns.map(c => c.name)
           })
         }
-      }
+      },
+
+      // Count and exists methods (implemented in addCustomFinders)
+      count: async () => 0, // Will be overridden in addCustomFinders
+      exists: async (id: any) => false // Will be overridden in addCustomFinders
     }
 
     // Add custom finder methods based on table structure

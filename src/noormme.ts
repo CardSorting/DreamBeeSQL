@@ -10,6 +10,8 @@ import { Logger } from './logging/logger'
 import { NOORMConfig, SchemaInfo, Repository, RelationshipInfo } from './types'
 import { NoormError } from './errors/NoormError.js'
 import { config as loadDotenv } from 'dotenv'
+import { SchemaWatcher, WatchOptions } from './watch/schema-watcher.js'
+import { QueryAnalyzer, QueryAnalyzerOptions } from './performance/query-analyzer.js'
 
 /**
  * NOORMME - No ORM, just magic!
@@ -24,6 +26,8 @@ export class NOORMME {
   private relationshipEngine: RelationshipEngine
   private cacheManager: CacheManager
   private logger: Logger
+  private schemaWatcher: SchemaWatcher | null = null
+  private queryAnalyzer: QueryAnalyzer | null = null
   private initialized = false
   private repositories = new Map<string, Repository<any>>()
 
@@ -101,6 +105,14 @@ export class NOORMME {
 
       // Initialize relationship engine
       this.relationshipEngine.initialize(schemaInfo.relationships)
+
+      // Initialize query analyzer for development mode
+      this.queryAnalyzer = new QueryAnalyzer(
+        this.db,
+        this.logger,
+        schemaInfo,
+        this.config.performance
+      )
 
       this.initialized = true
       this.logger.info('NOORMME initialized successfully!')
@@ -197,22 +209,116 @@ export class NOORMME {
   }
 
   /**
-   * Monitor schema changes (experimental)
+   * Start monitoring schema changes in development mode
+   */
+  startSchemaWatching(options?: WatchOptions): void {
+    if (!this.initialized) {
+      throw new NoormError('NOORMME must be initialized before starting schema watching')
+    }
+
+    if (!this.schemaWatcher) {
+      this.schemaWatcher = new SchemaWatcher(
+        this.db,
+        this.schemaDiscovery,
+        this.logger,
+        options
+      )
+
+      // Auto-refresh schema when changes detected
+      this.schemaWatcher.onSchemaChange(async (changes) => {
+        this.logger.info(`Schema changes detected: ${changes.length} changes`)
+        changes.forEach(change => {
+          this.logger.info(`  - ${change.type}: ${change.table}`)
+        })
+
+        try {
+          await this.refreshSchema()
+          this.logger.info('Schema refreshed successfully')
+        } catch (error) {
+          this.logger.error('Failed to refresh schema:', error)
+        }
+      })
+    }
+
+    this.schemaWatcher.startWatching()
+  }
+
+  /**
+   * Stop monitoring schema changes
+   */
+  stopSchemaWatching(): void {
+    if (this.schemaWatcher) {
+      this.schemaWatcher.stopWatching()
+    }
+  }
+
+  /**
+   * Register callback for schema changes
    */
   onSchemaChange(callback: (changes: any[]) => void): void {
-    // TODO: Implement schema change monitoring
-    this.logger.warn('Schema change monitoring not yet implemented')
+    if (!this.schemaWatcher) {
+      this.schemaWatcher = new SchemaWatcher(
+        this.db,
+        this.schemaDiscovery,
+        this.logger
+      )
+    }
+
+    this.schemaWatcher.onSchemaChange(callback)
   }
 
   /**
    * Get performance metrics
    */
   getPerformanceMetrics() {
-    return {
+    const baseMetrics = {
       queryCount: this.logger.getQueryCount(),
       averageQueryTime: this.logger.getAverageQueryTime(),
       cacheHitRate: this.cacheManager.getHitRate(),
       repositoryCount: this.repositories.size
+    }
+
+    if (this.queryAnalyzer) {
+      return {
+        ...baseMetrics,
+        ...this.queryAnalyzer.getPerformanceStats()
+      }
+    }
+
+    return baseMetrics
+  }
+
+  /**
+   * Enable query performance monitoring
+   */
+  enablePerformanceMonitoring(options?: QueryAnalyzerOptions): void {
+    if (!this.initialized) {
+      throw new NoormError('NOORMME must be initialized before enabling performance monitoring')
+    }
+
+    const schemaInfo = this.cacheManager.get<SchemaInfo>('schema')
+    if (!schemaInfo) {
+      throw new NoormError('Schema not found. Please reinitialize NOORMME.')
+    }
+
+    this.queryAnalyzer = new QueryAnalyzer(
+      this.db,
+      this.logger,
+      schemaInfo,
+      options
+    )
+
+    this.logger.info('Query performance monitoring enabled')
+  }
+
+  /**
+   * Disable query performance monitoring
+   */
+  disablePerformanceMonitoring(): void {
+    if (this.queryAnalyzer) {
+      this.queryAnalyzer.clearHistory()
+      this.queryAnalyzer = null
+      this.logger.info('Query performance monitoring disabled')
     }
   }
 
@@ -221,13 +327,16 @@ export class NOORMME {
    */
   async close(): Promise<void> {
     this.logger.info('Closing NOORMME...')
-    
+
+    // Stop schema watching if running
+    this.stopSchemaWatching()
+
     await this.db.destroy()
     await this.cacheManager.close()
-    
+
     this.initialized = false
     this.repositories.clear()
-    
+
     this.logger.info('NOORMME closed')
   }
 

@@ -1,6 +1,6 @@
 import inquirer from 'inquirer'
-import fs from 'fs/promises'
-import path from 'path'
+import { promises as fs } from 'fs'
+import * as path from 'path'
 import chalk from 'chalk'
 import { NOORMConfig } from '../../types/index.js'
 
@@ -44,7 +44,7 @@ export async function init(options: {
           type: 'input',
           name: 'connection',
           message: 'Database connection string:',
-          default: getDefaultConnectionString(config.dialect),
+          default: getDefaultConnectionString(config.dialect!),
           when: config.dialect !== 'sqlite',
         },
         {
@@ -55,7 +55,7 @@ export async function init(options: {
           when: config.dialect === 'sqlite',
         },
       ])
-      connectionString = answers.connection
+      connectionString = answers.connection || getDefaultConnectionString(config.dialect!)
     }
 
     // Confirm setup
@@ -75,8 +75,8 @@ export async function init(options: {
 
     // Generate files
     const outputDir = options.output || 'lib'
-    await generateDbFile(config.dialect!, connectionString!, outputDir, options.force)
-    await generateEnvExample(connectionString!)
+    await generateDbFile(config.dialect!, connectionString || '', outputDir, options.force)
+    await generateEnvExample(connectionString || '')
     await generateReadme(config.dialect!)
     await generatePackageScripts()
 

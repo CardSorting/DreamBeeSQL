@@ -1,5 +1,5 @@
-import fs from 'fs/promises'
-import path from 'path'
+import { promises as fs } from 'fs'
+import * as path from 'path'
 import chalk from 'chalk'
 import { NOORMME } from '../../noormme.js'
 import { TableInfo, ColumnInfo } from '../../types/index.js'

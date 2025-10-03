@@ -1,96 +1,263 @@
-# NOORM - No ORM, Just Magic! ✨
+# NOORMME
+
+> **No Pain, Everything to Gain** 🎯
 
 [![npm version](https://badge.fury.io/js/noorm.svg)](https://badge.fury.io/js/noorm)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org/)
 
-> **Zero-configuration pseudo-ORM built on Kysely that automatically discovers your database schema and generates everything you need. No manual entity definitions, no complex setup - just pure magic!**
+Zero-configuration TypeScript ORM built on Kysely with automatic schema discovery, enhanced error handling, and best-in-class developer experience.
 
-NOORM (pronounced "No-ORM") is a revolutionary approach to database access that eliminates the complexity of traditional ORMs while providing full type safety and developer experience. Simply connect to your existing database and NOORM does the rest!
+## ✨ Features
 
-## 🎯 Why NOORM?
+- **🔧 Zero Configuration** - Auto-loads from `.env`, no setup required
+- **🔍 Smart Error Messages** - Context-aware errors with helpful suggestions
+- **📊 Built-in Pagination** - Efficient pagination with metadata
+- **🔗 Relationship Counting** - Get counts without N+1 queries
+- **📱 CLI Tooling** - Project setup, schema inspection, type generation
+- **⚡ Performance Monitoring** - Query analysis and N+1 detection
+- **🔄 Schema Watching** - Auto-refresh on database changes
+- **🧪 Testing Utilities** - In-memory SQLite, factories, helpers
 
-| Feature | Traditional ORMs | NOORM |
-|---------|------------------|-------|
-| **Setup** | Complex configuration | Zero configuration |
-| **Schema** | Manual entity definitions | Auto-discovered |
-| **Types** | Manual type definitions | Auto-generated |
-| **Migration** | Schema migration files | Works with existing DB |
-| **Learning Curve** | Steep | Minimal |
-| **Developer Experience** | Complex setup | Instant productivity |
-| **Performance** | Often slow | Built on Kysely |
+## 🆚 Comparison with Other ORMs
 
-## 🚀 Quick Start (30 seconds)
+| Feature | NOORMME | Prisma | TypeORM | Drizzle |
+|---------|---------|--------|---------|---------|
+| Zero Config | ✅ | ❌ | ❌ | ❌ |
+| Enhanced Errors | ✅ | ❌ | ❌ | ❌ |
+| Built-in Pagination | ✅ | ❌ | ⚠️ | ❌ |
+| Relationship Counting | ✅ | ⚠️ | ⚠️ | ❌ |
+| CLI Tooling | ✅ | ✅ | ⚠️ | ⚠️ |
+| Schema Discovery | ✅ | ❌ | ✅ | ❌ |
+| Performance Monitoring | ✅ | ❌ | ❌ | ❌ |
+| Type Safety | ✅ | ✅ | ✅ | ✅ |
+
+## 🚀 Quick Start
+
+### 1. Install & Initialize
 
 ```bash
 npm install noorm
+npx noormme init
 ```
+
+### 2. Use
 
 ```typescript
-import { NOORMME } from 'noorm'
+import { db } from './lib/db'
 
-// 1. Connect to your database
-const db = new NOORMME({
-  dialect: 'postgresql',
-  connection: {
-    host: 'localhost',
-    port: 5432,
-    database: 'myapp',
-    username: 'user',
-    password: 'password'
-  }
-})
-
-// 2. Initialize (discovers everything automatically)
+// Auto-discovers schema and relationships
 await db.initialize()
 
-// 3. Use auto-generated repositories
+// Type-safe repositories with enhanced features
 const userRepo = db.getRepository('users')
-const users = await userRepo.findAll()
 
-// That's it! 🎉
+// Smart pagination
+const result = await userRepo.paginate({
+  page: 1,
+  limit: 20,
+  where: { active: true },
+  orderBy: { column: 'created_at', direction: 'desc' }
+})
+
+// Relationship counting (no N+1 queries)
+const userWithCounts = await userRepo.withCount(1, ['posts', 'comments'])
+// Returns: { id: 1, name: '...', postsCount: 5, commentsCount: 12 }
 ```
 
-**NOORM automatically:**
-- ✅ Discovers all tables and relationships
-- ✅ Generates TypeScript types
-- ✅ Creates entity classes
-- ✅ Builds repository classes with CRUD operations
-- ✅ Provides full IntelliSense support
+## Enhanced Developer Experience
 
-## ✨ Core Features
+### Before NOORMME
+```typescript
+// Generic errors, manual pagination, basic queries
+const db = new ORM(process.env.DATABASE_URL)
+const users = await db.user.findMany() // No context on errors
+const count = await db.user.count()     // Separate query for count
+```
 
-### 🎯 **Zero Configuration**
-- Works with any existing database
-- No manual entity definitions required
-- Automatic schema discovery
-- Just connect and go!
+### After NOORMME
+```typescript
+// Smart errors, built-in pagination, relationship insights
+const db = new NOORMME() // Auto-loads from .env
 
-### 🔒 **Type-Safe Magic**
-- Full TypeScript support with auto-generated types
-- IntelliSense for everything
-- Compile-time checking
-- No runtime surprises
+// Helpful error: "Column 'emai' not found. Did you mean 'email'?"
+const result = await userRepo.paginate({ page: 1, limit: 10 })
+const userWithCounts = await userRepo.withCount(1, ['posts', 'comments'])
+```
 
-### ⚡ **Built for Performance**
-- Smart caching and query optimization
-- Lazy loading relationships
-- Built on Kysely for optimal SQL generation
-- Production-ready from day one
+## Core Features
 
-### 🎨 **Developer Experience**
-- Clear, actionable error messages
-- Comprehensive documentation
-- Simple, intuitive API
-- Works exactly how you'd expect
+### 🔍 Enhanced Error Messages
 
-### 🗃️ **Migration System**
-- Production-ready SQL migrations
-- Clean architecture with zero database spam
-- Automatic Node.js module loading
-- Transaction safety and rollback support
-- Performance optimized with minimal overhead
+Get helpful, context-aware error messages instead of cryptic database errors:
+
+```typescript
+try {
+  await userRepo.findByEmai('test@example.com') // Typo
+} catch (error) {
+  // Error: Column 'emai' not found on table 'users'
+  // Suggestion: Did you mean 'email'?
+  // Available columns: id, name, email, age, active
+}
+```
+
+### 📊 Built-in Pagination
+
+Efficient, type-safe pagination with complete metadata:
+
+```typescript
+const result = await userRepo.paginate({
+  page: 1,
+  limit: 20,
+  where: { active: true },
+  orderBy: { column: 'created_at', direction: 'desc' }
+})
+
+// Returns:
+// {
+//   data: User[],
+//   pagination: {
+//     page: 1, limit: 20, total: 150, totalPages: 8,
+//     hasNext: true, hasPrev: false
+//   }
+// }
+```
+
+### 🔗 Relationship Counting
+
+Get relationship counts without loading related data:
+
+```typescript
+const user = await userRepo.withCount(userId, ['posts', 'comments'])
+// { id: 1, name: 'John', postsCount: 5, commentsCount: 12 }
+```
+
+### 📱 CLI Tooling
+
+Professional CLI for project setup and database inspection:
+
+```bash
+npx noormme init                    # Interactive project setup
+npx noormme inspect users          # Detailed table inspection
+npx noormme generate               # TypeScript type generation
+```
+
+### ⚡ Performance Monitoring
+
+Built-in query analysis and performance warnings:
+
+```typescript
+db.enablePerformanceMonitoring({
+  slowQueryThreshold: 1000,
+  nPlusOneDetection: true,
+  missingIndexDetection: true
+})
+
+// Automatic warnings:
+// 🐌 Slow query detected: 1500ms
+// 🔄 Potential N+1 query: same query executed 15 times
+// 📇 Column 'email' used in WHERE clause may benefit from an index
+```
+
+### 🔄 Schema Watching
+
+Monitor database changes in development:
+
+```typescript
+db.startSchemaWatching()
+
+db.onSchemaChange((changes) => {
+  console.log('Schema changes detected:', changes)
+  // Auto-refreshes schema and regenerates types
+})
+```
+
+## Available Methods
+
+Every repository automatically includes:
+
+- `findById(id)` - Find by primary key
+- `findAll()` - Get all records
+- `create(data)` - Create new record
+- `update(entity)` - Update existing record
+- `delete(id)` - Delete by primary key
+- `count()` - Count total records
+- `exists(id)` - Check if record exists
+- `paginate(options)` - Paginated results
+- `withCount(id, relations)` - Count related records
+- Dynamic finders: `findByColumnName(value)`
+- Dynamic list finders: `findManyByColumnName(value)`
+
+## Database Support
+
+- ✅ **PostgreSQL** - Full support with advanced features
+- ✅ **MySQL** - Complete compatibility
+- ✅ **SQLite** - Perfect for development and testing
+- ✅ **SQL Server** - Enterprise database support
+
+## Documentation
+
+- [CLI Commands](./docs/cli.md) - Complete CLI reference
+- [Error Handling](./docs/error-handling.md) - Error types and handling patterns
+- [Pagination](./docs/pagination.md) - Pagination features and best practices
+- [Relationships](./docs/relationships.md) - Relationship loading and optimization
+
+## Examples
+
+### Blog API
+
+```typescript
+// Get paginated posts with author information
+const posts = await postRepo.paginate({
+  page: 1,
+  limit: 10,
+  where: { published: true },
+  orderBy: { column: 'created_at', direction: 'desc' }
+})
+
+// Get user with post and comment counts
+const userStats = await userRepo.withCount(userId, ['posts', 'comments'])
+```
+
+### E-commerce
+
+```typescript
+// Product catalog with review counts
+const products = await Promise.all(
+  (await productRepo.findAll()).map(async product =>
+    await productRepo.withCount(product.id, ['reviews'])
+  )
+)
+
+// Order with related items
+const order = await orderRepo.findWithRelations(orderId, ['items', 'customer'])
+```
+
+## 🧪 Testing Utilities
+
+Comprehensive testing support:
+
+```typescript
+import { createTestDatabase, TestDataFactory } from 'noorm/testing'
+
+const db = await createTestDatabase({ seed: true })
+const factory = new TestDataFactory(db)
+
+// Create test data easily
+const user = await factory.createUser({ name: 'Test User' })
+const posts = await factory.createPosts(user.id, 5)
+```
+
+## Performance
+
+NOORMME is built for performance:
+
+- **Efficient counting** - Uses `COUNT(*)` queries, not in-memory counting
+- **Batch loading** - Prevents N+1 queries automatically
+- **Smart pagination** - Optimized offset/limit queries
+- **Query monitoring** - Built-in performance analysis
+- **Index suggestions** - Automatic index recommendations
 
 ## 📚 Usage Examples
 

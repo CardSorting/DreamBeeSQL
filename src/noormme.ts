@@ -529,8 +529,9 @@ export class NOORMME {
     
     switch (dialect) {
       case 'postgresql':
-        return new (require('./helpers/postgres').PostgresDialect)({
-          connection: {
+        const { Pool } = require('pg')
+        return new (require('./dialect/postgres/postgres-dialect').PostgresDialect)({
+          pool: new Pool({
             host: connection.host,
             port: connection.port,
             database: connection.database,
@@ -538,11 +539,11 @@ export class NOORMME {
             password: connection.password,
             ssl: connection.ssl,
             ...connection.pool
-          }
+          })
         })
       
       case 'mysql':
-        return new (require('./helpers/mysql').MysqlDialect)({
+        return new (require('./dialect/mysql/mysql-dialect').MysqlDialect)({
           connection: {
             host: connection.host,
             port: connection.port,
@@ -561,7 +562,7 @@ export class NOORMME {
         })
       
       case 'mssql':
-        return new (require('./helpers/mssql').MssqlDialect)({
+        return new (require('./dialect/mssql/mssql-dialect').MssqlDialect)({
           connection: {
             host: connection.host,
             port: connection.port,

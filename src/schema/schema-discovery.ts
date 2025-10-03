@@ -1,6 +1,7 @@
 import type { Kysely } from '../kysely.js'
 import { DatabaseIntrospector } from '../dialect/database-introspector'
 import { SchemaInfo, TableInfo, ColumnInfo, RelationshipInfo, IntrospectionConfig } from '../types'
+import type { Dialect } from '../dialect/dialect.js'
 
 /**
  * Schema discovery engine that introspects database structure
@@ -8,14 +9,16 @@ import { SchemaInfo, TableInfo, ColumnInfo, RelationshipInfo, IntrospectionConfi
 export class SchemaDiscovery {
   constructor(
     private db: Kysely<any>,
-    private config: IntrospectionConfig = {}
+    private config: IntrospectionConfig = {},
+    private dialect?: Dialect
   ) {}
 
   /**
    * Discover the complete database schema
    */
   async discoverSchema(): Promise<SchemaInfo> {
-    const introspector = new DatabaseIntrospector(this.db)
+    // Use the dialect-specific introspector if available, otherwise fall back to generic
+    const introspector = this.dialect?.createIntrospector?.(this.db) || new DatabaseIntrospector(this.db)
     
     // Get all tables
     const tables = await this.discoverTables(introspector)

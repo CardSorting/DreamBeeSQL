@@ -110,15 +110,33 @@ class SqliteConnection implements DatabaseConnection {
 
   executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
     const { sql, parameters } = compiledQuery
+    
+    // Convert parameters to SQLite-compatible types
+    const sqliteParameters = parameters.map(param => {
+      if (param === undefined) {
+        return null
+      }
+      if (typeof param === 'boolean') {
+        return param ? 1 : 0
+      }
+      if (param instanceof Date) {
+        return param.toISOString()
+      }
+      if (typeof param === 'object' && param !== null) {
+        return JSON.stringify(param)
+      }
+      return param
+    })
+    
     const stmt = this.#db.prepare(sql)
 
     if (stmt.reader) {
       return Promise.resolve({
-        rows: stmt.all(parameters) as O[],
+        rows: stmt.all(sqliteParameters) as O[],
       })
     }
 
-    const { changes, lastInsertRowid } = stmt.run(parameters)
+    const { changes, lastInsertRowid } = stmt.run(sqliteParameters)
 
     return Promise.resolve({
       numAffectedRows:
@@ -136,9 +154,27 @@ class SqliteConnection implements DatabaseConnection {
     _chunkSize: number,
   ): AsyncIterableIterator<QueryResult<R>> {
     const { sql, parameters, query } = compiledQuery
+    
+    // Convert parameters to SQLite-compatible types
+    const sqliteParameters = parameters.map(param => {
+      if (param === undefined) {
+        return null
+      }
+      if (typeof param === 'boolean') {
+        return param ? 1 : 0
+      }
+      if (param instanceof Date) {
+        return param.toISOString()
+      }
+      if (typeof param === 'object' && param !== null) {
+        return JSON.stringify(param)
+      }
+      return param
+    })
+    
     const stmt = this.#db.prepare(sql)
     if (SelectQueryNode.is(query)) {
-      const iter = stmt.iterate(parameters) as IterableIterator<R>
+      const iter = stmt.iterate(sqliteParameters) as IterableIterator<R>
       for (const row of iter) {
         yield {
           rows: [row],

@@ -1,4 +1,5 @@
 import type { Kysely } from '../kysely.js'
+import { sql } from '../raw-builder/sql.js'
 
 export interface TableMetadata {
   name: string
@@ -94,7 +95,8 @@ export class DatabaseIntrospector {
         name: t.name
       }))
     } catch (error) {
-      // Not SQLite, try MSSQL
+      // If sqlite_master fails, it's not SQLite
+      console.warn('SQLite table discovery failed:', error)
     }
 
     try {
@@ -218,29 +220,21 @@ export class DatabaseIntrospector {
     }
 
     try {
-      // SQLite
-      const sqliteColumns = await this.db
-        .selectFrom('pragma_table_info')
-        .select([
-          'name',
-          'type',
-          'notnull as nullable',
-          'dflt_value as defaultValue',
-          'pk as isPrimaryKey'
-        ])
-        .where('name', '=', tableName)
-        .execute()
+      // SQLite - use raw SQL for pragma_table_info
+      const result = await sql`pragma_table_info(${sql.lit(tableName)})`.execute(this.db)
+      const sqliteColumns = result.rows as any[]
 
-      return sqliteColumns.map(col => ({
+      return sqliteColumns.map((col: any) => ({
         name: col.name,
         type: col.type,
-        nullable: !col.nullable,
-        defaultValue: col.defaultValue,
-        isPrimaryKey: !!col.isPrimaryKey,
-        isAutoIncrement: col.type.toLowerCase().includes('integer') && col.isPrimaryKey
+        nullable: !col.notnull,
+        defaultValue: col.dflt_value,
+        isPrimaryKey: !!col.pk,
+        isAutoIncrement: col.type.toLowerCase().includes('integer') && col.pk
       }))
     } catch (error) {
       // Not SQLite, try MSSQL
+      console.warn('SQLite column discovery failed:', error)
     }
 
     try {
@@ -360,26 +354,19 @@ export class DatabaseIntrospector {
     }
 
     try {
-      // SQLite
-      const sqliteFks = await this.db
-        .selectFrom('pragma_foreign_key_list')
-        .select([
-          'id',
-          'from as column',
-          'table as referencedTable',
-          'to as referencedColumn'
-        ])
-        .where('table', '=', tableName)
-        .execute()
+      // SQLite - use raw SQL for pragma_foreign_key_list
+      const result = await sql`pragma_foreign_key_list(${sql.lit(tableName)})`.execute(this.db)
+      const sqliteFks = result.rows as any[]
 
-      return sqliteFks.map(fk => ({
-        name: `fk_${tableName}_${fk.column}`,
-        column: fk.column,
-        referencedTable: fk.referencedTable,
-        referencedColumn: fk.referencedColumn
+      return sqliteFks.map((fk: any) => ({
+        name: `fk_${tableName}_${fk.from}`,
+        column: fk.from,
+        referencedTable: fk.table,
+        referencedColumn: fk.to
       }))
     } catch (error) {
       // Not SQLite, try MSSQL
+      console.warn('SQLite foreign key discovery failed:', error)
     }
 
     try {

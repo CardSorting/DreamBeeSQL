@@ -20,6 +20,7 @@ import { QueryAnalyzer, QueryAnalyzerOptions } from './performance/query-analyze
 export class NOORMME {
   private db: Kysely<any>
   private config: NOORMConfig
+  private dialect: any
   private schemaDiscovery: SchemaDiscovery
   private typeGenerator: TypeGenerator
   private repositoryFactory: RepositoryFactory
@@ -61,13 +62,14 @@ export class NOORMME {
     this.cacheManager = new CacheManager(this.config.cache)
     
     // Initialize Kysely with the provided dialect
+    this.dialect = this.createDialect()
     this.db = new (require('./kysely.js').Kysely)({
-      dialect: this.createDialect(),
+      dialect: this.dialect,
       log: this.config.logging?.enabled ? this.logger.createKyselyLogger() : undefined
     })
 
     // Initialize core components
-    this.schemaDiscovery = new SchemaDiscovery(this.db, this.config.introspection)
+    this.schemaDiscovery = new SchemaDiscovery(this.db, this.config.introspection, this.dialect)
     this.typeGenerator = new TypeGenerator(this.config.introspection)
     this.repositoryFactory = new RepositoryFactory(this.db, this.config.performance)
     this.relationshipEngine = new RelationshipEngine(this.db, this.config.performance)
@@ -85,8 +87,8 @@ export class NOORMME {
     try {
       this.logger.info('Initializing NOORMME...')
 
-      // Test database connection using the introspector
-      const introspector = new DatabaseIntrospector(this.db)
+      // Test database connection using the dialect-specific introspector
+      const introspector = this.dialect.createIntrospector(this.db)
       await introspector.getTables()
       this.logger.info('Database connection successful')
 

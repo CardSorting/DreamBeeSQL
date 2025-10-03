@@ -1,4 +1,5 @@
-import { ColumnInfo } from '../../types/index.js'
+// TODO: Remove this import if ColumnInfo is not used, or fix the import path if necessary.
+// import { ColumnInfo } from '../../types/index.js'
 
 /**
  * Maps database column types to TypeScript types
@@ -49,13 +50,27 @@ export class TypeMapper {
   }
 
   /**
-   * Map database column info to our ColumnInfo interface
-   */
-  static mapColumnInfo(dbColumn: any, customTypeMappings?: Record<string, string>): ColumnInfo {
-    return {
-      name: dbColumn.name,
-      type: this.mapColumnType(dbColumn.type, customTypeMappings),
-      nullable: dbColumn.nullable,
+   /**
+    * Map database column info to our ColumnInfo interface
+    */
+   static mapColumnInfo(
+     dbColumn: any,
+     customTypeMappings?: Record<string, string>
+   ): {
+     name: string;
+     type: string;
+     nullable: boolean;
+     defaultValue?: any;
+     isPrimaryKey?: boolean;
+     isAutoIncrement?: boolean;
+     maxLength?: number;
+     precision?: number;
+     scale?: number;
+   } {
+     return {
+       name: dbColumn.name,
+       type: this.mapColumnType(dbColumn.type, customTypeMappings),
+       nullable: dbColumn.nullable,
       defaultValue: dbColumn.defaultValue,
       isPrimaryKey: dbColumn.isPrimaryKey,
       isAutoIncrement: dbColumn.isAutoIncrement,

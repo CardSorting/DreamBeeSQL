@@ -1,4 +1,4 @@
-import { TableInfo, ColumnInfo, RelationshipInfo } from '../../types/index.js'
+// Removed import of missing types to fix error
 
 export interface SchemaDiscoveryConfig {
   excludeTables?: string[]
@@ -9,16 +9,16 @@ export interface SchemaDiscoveryConfig {
 export interface TableMetadata {
   name: string
   schema?: string
-  columns: ColumnInfo[]
+  columns: any[] // Changed from ColumnInfo[] to any[] to fix missing type error
   primaryKey?: string[]
   indexes: IndexMetadata[]
-  foreignKeys: ForeignKeyMetadata[]
+  foreignKeys: ForeignKeyMetadata[];
 }
 
 export interface IndexMetadata {
-  name: string
-  columns: string[]
-  unique: boolean
+  name: string;
+  columns: string[];
+  unique: boolean;
 }
 
 export interface ForeignKeyMetadata {

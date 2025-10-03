@@ -171,6 +171,7 @@ export class NOORMME {
     return this.initialized
   }
 
+
   /**
    * Get a repository for the specified table
    */

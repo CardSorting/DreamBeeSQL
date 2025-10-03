@@ -25,10 +25,15 @@ export async function createTestDatabase(dialect: 'sqlite' | 'postgresql' | 'mys
   
   switch (dialect) {
     case 'sqlite':
+      // Create unique database file for each test instance
+      const timestamp = Date.now()
+      const random = Math.random().toString(36).substr(2, 9)
+      const uniqueDbPath = (config as any).database.replace('.db', `-${timestamp}-${random}.db`)
+      
       connection = {
         host: '',
         port: 0,
-        database: (config as any).database,
+        database: uniqueDbPath,
         username: '',
         password: ''
       }
@@ -390,6 +395,23 @@ async function insertTestData(db: NOORMME): Promise<void> {
 export async function cleanupTestDatabase(testDb: TestDatabase): Promise<void> {
   const { db } = testDb
   
+  // Check if database is still initialized before attempting cleanup
+  if (!db.isInitialized()) {
+    // Database already closed, just clean up file if SQLite
+    if (testDb.dialect === 'sqlite') {
+      try {
+        const fs = await import('fs')
+        const dbPath = testDb.connection.database
+        if (fs.existsSync(dbPath)) {
+          fs.unlinkSync(dbPath)
+        }
+      } catch (error) {
+        console.warn('Error removing SQLite database file:', error)
+      }
+    }
+    return
+  }
+  
   try {
     // Drop all test tables first (before closing connection)
     await dropTestTables(testDb)
@@ -402,6 +424,19 @@ export async function cleanupTestDatabase(testDb: TestDatabase): Promise<void> {
     await db.close()
   } catch (error) {
     console.warn('Error closing database connection:', error)
+  }
+  
+  // For SQLite, also remove the database file
+  if (testDb.dialect === 'sqlite') {
+    try {
+      const fs = await import('fs')
+      const dbPath = testDb.connection.database
+      if (fs.existsSync(dbPath)) {
+        fs.unlinkSync(dbPath)
+      }
+    } catch (error) {
+      console.warn('Error removing SQLite database file:', error)
+    }
   }
 }
 

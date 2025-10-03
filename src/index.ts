@@ -301,3 +301,11 @@ export { Collation } from './parser/collate-parser.js'
 // NOORMME - No ORM, just magic!
 export { NOORMME } from './noormme.js'
 export * from './types/index.js'
+
+// Error classes
+export * from './errors/NoormError.js'
+
+// CLI commands (for programmatic usage)
+export * from './cli/commands/init.js'
+export * from './cli/commands/inspect.js'
+export * from './cli/commands/generate.js'

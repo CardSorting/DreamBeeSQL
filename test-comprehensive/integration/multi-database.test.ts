@@ -7,6 +7,29 @@ import { expect } from 'chai'
 import { withMultipleDatabases, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 
+// Define entity interfaces for type safety
+interface User {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  age?: number
+  active: boolean
+  createdAt?: Date
+  updatedAt?: Date
+  posts?: Post[]
+}
+
+interface Post {
+  id: string
+  userId: string
+  title: string
+  content: string
+  published: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
 describe('Multi-Database Integration', () => {
   const enabledDatabases = getEnabledDatabases()
   
@@ -54,8 +77,8 @@ describe('Multi-Database Integration', () => {
       })
       
       // Verify users exist in respective databases
-      const foundSqliteUser = await sqliteUserRepo.findById('multi-sqlite-user')
-      const foundPostgresUser = await postgresUserRepo.findById('multi-postgres-user')
+      const foundSqliteUser = await sqliteUserRepo.findById('multi-sqlite-user') as User | null
+      const foundPostgresUser = await postgresUserRepo.findById('multi-postgres-user') as User | null
       
       expect(foundSqliteUser).to.exist
       expect(foundSqliteUser!.email).to.equal('sqlite@example.com')
@@ -104,7 +127,7 @@ describe('Multi-Database Integration', () => {
         firstName: 'SQLiteRel',
         lastName: 'User',
         active: true
-      })
+      }) as User
       
       const sqlitePost = await sqlitePostRepo.create({
         id: 'sqlite-rel-post',
@@ -112,7 +135,7 @@ describe('Multi-Database Integration', () => {
         title: 'SQLite Post',
         content: 'SQLite Content',
         published: true
-      })
+      }) as Post
       
       const postgresUser = await postgresUserRepo.create({
         id: 'postgres-rel-user',
@@ -120,7 +143,7 @@ describe('Multi-Database Integration', () => {
         firstName: 'PostgresRel',
         lastName: 'User',
         active: true
-      })
+      }) as User
       
       const postgresPost = await postgresPostRepo.create({
         id: 'postgres-rel-post',
@@ -128,21 +151,21 @@ describe('Multi-Database Integration', () => {
         title: 'PostgreSQL Post',
         content: 'PostgreSQL Content',
         published: true
-      })
+      }) as Post
       
       // Load relationships in respective databases
-      const sqliteUserWithPosts = await sqliteUserRepo.findWithRelations(sqliteUser.id, ['posts'])
-      const postgresUserWithPosts = await postgresUserRepo.findWithRelations(postgresUser.id, ['posts'])
+      const sqliteUserWithPosts = await sqliteUserRepo.findWithRelations(sqliteUser.id, ['posts']) as User | null
+      const postgresUserWithPosts = await postgresUserRepo.findWithRelations(postgresUser.id, ['posts']) as User | null
       
       expect(sqliteUserWithPosts).to.exist
       expect(sqliteUserWithPosts!.posts).to.exist
-      expect(sqliteUserWithPosts!.posts.length).to.equal(1)
-      expect(sqliteUserWithPosts!.posts[0].id).to.equal('sqlite-rel-post')
+      expect(sqliteUserWithPosts!.posts!.length).to.equal(1)
+      expect(sqliteUserWithPosts!.posts![0].id).to.equal('sqlite-rel-post')
       
       expect(postgresUserWithPosts).to.exist
       expect(postgresUserWithPosts!.posts).to.exist
-      expect(postgresUserWithPosts!.posts.length).to.equal(1)
-      expect(postgresUserWithPosts!.posts[0].id).to.equal('postgres-rel-post')
+      expect(postgresUserWithPosts!.posts!.length).to.equal(1)
+      expect(postgresUserWithPosts!.posts![0].id).to.equal('postgres-rel-post')
       
       // Clean up
       await sqlitePostRepo.delete('sqlite-rel-post')
@@ -180,7 +203,7 @@ describe('Multi-Database Integration', () => {
             active: true
           })
           .returningAll()
-          .executeTakeFirstOrThrow()
+          .executeTakeFirstOrThrow() as User
         
         return user
       })
@@ -196,7 +219,7 @@ describe('Multi-Database Integration', () => {
             active: true
           })
           .returningAll()
-          .executeTakeFirstOrThrow()
+          .executeTakeFirstOrThrow() as User
         
         return user
       })
@@ -248,7 +271,7 @@ describe('Multi-Database Integration', () => {
       
       // Test performance in both databases
       const sqliteDuration = await performanceHelper.measure('sqlite-operations', async () => {
-        const users = []
+        const users: User[] = []
         for (let i = 0; i < 10; i++) {
           const user = await sqliteUserRepo.create({
             id: `sqlite-perf-user-${i}`,
@@ -256,14 +279,14 @@ describe('Multi-Database Integration', () => {
             firstName: `SQLitePerf${i}`,
             lastName: 'User',
             active: true
-          })
+          }) as User
           users.push(user)
         }
         return users
       })
       
       const postgresDuration = await performanceHelper.measure('postgres-operations', async () => {
-        const users = []
+        const users: User[] = []
         for (let i = 0; i < 10; i++) {
           const user = await postgresUserRepo.create({
             id: `postgres-perf-user-${i}`,
@@ -271,7 +294,7 @@ describe('Multi-Database Integration', () => {
             firstName: `PostgresPerf${i}`,
             lastName: 'User',
             active: true
-          })
+          }) as User
           users.push(user)
         }
         return users
@@ -310,7 +333,7 @@ describe('Multi-Database Integration', () => {
       
       // Execute concurrent operations across databases
       const start = performance.now()
-      const promises = []
+      const promises: Promise<User>[] = []
       
       // SQLite operations
       for (let i = 0; i < 5; i++) {
@@ -321,7 +344,7 @@ describe('Multi-Database Integration', () => {
             firstName: `SQLiteConcurrent${i}`,
             lastName: 'User',
             active: true
-          })
+          }) as Promise<User>
         )
       }
       
@@ -334,7 +357,7 @@ describe('Multi-Database Integration', () => {
             firstName: `PostgresConcurrent${i}`,
             lastName: 'User',
             active: true
-          })
+          }) as Promise<User>
         )
       }
       
@@ -415,7 +438,7 @@ describe('Multi-Database Integration', () => {
         lastName: 'User',
         age: 30,
         active: true
-      })
+      }) as User
       
       const postgresUser = await postgresUserRepo.create({
         id: 'postgres-types-user',
@@ -424,7 +447,7 @@ describe('Multi-Database Integration', () => {
         lastName: 'User',
         age: 25,
         active: false
-      })
+      }) as User
       
       // Verify data types are handled correctly
       expect(sqliteUser.age).to.equal(30)
@@ -467,7 +490,7 @@ describe('Multi-Database Integration', () => {
         firstName: 'SQLiteError',
         lastName: 'User',
         active: true
-      })
+      }) as User
       
       // Try to create user with duplicate ID in PostgreSQL (should work)
       const postgresUser = await postgresUserRepo.create({
@@ -476,11 +499,11 @@ describe('Multi-Database Integration', () => {
         firstName: 'PostgresError',
         lastName: 'User',
         active: true
-      })
+      }) as User
       
       // Both should exist in their respective databases
-      const foundSqliteUser = await sqliteUserRepo.findById('sqlite-error-user')
-      const foundPostgresUser = await postgresUserRepo.findById('sqlite-error-user')
+      const foundSqliteUser = await sqliteUserRepo.findById('sqlite-error-user') as User | null
+      const foundPostgresUser = await postgresUserRepo.findById('sqlite-error-user') as User | null
       
       expect(foundSqliteUser).to.exist
       expect(foundPostgresUser).to.exist
@@ -519,7 +542,7 @@ describe('Multi-Database Integration', () => {
         firstName: 'SQLiteConn',
         lastName: 'User',
         active: true
-      })
+      }) as User
       
       const postgresUser = await postgresUserRepo.create({
         id: 'postgres-conn-user',
@@ -527,7 +550,7 @@ describe('Multi-Database Integration', () => {
         firstName: 'PostgresConn',
         lastName: 'User',
         active: true
-      })
+      }) as User
       
       // Close SQLite connection
       await sqliteDb.db.close()

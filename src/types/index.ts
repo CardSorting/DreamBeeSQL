@@ -139,6 +139,34 @@ export interface Repository<T> {
   findWithRelations(id: any, relations: string[]): Promise<T | null>
   loadRelationships(entities: T[], relations: string[]): Promise<void>
 
+  // Utility methods
+  count(): Promise<number>
+  exists(id: any): Promise<boolean>
+
+  // Pagination
+  paginate(options: {
+    page: number
+    limit: number
+    where?: Partial<T>
+    orderBy?: {
+      column: keyof T
+      direction: 'asc' | 'desc'
+    }
+  }): Promise<{
+    data: T[]
+    pagination: {
+      page: number
+      limit: number
+      total: number
+      totalPages: number
+      hasNext: boolean
+      hasPrev: boolean
+    }
+  }>
+
+  // Relationship counting
+  withCount(id: any, relationships: string[]): Promise<T & Record<string, number>>
+
   // Custom finders (auto-generated from schema)
   [key: string]: any
 }

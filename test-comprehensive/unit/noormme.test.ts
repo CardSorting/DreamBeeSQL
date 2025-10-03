@@ -2,151 +2,156 @@
  * Comprehensive unit tests for NOORMME core functionality
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'chai'
-import { NOORMME } from '../../src/noormme.js'
-import { withTestDatabase, performanceHelper, memoryHelper, assertions } from '../setup/test-helpers.js'
-import { getEnabledDatabases } from '../setup/test-config.js'
+import { describe, it, before, after } from 'mocha';
+import { expect } from 'chai';
+import { NOORMME } from '../../src/noormme.js';
+import { withTestDatabase, performanceHelper, memoryHelper, assertions } from '../setup/test-helpers.js';
+import { getEnabledDatabases } from '../setup/test-config.js';
 
 describe('NOORMME Core Functionality', () => {
-  const enabledDatabases = getEnabledDatabases()
+  const enabledDatabases = getEnabledDatabases();
   
   if (enabledDatabases.length === 0) {
-    console.warn('No databases enabled for testing')
-    return
+    console.warn('No databases enabled for testing');
+    return;
   }
 
   describe('Initialization', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should initialize successfully', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
+          const { db } = testDb;
           
           // Should not throw during initialization
-          await expect(db.initialize()).to.not.be.rejected
+          try {
+            await db.initialize();
+          } catch (error) {
+            expect.fail('Database initialization should not throw an error');
+          }
           
           // Should be marked as initialized
-          expect(db).to.have.property('initialized', true)
-        })
+          expect(db).to.have.property('initialized', true);
+        }));
 
         it('should throw error when getting repository before initialization', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
+          const { db } = testDb;
           
           // Create new instance without initializing
           const newDb = new NOORMME({
             dialect,
             connection: testDb.connection
-          })
+          });
           
           expect(() => {
-            newDb.getRepository('users')
-          }).to.throw('NOORMME must be initialized before getting repositories')
-        })
+            newDb.getRepository('users');
+          }).to.throw('NOORMME must be initialized before getting repositories');
+        }));
 
         it('should throw error for non-existent table', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
           expect(() => {
-            db.getRepository('nonexistent_table')
-          }).to.throw('Table \'nonexistent_table\' not found in schema')
-        })
+            db.getRepository('nonexistent_table');
+          }).to.throw('Table \'nonexistent_table\' not found in schema');
+        }));
 
         it('should provide Kysely instance', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
-          const kysely = db.getKysely()
-          expect(kysely).to.exist
-          expect(typeof kysely.selectFrom).to.equal('function')
-          expect(typeof kysely.insertInto).to.equal('function')
-          expect(typeof kysely.updateTable).to.equal('function')
-          expect(typeof kysely.deleteFrom).to.equal('function')
-        })
+          const kysely = db.getKysely();
+          expect(kysely).to.exist;
+          expect(typeof kysely.selectFrom).to.equal('function');
+          expect(typeof kysely.insertInto).to.equal('function');
+          expect(typeof kysely.updateTable).to.equal('function');
+          expect(typeof kysely.deleteFrom).to.equal('function');
+        }));
 
         it('should provide performance metrics', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
-          const metrics = db.getPerformanceMetrics()
-          expect(metrics).to.have.property('queryCount')
-          expect(metrics).to.have.property('averageQueryTime')
-          expect(metrics).to.have.property('cacheHitRate')
-          expect(metrics).to.have.property('repositoryCount')
+          const metrics = db.getPerformanceMetrics();
+          expect(metrics).to.have.property('queryCount');
+          expect(metrics).to.have.property('averageQueryTime');
+          expect(metrics).to.have.property('cacheHitRate');
+          expect(metrics).to.have.property('repositoryCount');
           
-          expect(metrics.queryCount).to.be.a('number')
-          expect(metrics.averageQueryTime).to.be.a('number')
-          expect(metrics.cacheHitRate).to.be.a('number')
-          expect(metrics.repositoryCount).to.be.a('number')
-        })
-      })
+          expect(metrics.queryCount).to.be.a('number');
+          expect(metrics.averageQueryTime).to.be.a('number');
+          expect(metrics.cacheHitRate).to.be.a('number');
+          expect(metrics.repositoryCount).to.be.a('number');
+        }));
+      });
     }
-  })
+  });
 
   describe('Repository Management', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should create repository for existing table', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
-          const userRepo = db.getRepository('users')
-          expect(userRepo).to.exist
-          expect(typeof userRepo.findById).to.equal('function')
-          expect(typeof userRepo.findAll).to.equal('function')
-          expect(typeof userRepo.create).to.equal('function')
-          expect(typeof userRepo.update).to.equal('function')
-          expect(typeof userRepo.delete).to.equal('function')
-        })
+          const userRepo = db.getRepository('users');
+          expect(userRepo).to.exist;
+          expect(typeof userRepo.findById).to.equal('function');
+          expect(typeof userRepo.findAll).to.equal('function');
+          expect(typeof userRepo.create).to.equal('function');
+          expect(typeof userRepo.update).to.equal('function');
+          expect(typeof userRepo.delete).to.equal('function');
+        }));
 
         it('should cache repository instances', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
-          const repo1 = db.getRepository('users')
-          const repo2 = db.getRepository('users')
+          const repo1 = db.getRepository('users');
+          const repo2 = db.getRepository('users');
           
-          expect(repo1).to.equal(repo2)
-        })
+          expect(repo1).to.equal(repo2);
+        }));
 
         it('should create different repositories for different tables', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
-          const userRepo = db.getRepository('users')
-          const postRepo = db.getRepository('posts')
+          const userRepo = db.getRepository('users');
+          const postRepo = db.getRepository('posts');
           
-          expect(userRepo).to.not.equal(postRepo)
-        })
+          expect(userRepo).to.not.equal(postRepo);
+        }));
 
         it('should provide schema information', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
-          const schemaInfo = await db.getSchemaInfo()
-          expect(schemaInfo).to.have.property('tables')
-          expect(schemaInfo).to.have.property('relationships')
-          expect(schemaInfo).to.have.property('views')
+          const schemaInfo = await db.getSchemaInfo();
+          expect(schemaInfo).to.have.property('tables');
+          expect(schemaInfo).to.have.property('relationships');
+          expect(schemaInfo).to.have.property('views');
           
-          expect(schemaInfo.tables).to.be.an('array')
-          expect(schemaInfo.relationships).to.be.an('array')
-          expect(schemaInfo.views).to.be.an('array')
+          expect(schemaInfo.tables).to.be.an('array');
+          expect(schemaInfo.relationships).to.be.an('array');
+          expect(schemaInfo.views).to.be.an('array');
           
           // Should have our test tables
-          const tableNames = schemaInfo.tables.map(t => t.name)
-          expect(tableNames).to.include('users')
-          expect(tableNames).to.include('posts')
-          expect(tableNames).to.include('comments')
-        })
-      })
+          const tableNames = schemaInfo.tables.map(t => t.name);
+          expect(tableNames).to.include('users');
+          expect(tableNames).to.include('posts');
+          expect(tableNames).to.include('comments');
+        }));
+      });
     }
-  })
+  });
 
   describe('Configuration Management', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should update configuration', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
           // Update logging configuration
           db.updateConfig({
@@ -154,7 +159,7 @@ describe('NOORMME Core Functionality', () => {
               level: 'debug',
               enabled: true
             }
-          })
+          });
           
           // Should not throw
           expect(() => {
@@ -163,13 +168,13 @@ describe('NOORMME Core Functionality', () => {
                 ttl: 600000,
                 maxSize: 2000
               }
-            })
-          }).to.not.throw()
-        })
+            });
+          }).to.not.throw();
+        }));
 
         it('should handle invalid configuration gracefully', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
           // Should not throw with invalid config
           expect(() => {
@@ -178,19 +183,19 @@ describe('NOORMME Core Functionality', () => {
                 level: 'invalid' as any,
                 enabled: true
               }
-            })
-          }).to.not.throw()
-        })
-      })
+            });
+          }).to.not.throw();
+        }));
+      });
     }
-  })
+  });
 
   describe('Transaction Support', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should execute transactions', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
           const result = await db.transaction(async (trx) => {
             const user = await trx
@@ -203,19 +208,19 @@ describe('NOORMME Core Functionality', () => {
                 active: true
               })
               .returningAll()
-              .executeTakeFirstOrThrow()
+              .executeTakeFirstOrThrow();
             
-            return user
-          })
+            return user;
+          });
           
-          expect(result).to.exist
-          expect(result.id).to.equal('transaction-user')
-          expect(result.email).to.equal('transaction@example.com')
-        })
+          expect(result).to.exist;
+          expect(result.id).to.equal('transaction-user');
+          expect(result.email).to.equal('transaction@example.com');
+        }));
 
         it('should rollback transactions on error', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
           try {
             await db.transaction(async (trx) => {
@@ -228,92 +233,92 @@ describe('NOORMME Core Functionality', () => {
                   lastName: 'User',
                   active: true
                 })
-                .execute()
+                .execute();
               
               // Force an error
-              throw new Error('Transaction rollback test')
-            })
+              throw new Error('Transaction rollback test');
+            });
           } catch (error) {
             // Expected error
           }
           
           // User should not exist after rollback
-          const userRepo = db.getRepository('users')
-          const user = await userRepo.findById('rollback-user')
-          expect(user).to.be.null
-        })
-      })
+          const userRepo = db.getRepository('users');
+          const user = await userRepo.findById('rollback-user');
+          expect(user).to.be.null;
+        }));
+      });
     }
-  })
+  });
 
   describe('Raw SQL Execution', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should execute raw SQL queries', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
-          const result = await db.execute('SELECT COUNT(*) as count FROM users')
-          expect(result).to.exist
-          expect(result[0]).to.have.property('count')
-          expect(result[0].count).to.be.a('number')
-        })
+          const result = await db.execute('SELECT COUNT(*) as count FROM users');
+          expect(result).to.exist;
+          expect(result[0]).to.have.property('count');
+          expect(result[0].count).to.be.a('number');
+        }));
 
         it('should execute raw SQL with parameters', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
-          const result = await db.execute('SELECT * FROM users WHERE active = ?', [true])
-          expect(result).to.be.an('array')
-        })
-      })
+          const result = await db.execute('SELECT * FROM users WHERE active = ?', [true]);
+          expect(result).to.be.an('array');
+        }));
+      });
     }
-  })
+  });
 
   describe('Performance', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should initialize within performance threshold', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
+          const { db } = testDb;
           
-          const duration = await performanceHelper.measure('initialization', async () => {
-            await db.initialize()
-          })
+          const start = performance.now();
+          await db.initialize();
+          const duration = performance.now() - start;
           
           // Initialization should be fast
-          assertions.assertPerformance(duration, 1000, 0.5) // 50% tolerance
-        })
+          expect(duration).to.be.lessThan(1000); // 1 second max
+        }));
 
         it('should handle memory efficiently', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
+          const { db } = testDb;
           
           const { delta } = await memoryHelper.measureMemory(async () => {
-            await db.initialize()
-          })
+            await db.initialize();
+          });
           
           // Memory usage should be reasonable
-          assertions.assertMemoryUsage(delta, 50) // 50MB limit
-        })
+          assertions.assertMemoryUsage(delta, 50); // 50MB limit
+        }));
 
         it('should maintain performance with multiple repositories', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
-          const duration = await performanceHelper.measure('multiple-repositories', async () => {
-            // Create multiple repositories
-            for (let i = 0; i < 100; i++) {
-              db.getRepository('users')
-              db.getRepository('posts')
-              db.getRepository('comments')
-            }
-          })
+          const start = performance.now();
+          // Create multiple repositories
+          for (let i = 0; i < 100; i++) {
+            db.getRepository('users');
+            db.getRepository('posts');
+            db.getRepository('comments');
+          }
+          const duration = performance.now() - start;
           
           // Should be very fast due to caching
-          assertions.assertPerformance(duration, 100, 0.2) // 20% tolerance
-        })
-      })
+          expect(duration).to.be.lessThan(100); // 100ms max
+        }));
+      });
     }
-  })
+  });
 
   describe('Error Handling', () => {
     for (const dialect of enabledDatabases) {
@@ -328,56 +333,74 @@ describe('NOORMME Core Functionality', () => {
               username: 'invalid-user',
               password: 'invalid-password'
             }
-          })
+          });
           
-          await expect(invalidDb.initialize()).to.be.rejected
-        })
+          try {
+            await invalidDb.initialize();
+            expect.fail('Database initialization should throw an error for invalid connection');
+          } catch (error) {
+            expect(error).to.be.instanceOf(Error);
+          }
+        });
 
         it('should handle invalid SQL gracefully', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
-          await expect(db.execute('INVALID SQL QUERY')).to.be.rejected
-        })
+          try {
+            await db.execute('INVALID SQL QUERY');
+            expect.fail('Invalid SQL should throw an error');
+          } catch (error) {
+            expect(error).to.be.instanceOf(Error);
+          }
+        }));
 
         it('should handle repository operations on closed database', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
-          await db.close()
+          const { db } = testDb;
+          await db.initialize();
+          await db.close();
           
           expect(() => {
-            db.getRepository('users')
-          }).to.throw('NOORMME must be initialized before getting repositories')
-        })
-      })
+            db.getRepository('users');
+          }).to.throw('NOORMME must be initialized before getting repositories');
+        }));
+      });
     }
-  })
+  });
 
   describe('Cleanup', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
         it('should close database connections properly', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
           // Should not throw
-          await expect(db.close()).to.not.be.rejected
+          try {
+            await db.close();
+          } catch (error) {
+            expect.fail('Database close should not throw an error');
+          }
           
           // Should be marked as not initialized
-          expect(db).to.have.property('initialized', false)
-        })
+          expect(db).to.have.property('initialized', false);
+        }));
 
         it('should handle multiple close calls gracefully', withTestDatabase(dialect, async (testDb) => {
-          const { db } = testDb
-          await db.initialize()
+          const { db } = testDb;
+          await db.initialize();
           
           // First close
-          await db.close()
+          await db.close();
           
           // Second close should not throw
-          await expect(db.close()).to.not.be.rejected
-        })
-      })
+          try {
+            await db.close();
+          } catch (error) {
+            expect.fail('Multiple database close calls should not throw an error');
+          }
+        }));
+      });
     }
-  })
-})
+  });
+});

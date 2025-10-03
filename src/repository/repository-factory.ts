@@ -1,5 +1,7 @@
 import type { Kysely } from '../kysely.js'
 import { TableInfo, RelationshipInfo, Repository, PerformanceConfig } from '../types'
+import { NoormError, RelationshipNotFoundError } from '../errors/NoormError.js'
+import { wrapKyselyError } from '../utils/errorHelpers.js'
 
 /**
  * Repository factory that creates dynamic repository classes
@@ -17,55 +19,95 @@ export class RepositoryFactory {
     const repository: Repository<T> = {
       // Basic CRUD operations
       findById: async (id: any) => {
-        const result = await this.db
-          .selectFrom(table.name)
-          .selectAll()
-          .where(this.getPrimaryKeyCondition(table, id))
-          .executeTakeFirst()
-        
-        return result as T | null
+        try {
+          const result = await this.db
+            .selectFrom(table.name)
+            .selectAll()
+            .where(this.getPrimaryKeyCondition(table, id))
+            .executeTakeFirst()
+
+          return result as T | null
+        } catch (error) {
+          throw wrapKyselyError(error, {
+            table: table.name,
+            operation: 'findById',
+            availableColumns: table.columns.map(c => c.name)
+          })
+        }
       },
 
       findAll: async () => {
-        const results = await this.db
-          .selectFrom(table.name)
-          .selectAll()
-          .execute()
-        
-        return results as T[]
+        try {
+          const results = await this.db
+            .selectFrom(table.name)
+            .selectAll()
+            .execute()
+
+          return results as T[]
+        } catch (error) {
+          throw wrapKyselyError(error, {
+            table: table.name,
+            operation: 'findAll',
+            availableColumns: table.columns.map(c => c.name)
+          })
+        }
       },
 
       create: async (data: Partial<T>) => {
-        const result = await this.db
-          .insertInto(table.name)
-          .values(data as any)
-          .returningAll()
-          .executeTakeFirstOrThrow()
-        
-        return result as T
+        try {
+          const result = await this.db
+            .insertInto(table.name)
+            .values(data as any)
+            .returningAll()
+            .executeTakeFirstOrThrow()
+
+          return result as T
+        } catch (error) {
+          throw wrapKyselyError(error, {
+            table: table.name,
+            operation: 'create',
+            availableColumns: table.columns.map(c => c.name)
+          })
+        }
       },
 
       update: async (entity: T) => {
-        const primaryKeyValue = this.getPrimaryKeyValue(table, entity)
-        const updateData = this.getUpdateData(table, entity)
-        
-        const result = await this.db
-          .updateTable(table.name)
-          .set(updateData)
-          .where(this.getPrimaryKeyCondition(table, primaryKeyValue))
-          .returningAll()
-          .executeTakeFirstOrThrow()
-        
-        return result as T
+        try {
+          const primaryKeyValue = this.getPrimaryKeyValue(table, entity)
+          const updateData = this.getUpdateData(table, entity)
+
+          const result = await this.db
+            .updateTable(table.name)
+            .set(updateData)
+            .where(this.getPrimaryKeyCondition(table, primaryKeyValue))
+            .returningAll()
+            .executeTakeFirstOrThrow()
+
+          return result as T
+        } catch (error) {
+          throw wrapKyselyError(error, {
+            table: table.name,
+            operation: 'update',
+            availableColumns: table.columns.map(c => c.name)
+          })
+        }
       },
 
       delete: async (id: any) => {
-        const result = await this.db
-          .deleteFrom(table.name)
-          .where(this.getPrimaryKeyCondition(table, id))
-          .execute()
-        
-        return result.length > 0
+        try {
+          const result = await this.db
+            .deleteFrom(table.name)
+            .where(this.getPrimaryKeyCondition(table, id))
+            .execute()
+
+          return result.length > 0
+        } catch (error) {
+          throw wrapKyselyError(error, {
+            table: table.name,
+            operation: 'delete',
+            availableColumns: table.columns.map(c => c.name)
+          })
+        }
       },
 
       // Relationship operations
@@ -73,12 +115,142 @@ export class RepositoryFactory {
         const entity = await repository.findById(id)
         if (!entity) return null
 
+        // Validate relationships exist
+        for (const relationName of relations) {
+          const relationship = relationships.find(r => r.name === relationName)
+          if (!relationship) {
+            throw new RelationshipNotFoundError(
+              relationName,
+              table.name,
+              relationships.map(r => r.name)
+            )
+          }
+        }
+
         await this.loadRelationships([entity], relations, relationships)
         return entity
       },
 
       loadRelationships: async (entities: T[], relations: string[]) => {
+        // Validate relationships exist
+        for (const relationName of relations) {
+          const relationship = relationships.find(r => r.name === relationName)
+          if (!relationship) {
+            throw new RelationshipNotFoundError(
+              relationName,
+              table.name,
+              relationships.map(r => r.name)
+            )
+          }
+        }
+
         await this.loadRelationships(entities, relations, relationships)
+      },
+
+      // Pagination helper
+      paginate: async (options: {
+        page: number;
+        limit: number;
+        where?: Partial<T>;
+        orderBy?: {
+          column: keyof T;
+          direction: 'asc' | 'desc';
+        };
+      }) => {
+        try {
+          const { page, limit, where, orderBy } = options
+          const offset = (page - 1) * limit
+
+          // Build base query
+          let query = this.db.selectFrom(table.name)
+
+          // Apply where conditions
+          if (where) {
+            Object.entries(where).forEach(([key, value]) => {
+              if (value !== undefined) {
+                query = query.where(key as any, '=', value)
+              }
+            })
+          }
+
+          // Get total count
+          const countResult = await query
+            .select(({ fn }) => [fn.count<number>('*').as('count')])
+            .executeTakeFirst()
+          const total = Number(countResult?.count ?? 0)
+
+          // Get paginated data
+          let dataQuery = query.selectAll().limit(limit).offset(offset)
+
+          if (orderBy) {
+            dataQuery = dataQuery.orderBy(orderBy.column as string, orderBy.direction)
+          }
+
+          const data = await dataQuery.execute()
+
+          return {
+            data: data as T[],
+            pagination: {
+              page,
+              limit,
+              total,
+              totalPages: Math.ceil(total / limit),
+              hasNext: offset + limit < total,
+              hasPrev: page > 1,
+            },
+          }
+        } catch (error) {
+          throw wrapKyselyError(error, {
+            table: table.name,
+            operation: 'paginate',
+            availableColumns: table.columns.map(c => c.name)
+          })
+        }
+      },
+
+      // Count relationships
+      withCount: async (id: any, relationshipNames: string[]) => {
+        try {
+          const entity = await repository.findById(id)
+          if (!entity) {
+            throw new NoormError(`${table.name} not found with id: ${id}`, {
+              table: table.name,
+              operation: 'withCount'
+            })
+          }
+
+          const counts: Record<string, number> = {}
+
+          for (const relationName of relationshipNames) {
+            const relationship = relationships.find(r => r.name === relationName)
+            if (!relationship) {
+              throw new RelationshipNotFoundError(
+                relationName,
+                table.name,
+                relationships.map(r => r.name)
+              )
+            }
+
+            const countResult = await this.db
+              .selectFrom(relationship.toTable)
+              .where(relationship.toColumn as any, '=', (entity as any)[relationship.fromColumn])
+              .select(({ fn }) => [fn.count<number>('*').as('count')])
+              .executeTakeFirst()
+
+            counts[`${relationName}Count`] = Number(countResult?.count ?? 0)
+          }
+
+          return { ...entity, ...counts } as T & Record<string, number>
+        } catch (error) {
+          if (error instanceof NoormError) {
+            throw error
+          }
+          throw wrapKyselyError(error, {
+            table: table.name,
+            operation: 'withCount',
+            availableColumns: table.columns.map(c => c.name)
+          })
+        }
       }
     }
 

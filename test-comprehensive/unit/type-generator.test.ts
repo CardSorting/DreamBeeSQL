@@ -40,6 +40,7 @@ describe('Type Generation', () => {
           expect(entityNames).to.include('Posts')
           expect(entityNames).to.include('Comments')
         }))
+        
         it('should generate correct entity interfaces', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -59,6 +60,7 @@ describe('Type Generation', () => {
           expect(interfaceCode).to.include('lastName:')
           expect(interfaceCode).to.include('active:')
         }))
+        
         it('should generate insert types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -79,6 +81,7 @@ describe('Type Generation', () => {
           // Should not include auto-generated fields
           expect(insertType).to.not.include('id:') // Assuming id is auto-generated
         }))
+        
         it('should generate update types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -97,6 +100,7 @@ describe('Type Generation', () => {
           expect(updateType).to.include('firstName?:')
           expect(updateType).to.include('lastName?:')
         }))
+        
         it('should generate select types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -116,6 +120,7 @@ describe('Type Generation', () => {
           expect(selectType).to.include('lastName:')
           expect(selectType).to.include('active:')
         }))
+        
         it('should handle nullable columns correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -138,6 +143,7 @@ describe('Type Generation', () => {
           // Optional fields should have ?
           expect(interfaceCode).to.include('age?:')
         }))
+        
         it('should handle different column types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -158,9 +164,10 @@ describe('Type Generation', () => {
           expect(interfaceCode).to.include('active: boolean')
           expect(interfaceCode).to.include('age?: number')
         }))
-      }))
+      })
     }
-  }))
+  })
+  
   describe('Relationship Type Generation', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -182,6 +189,7 @@ describe('Type Generation', () => {
           expect(generatedTypes.interfaces).to.include('PostsUsers')
           expect(generatedTypes.interfaces).to.include('PostsComments')
         }))
+        
         it('should generate correct relationship type structures', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -200,6 +208,7 @@ describe('Type Generation', () => {
           expect(interfaceCode).to.include(': Users')
           expect(interfaceCode).to.include(': Profiles')
         }))
+        
         it('should handle many-to-many relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -213,9 +222,10 @@ describe('Type Generation', () => {
           // Many-to-many relationships should be arrays
           expect(interfaceCode).to.include('Tags[]')
         }))
-      }))
+      })
     }
-  }))
+  })
+  
   describe('Type Mapping', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -241,6 +251,7 @@ describe('Type Generation', () => {
           // Date types
           expect(interfaceCode).to.include(': Date')
         }))
+        
         it('should handle custom type mappings', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -252,7 +263,7 @@ describe('Type Generation', () => {
               'integer': 'CustomNumber',
               'boolean': 'CustomBoolean'
             }
-          }))
+          })
           const generatedTypes = typeGenerator.generateTypes(schemaInfo)
           const interfaceCode = generatedTypes.interfaces
           
@@ -261,6 +272,7 @@ describe('Type Generation', () => {
           expect(interfaceCode).to.include(': CustomNumber')
           expect(interfaceCode).to.include(': CustomBoolean')
         }))
+        
         it('should handle parameterized types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -276,6 +288,7 @@ describe('Type Generation', () => {
           expect(interfaceCode).to.include(': string') // varchar should map to string
           expect(interfaceCode).to.include(': number') // decimal should map to number
         }))
+        
         it('should default unknown types to any', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -290,9 +303,10 @@ describe('Type Generation', () => {
           // This test ensures we're not falling back to 'any' unnecessarily
           expect(interfaceCode).to.not.include(': any')
         }))
-      }))
+      })
     }
-  }))
+  })
+  
   describe('Configuration', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -306,13 +320,14 @@ describe('Type Generation', () => {
               'text': 'MyCustomString',
               'integer': 'MyCustomNumber'
             }
-          }))
+          })
           const generatedTypes = typeGenerator.generateTypes(schemaInfo)
           const interfaceCode = generatedTypes.interfaces
           
           expect(interfaceCode).to.include(': MyCustomString')
           expect(interfaceCode).to.include(': MyCustomNumber')
         }))
+        
         it('should handle empty custom type mappings', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -320,12 +335,13 @@ describe('Type Generation', () => {
           const schemaInfo = await db.getSchemaInfo()
           const typeGenerator = new TypeGenerator({
             customTypeMappings: {}
-          }))
+          })
           const generatedTypes = typeGenerator.generateTypes(schemaInfo)
           expect(generatedTypes).to.exist
           expect(generatedTypes.entities).to.be.an('array')
           expect(generatedTypes.entities.length).to.be.greaterThan(0)
         }))
+        
         it('should handle undefined custom type mappings', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -338,9 +354,10 @@ describe('Type Generation', () => {
           expect(generatedTypes.entities).to.be.an('array')
           expect(generatedTypes.entities.length).to.be.greaterThan(0)
         }))
-      }))
+      })
     }
-  }))
+  })
+  
   describe('Edge Cases', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -359,7 +376,8 @@ describe('Type Generation', () => {
           expect(generatedTypes.entities.length).to.equal(0)
           expect(generatedTypes.interfaces).to.be.a('string')
           expect(generatedTypes.types).to.be.a('string')
-        }))
+        })
+        
         it('should handle schema with no relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -380,6 +398,7 @@ describe('Type Generation', () => {
           // Should still generate relationship types section
           expect(generatedTypes.interfaces).to.include('// Relationship types')
         }))
+        
         it('should handle tables with no columns', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -410,6 +429,7 @@ describe('Type Generation', () => {
           expect(emptyTableEntity).to.exist
           expect(emptyTableEntity!.interface).to.include('export interface EmptyTable')
         }))
+        
         it('should handle tables with special characters in names', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -429,9 +449,9 @@ describe('Type Generation', () => {
                     defaultValue: null,
                     isPrimaryKey: true,
                     isAutoIncrement: false,
-                    maxLength: null,
-                    precision: null,
-                    scale: null
+                    maxLength: undefined,
+                    precision: undefined,
+                    scale: undefined
                   }
                 ],
                 primaryKey: ['user_id'],
@@ -453,9 +473,10 @@ describe('Type Generation', () => {
           expect(specialTableEntity!.interface).to.include('export interface UserProfiles')
           expect(specialTableEntity!.interface).to.include('userId:')
         }))
-      }))
+      })
     }
-  }))
+  })
+  
   describe('Performance', () => {
     for (const dialect of enabledDatabases) {
       describe(`${dialect.toUpperCase()}`, () => {
@@ -473,6 +494,7 @@ describe('Type Generation', () => {
           expect(generatedTypes).to.exist
           expect(duration).to.be.lessThan(1000) // Should complete within 1 second
         }))
+        
         it('should handle large schemas efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
@@ -499,7 +521,7 @@ describe('Type Generation', () => {
           expect(generatedTypes.entities.length).to.equal(largeSchema.tables.length)
           expect(duration).to.be.lessThan(2000) // Should complete within 2 seconds
         }))
-      }))
+      })
     }
-  }))
-}))
+  })
+})

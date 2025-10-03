@@ -3,6 +3,7 @@
  */
 
 import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { withTestDatabase, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 import { createNodeMigrationManager } from '../../src/migration/node-migration-manager.js'
@@ -10,7 +11,6 @@ import { NOORMME } from '../../src/noormme.js'
 
 describe('Migration System Integration', () => {
   const enabledDatabases = getEnabledDatabases()
-  const { expect } = require('chai')
   
   if (enabledDatabases.length === 0) {
     console.warn('No databases enabled for testing')

@@ -8,6 +8,8 @@ import { RelationshipEngine } from './relationships/relationship-engine'
 import { CacheManager } from './cache/cache-manager'
 import { Logger } from './logging/logger'
 import { NOORMConfig, SchemaInfo, Repository, RelationshipInfo } from './types'
+import { NoormError } from './errors/NoormError.js'
+import { config as loadDotenv } from 'dotenv'
 
 /**
  * NOORMME - No ORM, just magic!
@@ -25,7 +27,31 @@ export class NOORMME {
   private initialized = false
   private repositories = new Map<string, Repository<any>>()
 
-  constructor(config: NOORMConfig) {
+  constructor(configOrConnectionString?: NOORMConfig | string) {
+    // Load .env if it exists
+    loadDotenv({ path: '.env' })
+
+    // Handle different constructor signatures
+    let config: NOORMConfig
+    if (!configOrConnectionString) {
+      // Try to read from environment
+      const databaseUrl = process.env.DATABASE_URL
+      if (!databaseUrl) {
+        throw new NoormError(
+          'No database configuration provided',
+          {
+            operation: 'initialization',
+            suggestion: 'Either pass a connection string or set DATABASE_URL in .env',
+          }
+        )
+      }
+      config = this.parseConnectionString(databaseUrl)
+    } else if (typeof configOrConnectionString === 'string') {
+      config = this.parseConnectionString(configOrConnectionString)
+    } else {
+      config = configOrConnectionString
+    }
+
     this.config = this.mergeConfig(config)
     this.logger = new Logger(this.config.logging)
     this.cacheManager = new CacheManager(this.config.cache)
@@ -256,6 +282,87 @@ export class NOORMME {
         maxBatchSize: 100,
         ...config.performance
       }
+    }
+  }
+
+  /**
+   * Parse connection string into NOORMConfig
+   */
+  private parseConnectionString(connectionString: string): NOORMConfig {
+    try {
+      const url = new URL(connectionString)
+
+      let dialect: NOORMConfig['dialect']
+      switch (url.protocol) {
+        case 'postgresql:':
+        case 'postgres:':
+          dialect = 'postgresql'
+          break
+        case 'mysql:':
+          dialect = 'mysql'
+          break
+        case 'sqlite:':
+          dialect = 'sqlite'
+          break
+        case 'mssql:':
+        case 'sqlserver:':
+          dialect = 'mssql'
+          break
+        default:
+          throw new NoormError(
+            `Unsupported database protocol: ${url.protocol}`,
+            {
+              operation: 'connection_string_parsing',
+              suggestion: 'Supported protocols: postgresql, mysql, sqlite, mssql'
+            }
+          )
+      }
+
+      if (dialect === 'sqlite') {
+        return {
+          dialect,
+          connection: {
+            database: url.pathname,
+            host: '',
+            port: 0,
+            username: '',
+            password: ''
+          }
+        }
+      }
+
+      return {
+        dialect,
+        connection: {
+          host: url.hostname || 'localhost',
+          port: url.port ? parseInt(url.port) : this.getDefaultPort(dialect),
+          database: url.pathname.slice(1), // Remove leading slash
+          username: url.username || '',
+          password: url.password || '',
+          ssl: url.searchParams.get('ssl') === 'true' || url.searchParams.get('sslmode') === 'require'
+        }
+      }
+    } catch (error) {
+      throw new NoormError(
+        `Failed to parse connection string: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          operation: 'connection_string_parsing',
+          suggestion: 'Ensure connection string format is: protocol://username:password@host:port/database'
+        }
+      )
+    }
+  }
+
+  /**
+   * Get default port for database dialect
+   */
+  private getDefaultPort(dialect: NOORMConfig['dialect']): number {
+    switch (dialect) {
+      case 'postgresql': return 5432
+      case 'mysql': return 3306
+      case 'mssql': return 1433
+      case 'sqlite': return 0
+      default: return 5432
     }
   }
 

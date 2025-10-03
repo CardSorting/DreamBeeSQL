@@ -7,6 +7,45 @@ import { expect } from 'chai'
 import { withTestDatabase, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 
+// Type definitions for entities with relationships
+interface UserWithRelations {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  active: boolean
+  posts?: any[]
+  comments?: any[]
+  profiles?: any
+}
+
+interface PostWithRelations {
+  id: string
+  userId: string
+  title: string
+  content: string
+  published: boolean
+  users?: any
+  comments?: any[]
+  tags?: any[]
+}
+
+interface CommentWithRelations {
+  id: string
+  postId: string
+  userId: string
+  content: string
+  users?: any
+  posts?: any
+}
+
+interface TagWithRelations {
+  id: string
+  name: string
+  color?: string
+  posts?: any[]
+}
+
 describe('Relationship Loading Integration', () => {
   const enabledDatabases = getEnabledDatabases()
   
@@ -32,9 +71,9 @@ describe('Relationship Loading Integration', () => {
             firstName: 'User',
             lastName: 'WithPosts',
             active: true
-          })
+          }) as any
           
-          const posts = []
+          const posts: any[] = []
           for (let i = 0; i < 5; i++) {
             const post = await postRepo.create({
               id: `user-post-${i}`,
@@ -42,21 +81,21 @@ describe('Relationship Loading Integration', () => {
               title: `Post ${i}`,
               content: `Content ${i}`,
               published: i % 2 === 0
-            })
-            posts.push(post)
+            }) as any
+            posts.push(post as any)
           }
           
           // Load user with posts
-          const userWithPosts = await userRepo.findWithRelations(user.id, ['posts'])
+          const userWithPosts = await userRepo.findWithRelations(user.id, ['posts']) as UserWithRelations | null
           
           expect(userWithPosts).to.exist
           expect(userWithPosts!.id).to.equal(user.id)
           expect(userWithPosts!.posts).to.exist
           expect(userWithPosts!.posts).to.be.an('array')
-          expect(userWithPosts!.posts.length).to.equal(5)
+          expect(userWithPosts!.posts!.length).to.equal(5)
           
           // Verify posts
-          for (const post of userWithPosts!.posts) {
+          for (const post of userWithPosts!.posts!) {
             expect(post.userId).to.equal(user.id)
             expect(post.title).to.include('Post')
             expect(post.content).to.include('Content')
@@ -64,9 +103,9 @@ describe('Relationship Loading Integration', () => {
           
           // Clean up
           for (const post of posts) {
-            await postRepo.delete(post.id)
+            await postRepo.delete((post as any).id)
           }
-          await userRepo.delete(user.id)
+          await userRepo.delete((user as any).id)
         }))
         
         it('should load users with their comments', withTestDatabase(dialect, async (testDb) => {
@@ -84,7 +123,7 @@ describe('Relationship Loading Integration', () => {
             firstName: 'User',
             lastName: 'WithComments',
             active: true
-          })
+          }) as any
           
           const post = await postRepo.create({
             id: 'comment-post',
@@ -92,30 +131,30 @@ describe('Relationship Loading Integration', () => {
             title: 'Comment Post',
             content: 'Comment Content',
             published: true
-          })
+          }) as any
           
-          const comments = []
+          const comments: any[] = []
           for (let i = 0; i < 3; i++) {
             const comment = await commentRepo.create({
               id: `user-comment-${i}`,
               postId: post.id,
               userId: user.id,
               content: `Comment ${i}`
-            })
-            comments.push(comment)
+            }) as any
+            comments.push(comment as any)
           }
           
           // Load user with comments
-          const userWithComments = await userRepo.findWithRelations(user.id, ['comments'])
+          const userWithComments = await userRepo.findWithRelations(user.id, ['comments']) as UserWithRelations | null
           
           expect(userWithComments).to.exist
           expect(userWithComments!.id).to.equal(user.id)
           expect(userWithComments!.comments).to.exist
           expect(userWithComments!.comments).to.be.an('array')
-          expect(userWithComments!.comments.length).to.equal(3)
+          expect(userWithComments!.comments!.length).to.equal(3)
           
           // Verify comments
-          for (const comment of userWithComments!.comments) {
+          for (const comment of userWithComments!.comments!) {
             expect(comment.userId).to.equal(user.id)
             expect(comment.postId).to.equal(post.id)
             expect(comment.content).to.include('Comment')
@@ -123,10 +162,10 @@ describe('Relationship Loading Integration', () => {
           
           // Clean up
           for (const comment of comments) {
-            await commentRepo.delete(comment.id)
+            await commentRepo.delete((comment as any).id)
           }
-          await postRepo.delete(post.id)
-          await userRepo.delete(user.id)
+          await postRepo.delete((post as any).id)
+          await userRepo.delete((user as any).id)
         }))
         
         it('should load users with their profiles', withTestDatabase(dialect, async (testDb) => {
@@ -143,7 +182,7 @@ describe('Relationship Loading Integration', () => {
             firstName: 'User',
             lastName: 'WithProfile',
             active: true
-          })
+          }) as any
           
           const profile = await profileRepo.create({
             id: 'user-profile',
@@ -151,22 +190,22 @@ describe('Relationship Loading Integration', () => {
             bio: 'Test bio',
             avatar: 'https://example.com/avatar.jpg',
             website: 'https://example.com'
-          })
+          }) as any
           
           // Load user with profile
-          const userWithProfile = await userRepo.findWithRelations(user.id, ['profiles'])
+          const userWithProfile = await userRepo.findWithRelations(user.id, ['profiles']) as UserWithRelations | null
           
           expect(userWithProfile).to.exist
           expect(userWithProfile!.id).to.equal(user.id)
           expect(userWithProfile!.profiles).to.exist
           expect(userWithProfile!.profiles).to.be.an('object')
-          expect(userWithProfile!.profiles.id).to.equal(profile.id)
-          expect(userWithProfile!.profiles.userId).to.equal(user.id)
-          expect(userWithProfile!.profiles.bio).to.equal('Test bio')
+          expect(userWithProfile!.profiles!.id).to.equal(profile.id)
+          expect(userWithProfile!.profiles!.userId).to.equal(user.id)
+          expect(userWithProfile!.profiles!.bio).to.equal('Test bio')
           
           // Clean up
-          await profileRepo.delete(profile.id)
-          await userRepo.delete(user.id)
+          await profileRepo.delete((profile as any).id)
+          await userRepo.delete((user as any).id)
         }))
       })
     }
@@ -189,7 +228,7 @@ describe('Relationship Loading Integration', () => {
             firstName: 'Post',
             lastName: 'User',
             active: true
-          })
+          }) as any
           
           const post = await postRepo.create({
             id: 'post-with-user',
@@ -197,23 +236,23 @@ describe('Relationship Loading Integration', () => {
             title: 'Post With User',
             content: 'Post Content',
             published: true
-          })
+          }) as any
           
           // Load post with user
-          const postWithUser = await postRepo.findWithRelations(post.id, ['users'])
+          const postWithUser = await postRepo.findWithRelations(post.id, ['users']) as PostWithRelations | null
           
           expect(postWithUser).to.exist
           expect(postWithUser!.id).to.equal(post.id)
           expect(postWithUser!.users).to.exist
           expect(postWithUser!.users).to.be.an('object')
-          expect(postWithUser!.users.id).to.equal(user.id)
-          expect(postWithUser!.users.email).to.equal(user.email)
-          expect(postWithUser!.users.firstName).to.equal('Post')
-          expect(postWithUser!.users.lastName).to.equal('User')
+          expect(postWithUser!.users!.id).to.equal(user.id)
+          expect(postWithUser!.users!.email).to.equal(user.email)
+          expect(postWithUser!.users!.firstName).to.equal('Post')
+          expect(postWithUser!.users!.lastName).to.equal('User')
           
           // Clean up
-          await postRepo.delete(post.id)
-          await userRepo.delete(user.id)
+          await postRepo.delete((post as any).id)
+          await userRepo.delete((user as any).id)
         }))
         
         it('should load comments with their users', withTestDatabase(dialect, async (testDb) => {
@@ -231,7 +270,7 @@ describe('Relationship Loading Integration', () => {
             firstName: 'Comment',
             lastName: 'User',
             active: true
-          })
+          }) as any
           
           const post = await postRepo.create({
             id: 'comment-post',
@@ -239,29 +278,29 @@ describe('Relationship Loading Integration', () => {
             title: 'Comment Post',
             content: 'Comment Content',
             published: true
-          })
+          }) as any
           
           const comment = await commentRepo.create({
             id: 'comment-with-user',
             postId: post.id,
             userId: user.id,
             content: 'Comment Content'
-          })
+          }) as any
           
           // Load comment with user
-          const commentWithUser = await commentRepo.findWithRelations(comment.id, ['users'])
+          const commentWithUser = await commentRepo.findWithRelations(comment.id, ['users']) as CommentWithRelations | null
           
           expect(commentWithUser).to.exist
           expect(commentWithUser!.id).to.equal(comment.id)
           expect(commentWithUser!.users).to.exist
           expect(commentWithUser!.users).to.be.an('object')
-          expect(commentWithUser!.users.id).to.equal(user.id)
-          expect(commentWithUser!.users.email).to.equal(user.email)
+          expect(commentWithUser!.users!.id).to.equal(user.id)
+          expect(commentWithUser!.users!.email).to.equal(user.email)
           
           // Clean up
-          await commentRepo.delete(comment.id)
-          await postRepo.delete(post.id)
-          await userRepo.delete(user.id)
+          await commentRepo.delete((comment as any).id)
+          await postRepo.delete((post as any).id)
+          await userRepo.delete((user as any).id)
         }))
         
         it('should load comments with their posts', withTestDatabase(dialect, async (testDb) => {
@@ -279,7 +318,7 @@ describe('Relationship Loading Integration', () => {
             firstName: 'CommentPost',
             lastName: 'User',
             active: true
-          })
+          }) as any
           
           const post = await postRepo.create({
             id: 'comment-post-ref',
@@ -287,30 +326,30 @@ describe('Relationship Loading Integration', () => {
             title: 'Comment Post Ref',
             content: 'Comment Post Content',
             published: true
-          })
+          }) as any
           
           const comment = await commentRepo.create({
             id: 'comment-with-post',
             postId: post.id,
             userId: user.id,
             content: 'Comment Content'
-          })
+          }) as any
           
           // Load comment with post
-          const commentWithPost = await commentRepo.findWithRelations(comment.id, ['posts'])
+          const commentWithPost = await commentRepo.findWithRelations(comment.id, ['posts']) as CommentWithRelations | null
           
           expect(commentWithPost).to.exist
           expect(commentWithPost!.id).to.equal(comment.id)
           expect(commentWithPost!.posts).to.exist
           expect(commentWithPost!.posts).to.be.an('object')
-          expect(commentWithPost!.posts.id).to.equal(post.id)
-          expect(commentWithPost!.posts.title).to.equal('Comment Post Ref')
-          expect(commentWithPost!.posts.content).to.equal('Comment Post Content')
+          expect(commentWithPost!.posts!.id).to.equal(post.id)
+          expect(commentWithPost!.posts!.title).to.equal('Comment Post Ref')
+          expect(commentWithPost!.posts!.content).to.equal('Comment Post Content')
           
           // Clean up
-          await commentRepo.delete(comment.id)
-          await postRepo.delete(post.id)
-          await userRepo.delete(user.id)
+          await commentRepo.delete((comment as any).id)
+          await postRepo.delete((post as any).id)
+          await userRepo.delete((user as any).id)
         }))
       })
     }
@@ -334,7 +373,7 @@ describe('Relationship Loading Integration', () => {
             firstName: 'Tag',
             lastName: 'User',
             active: true
-          })
+          }) as any
           
           const post = await postRepo.create({
             id: 'post-with-tags',
@@ -342,16 +381,16 @@ describe('Relationship Loading Integration', () => {
             title: 'Post With Tags',
             content: 'Post Content',
             published: true
-          })
+          }) as any
           
-          const tags = []
+          const tags: any[] = []
           for (let i = 0; i < 3; i++) {
             const tag = await tagRepo.create({
               id: `post-tag-${i}`,
               name: `Tag ${i}`,
               color: `#${i}${i}${i}${i}${i}${i}`
-            })
-            tags.push(tag)
+            }) as any
+            tags.push(tag as any)
           }
           
           // Create post-tag relationships
@@ -360,23 +399,23 @@ describe('Relationship Loading Integration', () => {
             await kysely
               .insertInto('post_tags')
               .values({
-                postId: post.id,
-                tagId: tag.id
+                postId: (post as any).id,
+                tagId: (tag as any).id
               })
               .execute()
           }
           
           // Load post with tags
-          const postWithTags = await postRepo.findWithRelations(post.id, ['tags'])
+          const postWithTags = await postRepo.findWithRelations(post.id, ['tags']) as PostWithRelations | null
           
           expect(postWithTags).to.exist
           expect(postWithTags!.id).to.equal(post.id)
           expect(postWithTags!.tags).to.exist
           expect(postWithTags!.tags).to.be.an('array')
-          expect(postWithTags!.tags.length).to.equal(3)
+          expect(postWithTags!.tags!.length).to.equal(3)
           
           // Verify tags
-          for (const tag of postWithTags!.tags) {
+          for (const tag of postWithTags!.tags!) {
             expect(tag.name).to.include('Tag')
             expect(tag.color).to.include('#')
           }
@@ -385,13 +424,13 @@ describe('Relationship Loading Integration', () => {
           for (const tag of tags) {
             await kysely
               .deleteFrom('post_tags')
-              .where('postId', '=', post.id)
-              .where('tagId', '=', tag.id)
+              .where('postId', '=', (post as any).id)
+              .where('tagId', '=', (tag as any).id)
               .execute()
-            await tagRepo.delete(tag.id)
+            await tagRepo.delete((tag as any).id)
           }
-          await postRepo.delete(post.id)
-          await userRepo.delete(user.id)
+          await postRepo.delete((post as any).id)
+          await userRepo.delete((user as any).id)
         }))
         
         it('should load tags with their posts', withTestDatabase(dialect, async (testDb) => {
@@ -409,9 +448,9 @@ describe('Relationship Loading Integration', () => {
             firstName: 'TagPosts',
             lastName: 'User',
             active: true
-          })
+          }) as any
           
-          const posts = []
+          const posts: any[] = []
           for (let i = 0; i < 2; i++) {
             const post = await postRepo.create({
               id: `tag-post-${i}`,
@@ -419,15 +458,15 @@ describe('Relationship Loading Integration', () => {
               title: `Tag Post ${i}`,
               content: `Tag Post Content ${i}`,
               published: true
-            })
-            posts.push(post)
+            }) as any
+            posts.push(post as any)
           }
           
           const tag = await tagRepo.create({
             id: 'tag-with-posts',
             name: 'Tag With Posts',
             color: '#123456'
-          })
+          }) as any
           
           // Create post-tag relationships
           const kysely = db.getKysely()
@@ -435,23 +474,23 @@ describe('Relationship Loading Integration', () => {
             await kysely
               .insertInto('post_tags')
               .values({
-                postId: post.id,
-                tagId: tag.id
+                postId: (post as any).id,
+                tagId: (tag as any).id
               })
               .execute()
           }
           
           // Load tag with posts
-          const tagWithPosts = await tagRepo.findWithRelations(tag.id, ['posts'])
+          const tagWithPosts = await tagRepo.findWithRelations(tag.id, ['posts']) as TagWithRelations | null
           
           expect(tagWithPosts).to.exist
           expect(tagWithPosts!.id).to.equal(tag.id)
           expect(tagWithPosts!.posts).to.exist
           expect(tagWithPosts!.posts).to.be.an('array')
-          expect(tagWithPosts!.posts.length).to.equal(2)
+          expect(tagWithPosts!.posts!.length).to.equal(2)
           
           // Verify posts
-          for (const post of tagWithPosts!.posts) {
+          for (const post of tagWithPosts!.posts!) {
             expect(post.title).to.include('Tag Post')
             expect(post.content).to.include('Tag Post Content')
           }
@@ -460,13 +499,13 @@ describe('Relationship Loading Integration', () => {
           for (const post of posts) {
             await kysely
               .deleteFrom('post_tags')
-              .where('postId', '=', post.id)
-              .where('tagId', '=', tag.id)
+              .where('postId', '=', (post as any).id)
+              .where('tagId', '=', (tag as any).id)
               .execute()
-            await postRepo.delete(post.id)
+            await postRepo.delete((post as any).id)
           }
-          await tagRepo.delete(tag.id)
-          await userRepo.delete(user.id)
+          await tagRepo.delete((tag as any).id)
+          await userRepo.delete((user as any).id)
         }))
       })
     }
@@ -490,9 +529,9 @@ describe('Relationship Loading Integration', () => {
             firstName: 'Nested',
             lastName: 'User',
             active: true
-          })
+          }) as any
           
-          const posts = []
+          const posts: any[] = []
           for (let i = 0; i < 2; i++) {
             const post = await postRepo.create({
               id: `nested-post-${i}`,
@@ -500,8 +539,8 @@ describe('Relationship Loading Integration', () => {
               title: `Nested Post ${i}`,
               content: `Nested Content ${i}`,
               published: true
-            })
-            posts.push(post)
+            }) as any
+            posts.push(post as any)
             
             // Create comments for each post
             for (let j = 0; j < 2; j++) {
@@ -510,24 +549,24 @@ describe('Relationship Loading Integration', () => {
                 postId: post.id,
                 userId: user.id,
                 content: `Comment ${i}-${j}`
-              })
+              }) as any
             }
           }
           
           // Load user with posts
-          const userWithPosts = await userRepo.findWithRelations(user.id, ['posts'])
+          const userWithPosts = await userRepo.findWithRelations(user.id, ['posts']) as UserWithRelations | null
           
           expect(userWithPosts).to.exist
           expect(userWithPosts!.posts).to.exist
-          expect(userWithPosts!.posts.length).to.equal(2)
+          expect(userWithPosts!.posts!.length).to.equal(2)
           
           // Load each post with comments
-          for (const post of userWithPosts!.posts) {
-            const postWithComments = await postRepo.findWithRelations(post.id, ['comments'])
+          for (const post of userWithPosts!.posts!) {
+            const postWithComments = await postRepo.findWithRelations(post.id, ['comments']) as PostWithRelations | null
             expect(postWithComments!.comments).to.exist
-            expect(postWithComments!.comments.length).to.equal(2)
+            expect(postWithComments!.comments!.length).to.equal(2)
             
-            for (const comment of postWithComments!.comments) {
+            for (const comment of postWithComments!.comments!) {
               expect(comment.postId).to.equal(post.id)
               expect(comment.userId).to.equal(user.id)
             }
@@ -536,13 +575,13 @@ describe('Relationship Loading Integration', () => {
           // Clean up
           for (const post of posts) {
             const comments = await commentRepo.findAll()
-            const postComments = comments.filter(c => c.postId === post.id)
+            const postComments = comments.filter((c: any) => c.postId === (post as any).id)
             for (const comment of postComments) {
-              await commentRepo.delete(comment.id)
+              await commentRepo.delete((comment as any).id)
             }
-            await postRepo.delete(post.id)
+            await postRepo.delete((post as any).id)
           }
-          await userRepo.delete(user.id)
+          await userRepo.delete((user as any).id)
         }))
         
         it('should load posts with users and comments', withTestDatabase(dialect, async (testDb) => {
@@ -560,7 +599,7 @@ describe('Relationship Loading Integration', () => {
             firstName: 'NestedPost',
             lastName: 'User',
             active: true
-          })
+          }) as any
           
           const post = await postRepo.create({
             id: 'nested-post',
@@ -568,42 +607,42 @@ describe('Relationship Loading Integration', () => {
             title: 'Nested Post',
             content: 'Nested Content',
             published: true
-          })
+          }) as any
           
-          const comments = []
+          const comments: any[] = []
           for (let i = 0; i < 3; i++) {
             const comment = await commentRepo.create({
               id: `nested-post-comment-${i}`,
               postId: post.id,
               userId: user.id,
               content: `Comment ${i}`
-            })
-            comments.push(comment)
+            }) as any
+            comments.push(comment as any)
           }
           
           // Load post with user
-          const postWithUser = await postRepo.findWithRelations(post.id, ['users'])
+          const postWithUser = await postRepo.findWithRelations(post.id, ['users']) as PostWithRelations | null
           expect(postWithUser!.users).to.exist
-          expect(postWithUser!.users.id).to.equal(user.id)
+          expect(postWithUser!.users!.id).to.equal(user.id)
           
           // Load post with comments
-          const postWithComments = await postRepo.findWithRelations(post.id, ['comments'])
+          const postWithComments = await postRepo.findWithRelations(post.id, ['comments']) as PostWithRelations | null
           expect(postWithComments!.comments).to.exist
-          expect(postWithComments!.comments.length).to.equal(3)
+          expect(postWithComments!.comments!.length).to.equal(3)
           
           // Load each comment with user
-          for (const comment of postWithComments!.comments) {
-            const commentWithUser = await commentRepo.findWithRelations(comment.id, ['users'])
+          for (const comment of postWithComments!.comments!) {
+            const commentWithUser = await commentRepo.findWithRelations(comment.id, ['users']) as CommentWithRelations | null
             expect(commentWithUser!.users).to.exist
-            expect(commentWithUser!.users.id).to.equal(user.id)
+            expect(commentWithUser!.users!.id).to.equal(user.id)
           }
           
           // Clean up
           for (const comment of comments) {
-            await commentRepo.delete(comment.id)
+            await commentRepo.delete((comment as any).id)
           }
-          await postRepo.delete(post.id)
-          await userRepo.delete(user.id)
+          await postRepo.delete((post as any).id)
+          await userRepo.delete((user as any).id)
         }))
       })
     }
@@ -620,8 +659,8 @@ describe('Relationship Loading Integration', () => {
           const postRepo = db.getRepository('posts')
           
           // Create multiple users and posts
-          const users = []
-          const posts = []
+          const users: any[] = []
+          const posts: any[] = []
           
           for (let i = 0; i < 5; i++) {
             const user = await userRepo.create({
@@ -630,8 +669,8 @@ describe('Relationship Loading Integration', () => {
               firstName: `Batch${i}`,
               lastName: 'User',
               active: true
-            })
-            users.push(user)
+            }) as any
+            users.push(user as any)
             
             // Create 2 posts per user
             for (let j = 0; j < 2; j++) {
@@ -641,8 +680,8 @@ describe('Relationship Loading Integration', () => {
                 title: `Batch Post ${i}-${j}`,
                 content: `Batch Content ${i}-${j}`,
                 published: true
-              })
-              posts.push(post)
+              }) as any
+              posts.push(post as any)
             }
           }
           
@@ -656,22 +695,23 @@ describe('Relationship Loading Integration', () => {
           
           // Verify all users have posts loaded
           for (const user of users) {
-            expect(user.posts).to.exist
-            expect(user.posts).to.be.an('array')
-            expect(user.posts.length).to.equal(2)
+            const userWithPosts = user as UserWithRelations
+            expect(userWithPosts.posts).to.exist
+            expect(userWithPosts.posts).to.be.an('array')
+            expect(userWithPosts.posts!.length).to.equal(2)
             
-            for (const post of user.posts) {
-              expect(post.userId).to.equal(user.id)
+            for (const post of userWithPosts.posts!) {
+              expect(post.userId).to.equal((user as any).id)
               expect(post.title).to.include('Batch Post')
             }
           }
           
           // Clean up
           for (const post of posts) {
-            await postRepo.delete(post.id)
+            await postRepo.delete((post as any).id)
           }
           for (const user of users) {
-            await userRepo.delete(user.id)
+            await userRepo.delete((user as any).id)
           }
         }))
         
@@ -689,9 +729,9 @@ describe('Relationship Loading Integration', () => {
             firstName: 'BatchPosts',
             lastName: 'User',
             active: true
-          })
+          }) as any
           
-          const posts = []
+          const posts: any[] = []
           for (let i = 0; i < 10; i++) {
             const post = await postRepo.create({
               id: `batch-posts-${i}`,
@@ -699,8 +739,8 @@ describe('Relationship Loading Integration', () => {
               title: `Batch Post ${i}`,
               content: `Batch Content ${i}`,
               published: true
-            })
-            posts.push(post)
+            }) as any
+            posts.push(post as any)
           }
           
           // Batch load relationships
@@ -713,17 +753,18 @@ describe('Relationship Loading Integration', () => {
           
           // Verify all posts have user loaded
           for (const post of posts) {
-            expect(post.users).to.exist
-            expect(post.users).to.be.an('object')
-            expect(post.users.id).to.equal(user.id)
-            expect(post.users.email).to.equal(user.email)
+            const postWithUsers = post as PostWithRelations
+            expect(postWithUsers.users).to.exist
+            expect(postWithUsers.users).to.be.an('object')
+            expect(postWithUsers.users!.id).to.equal((user as any).id)
+            expect(postWithUsers.users!.email).to.equal((user as any).email)
           }
           
           // Clean up
           for (const post of posts) {
-            await postRepo.delete(post.id)
+            await postRepo.delete((post as any).id)
           }
-          await userRepo.delete(user.id)
+          await userRepo.delete((user as any).id)
         }))
         
         it('should handle large batch sizes efficiently', withTestDatabase(dialect, async (testDb) => {
@@ -734,8 +775,8 @@ describe('Relationship Loading Integration', () => {
           const postRepo = db.getRepository('posts')
           
           // Create large batch of users and posts
-          const users = []
-          const posts = []
+          const users: any[] = []
+          const posts: any[] = []
           
           for (let i = 0; i < 20; i++) {
             const user = await userRepo.create({
@@ -744,8 +785,8 @@ describe('Relationship Loading Integration', () => {
               firstName: `LargeBatch${i}`,
               lastName: 'User',
               active: true
-            })
-            users.push(user)
+            }) as any
+            users.push(user as any)
             
             // Create 1 post per user
             const post = await postRepo.create({
@@ -754,8 +795,8 @@ describe('Relationship Loading Integration', () => {
               title: `Large Batch Post ${i}`,
               content: `Large Batch Content ${i}`,
               published: true
-            })
-            posts.push(post)
+            }) as any
+            posts.push(post as any)
           }
           
           // Batch load relationships
@@ -768,18 +809,19 @@ describe('Relationship Loading Integration', () => {
           
           // Verify all users have posts loaded
           for (const user of users) {
-            expect(user.posts).to.exist
-            expect(user.posts).to.be.an('array')
-            expect(user.posts.length).to.equal(1)
-            expect(user.posts[0].userId).to.equal(user.id)
+            const userWithPosts = user as UserWithRelations
+            expect(userWithPosts.posts).to.exist
+            expect(userWithPosts.posts).to.be.an('array')
+            expect(userWithPosts.posts!.length).to.equal(1)
+            expect(userWithPosts.posts![0].userId).to.equal((user as any).id)
           }
           
           // Clean up
           for (const post of posts) {
-            await postRepo.delete(post.id)
+            await postRepo.delete((post as any).id)
           }
           for (const user of users) {
-            await userRepo.delete(user.id)
+            await userRepo.delete((user as any).id)
           }
         }))
       })
@@ -803,9 +845,9 @@ describe('Relationship Loading Integration', () => {
             firstName: 'Perf',
             lastName: 'User',
             active: true
-          })
+          }) as any
           
-          const posts = []
+          const posts: any[] = []
           for (let i = 0; i < 10; i++) {
             const post = await postRepo.create({
               id: `perf-post-${i}`,
@@ -813,13 +855,13 @@ describe('Relationship Loading Integration', () => {
               title: `Perf Post ${i}`,
               content: `Perf Content ${i}`,
               published: true
-            })
-            posts.push(post)
+            }) as any
+            posts.push(post as any)
           }
           
           // Test relationship loading performance
           const duration = await performanceHelper.measure('relationship-loading', async () => {
-            const userWithPosts = await userRepo.findWithRelations(user.id, ['posts'])
+            const userWithPosts = await userRepo.findWithRelations(user.id, ['posts']) as UserWithRelations | null
             return userWithPosts
           })
           
@@ -828,9 +870,9 @@ describe('Relationship Loading Integration', () => {
           
           // Clean up
           for (const post of posts) {
-            await postRepo.delete(post.id)
+            await postRepo.delete((post as any).id)
           }
-          await userRepo.delete(user.id)
+          await userRepo.delete((user as any).id)
         }))
         
         it('should handle concurrent relationship loading', withTestDatabase(dialect, async (testDb) => {
@@ -841,8 +883,8 @@ describe('Relationship Loading Integration', () => {
           const postRepo = db.getRepository('posts')
           
           // Create test data
-          const users = []
-          const posts = []
+          const users: any[] = []
+          const posts: any[] = []
           
           for (let i = 0; i < 5; i++) {
             const user = await userRepo.create({
@@ -851,8 +893,8 @@ describe('Relationship Loading Integration', () => {
               firstName: `Concurrent${i}`,
               lastName: 'User',
               active: true
-            })
-            users.push(user)
+            }) as any
+            users.push(user as any)
             
             const post = await postRepo.create({
               id: `concurrent-post-${i}`,
@@ -860,14 +902,14 @@ describe('Relationship Loading Integration', () => {
               title: `Concurrent Post ${i}`,
               content: `Concurrent Content ${i}`,
               published: true
-            })
-            posts.push(post)
+            }) as any
+            posts.push(post as any)
           }
           
           // Concurrent relationship loading
           const start = performance.now()
-          const promises = users.map(user => 
-            userRepo.findWithRelations(user.id, ['posts'])
+          const promises = users.map((user: any) => 
+            userRepo.findWithRelations(user.id, ['posts']) as Promise<UserWithRelations | null>
           )
           
           const results = await Promise.all(promises)
@@ -882,16 +924,16 @@ describe('Relationship Loading Integration', () => {
             const result = results[i]
             expect(result).to.exist
             expect(result!.posts).to.exist
-            expect(result!.posts.length).to.equal(1)
-            expect(result!.posts[0].userId).to.equal(users[i].id)
+            expect(result!.posts!.length).to.equal(1)
+            expect(result!.posts![0].userId).to.equal((users[i] as any).id)
           }
           
           // Clean up
           for (const post of posts) {
-            await postRepo.delete(post.id)
+            await postRepo.delete((post as any).id)
           }
           for (const user of users) {
-            await userRepo.delete(user.id)
+            await userRepo.delete((user as any).id)
           }
         }))
       })

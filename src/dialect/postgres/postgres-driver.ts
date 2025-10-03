@@ -22,15 +22,53 @@ export class PostgresDriver implements Driver {
   readonly #config: PostgresDialectConfig
   readonly #connections = new WeakMap<PostgresPoolClient, DatabaseConnection>()
   #pool?: PostgresPool
+  #isInitialized = false
+  #isDestroyed = false
 
   constructor(config: PostgresDialectConfig) {
     this.#config = freeze({ ...config })
   }
 
   async init(): Promise<void> {
-    this.#pool = isFunction(this.#config.pool)
-      ? await this.#config.pool()
-      : this.#config.pool
+    if (this.#isInitialized) {
+      return
+    }
+
+    try {
+      this.#pool = isFunction(this.#config.pool)
+        ? await this.#config.pool()
+        : this.#config.pool
+
+      // Test the connection
+      const testConnection = await this.#pool!.connect()
+      await testConnection.query('SELECT 1', [])
+      testConnection.release()
+
+      this.#isInitialized = true
+      console.log('✅ PostgreSQL driver initialized successfully')
+    } catch (error) {
+      console.error('❌ Failed to initialize PostgreSQL driver:', error)
+      throw error
+    }
+  }
+
+  async destroy(): Promise<void> {
+    if (this.#isDestroyed || !this.#pool) {
+      return
+    }
+
+    try {
+      await this.#pool.end()
+      this.#isDestroyed = true
+      console.log('✅ PostgreSQL driver destroyed successfully')
+    } catch (error) {
+      console.error('❌ Failed to destroy PostgreSQL driver:', error)
+      throw error
+    }
+  }
+
+  get isInitialized(): boolean {
+    return this.#isInitialized && !this.#isDestroyed
   }
 
   async acquireConnection(): Promise<DatabaseConnection> {
@@ -129,14 +167,6 @@ export class PostgresDriver implements Driver {
   async releaseConnection(connection: PostgresConnection): Promise<void> {
     connection[PRIVATE_RELEASE_METHOD]()
   }
-
-  async destroy(): Promise<void> {
-    if (this.#pool) {
-      const pool = this.#pool
-      this.#pool = undefined
-      await pool.end()
-    }
-  }
 }
 
 interface PostgresConnectionOptions {
@@ -146,6 +176,8 @@ interface PostgresConnectionOptions {
 class PostgresConnection implements DatabaseConnection {
   #client: PostgresPoolClient
   #options: PostgresConnectionOptions
+  #isReleased = false
+  #queryCount = 0
 
   constructor(client: PostgresPoolClient, options: PostgresConnectionOptions) {
     this.#client = client
@@ -153,11 +185,24 @@ class PostgresConnection implements DatabaseConnection {
   }
 
   async executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
+    // Allow queries even if connection is marked as released, 
+    // as the actual client might still be available
+
+    const startTime = Date.now()
+    this.#queryCount++
+
     try {
       const { command, rowCount, rows } = await this.#client.query<O>(
         compiledQuery.sql,
         [...compiledQuery.parameters],
       )
+
+      const duration = Date.now() - startTime
+      
+      // Log slow queries (>100ms)
+      if (duration > 100) {
+        console.warn(`🐌 Slow PostgreSQL query (${duration}ms): ${compiledQuery.sql.substring(0, 100)}...`)
+      }
 
       return {
         numAffectedRows:
@@ -170,8 +215,31 @@ class PostgresConnection implements DatabaseConnection {
         rows: rows ?? [],
       }
     } catch (err) {
-      throw extendStackTrace(err, new Error())
+      const duration = Date.now() - startTime
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      console.error(`❌ PostgreSQL query failed (${duration}ms):`, {
+        sql: compiledQuery.sql.substring(0, 200) + '...',
+        parameters: compiledQuery.parameters,
+        error: errorMessage
+      })
+      throw extendStackTrace(err as Error, new Error())
     }
+  }
+
+  [PRIVATE_RELEASE_METHOD](): void {
+    if (!this.#isReleased) {
+      this.#isReleased = true
+      this.#client.release()
+      console.log(`🔌 PostgreSQL connection released (${this.#queryCount} queries executed)`)
+    }
+  }
+
+  get isReleased(): boolean {
+    return this.#isReleased
+  }
+
+  get queryCount(): number {
+    return this.#queryCount
   }
 
   async *streamQuery<O>(
@@ -210,9 +278,5 @@ class PostgresConnection implements DatabaseConnection {
     } finally {
       await cursor.close()
     }
-  }
-
-  [PRIVATE_RELEASE_METHOD](): void {
-    this.#client.release()
   }
 }

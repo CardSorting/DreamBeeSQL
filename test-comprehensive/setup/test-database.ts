@@ -4,6 +4,7 @@
 
 import { NOORMME } from '../../src/noormme.js'
 import { getTestConfig, getDatabaseConfig, isDatabaseEnabled } from './test-config.js'
+import { sql } from '../../src/raw-builder/sql.js'
 
 export interface TestDatabase {
   dialect: 'sqlite' | 'postgresql' | 'mysql' | 'mssql'
@@ -89,19 +90,88 @@ export async function createTestDatabase(dialect: 'sqlite' | 'postgresql' | 'mys
  * Setup test database with sample schema
  */
 export async function setupTestDatabase(testDb: TestDatabase): Promise<void> {
-  const { db } = testDb
+  const { db, dialect } = testDb
   
-  // Create test schema first (before initializing NOORMME)
-  await createTestSchema(db)
-  
-  // Initialize NOORMME (this will discover the tables we just created)
-  // Only initialize if not already initialized
-  if (!db.isInitialized()) {
-    await db.initialize()
+  try {
+    // Initialize NOORMME first if not already initialized
+    if (!db.isInitialized()) {
+      await db.initialize()
+    }
+    
+    // Clean up any existing data after initialization
+    await cleanupTestDatabase(testDb)
+    
+    // Create test schema
+    await createTestSchema(db)
+    
+    // Insert test data
+    await insertTestData(db)
+    
+    console.log(`✅ ${dialect.toUpperCase()} test database setup completed successfully`)
+  } catch (error) {
+    console.error(`❌ Failed to setup ${dialect.toUpperCase()} test database:`, error)
+    throw error
   }
+}
+
+/**
+ * Clean up test database
+ */
+export async function cleanupTestDatabase(testDb: TestDatabase): Promise<void> {
+  const { db, dialect } = testDb
   
-  // Insert test data
-  await insertTestData(db)
+  try {
+    // Check if database is initialized before attempting cleanup
+    if (!db.isInitialized()) {
+      console.log(`⚠️ Database not initialized, skipping cleanup for ${dialect.toUpperCase()}`)
+      return
+    }
+    
+    const kysely = db.getKysely()
+    
+    if (dialect === 'postgresql') {
+      // PostgreSQL cleanup - drop all tables in public schema
+      await sql`
+        DO $$ 
+        DECLARE 
+            r RECORD;
+        BEGIN
+            FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+                EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+            END LOOP;
+        END $$;
+      `.execute(kysely)
+      
+      // Also drop any sequences
+      await sql`
+        DO $$ 
+        DECLARE 
+            r RECORD;
+        BEGIN
+            FOR r IN (SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public') LOOP
+                EXECUTE 'DROP SEQUENCE IF EXISTS ' || quote_ident(r.sequence_name) || ' CASCADE';
+            END LOOP;
+        END $$;
+      `.execute(kysely)
+    } else if (dialect === 'sqlite') {
+      // SQLite cleanup - drop all tables
+      const tables = await kysely
+        .selectFrom('sqlite_master')
+        .select('name')
+        .where('type', '=', 'table')
+        .where('name', 'not like', 'sqlite_%')
+        .execute()
+      
+      for (const table of tables) {
+        await kysely.schema.dropTable(table.name).ifExists().execute()
+      }
+    }
+    
+    console.log(`🧹 ${dialect.toUpperCase()} database cleaned up successfully`)
+  } catch (error) {
+    console.warn(`⚠️ Warning: Failed to cleanup ${dialect.toUpperCase()} database:`, error)
+    // Don't throw error for cleanup failures
+  }
 }
 
 /**
@@ -390,91 +460,12 @@ async function insertTestData(db: NOORMME): Promise<void> {
 }
 
 /**
- * Clean up test database
+ * Get connection string for a dialect
  */
-export async function cleanupTestDatabase(testDb: TestDatabase): Promise<void> {
-  const { db } = testDb
-  
-  // Check if database is still initialized before attempting cleanup
-  if (!db.isInitialized()) {
-    // Database already closed, just clean up file if SQLite
-    if (testDb.dialect === 'sqlite') {
-      try {
-        const fs = await import('fs')
-        const dbPath = testDb.connection.database
-        if (fs.existsSync(dbPath)) {
-          fs.unlinkSync(dbPath)
-        }
-      } catch (error) {
-        console.warn('Error removing SQLite database file:', error)
-      }
-    }
-    return
-  }
-  
-  try {
-    // Drop all test tables first (before closing connection)
-    await dropTestTables(testDb)
-  } catch (error) {
-    console.warn('Error dropping test tables:', error)
-  }
-  
-  try {
-    // Close database connection
-    await db.close()
-  } catch (error) {
-    console.warn('Error closing database connection:', error)
-  }
-  
-  // For SQLite, also remove the database file
-  if (testDb.dialect === 'sqlite') {
-    try {
-      const fs = await import('fs')
-      const dbPath = testDb.connection.database
-      if (fs.existsSync(dbPath)) {
-        fs.unlinkSync(dbPath)
-      }
-    } catch (error) {
-      console.warn('Error removing SQLite database file:', error)
-    }
-  }
-}
-
-/**
- * Drop all test tables
- */
-export async function dropTestTables(testDb: TestDatabase): Promise<void> {
-  const { db } = testDb
-  const kysely = db.getKysely()
-  
-  const tables = ['post_tags', 'comments', 'posts', 'profiles', 'users', 'tags']
-  
-  for (const table of tables) {
-    try {
-      await kysely.schema.dropTable(table).ifExists().execute()
-    } catch (error) {
-      console.warn(`Could not drop table ${table}:`, error)
-    }
-  }
-}
-
-/**
- * Reset test database (drop and recreate)
- */
-export async function resetTestDatabase(testDb: TestDatabase): Promise<void> {
-  await dropTestTables(testDb)
-  await setupTestDatabase(testDb)
-}
-
-/**
- * Get test database connection string for a dialect
- */
-export function getTestConnectionString(dialect: 'sqlite' | 'postgresql' | 'mysql' | 'mssql'): string {
-  const config = getDatabaseConfig(dialect)
-  
+export function getConnectionString(dialect: string, config: any): string {
   switch (dialect) {
     case 'sqlite':
-      return (config as any).database
+      return config.database
       
     case 'postgresql':
       return `postgresql://${(config as any).username}:${(config as any).password}@${(config as any).host}:${(config as any).port}/${(config as any).database}`

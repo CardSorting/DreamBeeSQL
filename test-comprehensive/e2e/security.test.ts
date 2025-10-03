@@ -558,7 +558,7 @@ describe('Security E2E Tests', () => {
               active: true
             })
             expect.fail('Should have thrown an error')
-          } catch (error) {
+          } catch (error: any) {
             // Verify error message doesn't contain sensitive data
             expect(error).to.be.instanceOf(Error)
             expect(error.message).to.not.include('leaktest@example.com')

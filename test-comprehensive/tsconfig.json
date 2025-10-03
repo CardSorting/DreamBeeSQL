@@ -30,12 +30,17 @@
     "unit/**/*.ts",
     "integration/**/*.ts",
     "performance/**/*.ts",
-    "e2e/**/*.ts"
+    "e2e/**/*.ts",
+    "sqlite-compatibility.test.ts",
+    "sqlite-introspection.test.ts",
+    "sqlite-parameter-binding.test.ts",
+    "sqlite-syntax.test.ts",
+    "sqlite-constraints.test.ts",
+    "sqlite-minimal.test.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "**/*.test.ts"
+    "dist"
   ],
   "ts-node": {
     "esm": true,

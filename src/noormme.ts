@@ -1,6 +1,6 @@
 import type { Kysely } from './kysely.js'
 import type { Dialect } from './dialect/dialect.js'
-import { DatabaseIntrospector } from './dialect/database-introspector'
+import { DatabaseIntrospector } from './dialect/database-introspector.js'
 import { SchemaDiscovery } from './schema/schema-discovery.js'
 import { TypeGenerator } from './types/type-generator.js'
 import { RepositoryFactory } from './repository/repository-factory'
@@ -85,8 +85,9 @@ export class NOORMME {
     try {
       this.logger.info('Initializing NOORMME...')
 
-      // Test database connection
-      await this.db.selectFrom('information_schema.tables').select('table_name').limit(1).execute()
+      // Test database connection using the introspector
+      const introspector = new DatabaseIntrospector(this.db)
+      await introspector.getTables()
       this.logger.info('Database connection successful')
 
       // Discover schema
@@ -111,7 +112,12 @@ export class NOORMME {
         this.db,
         this.logger,
         schemaInfo,
-        this.config.performance
+        {
+          enabled: this.config.performance?.enableQueryOptimization ?? true,
+          slowQueryThreshold: 1000,
+          missingIndexDetection: true,
+          largeResultSetThreshold: 1000
+        }
       )
 
       this.initialized = true
@@ -506,8 +512,9 @@ export class NOORMME {
         })
       
       case 'sqlite':
-        return new (require('./helpers/sqlite').SqliteDialect)({
-          database: connection.database
+        const Database = require('better-sqlite3')
+        return new (require('./dialect/sqlite/sqlite-dialect').SqliteDialect)({
+          database: new Database(connection.database)
         })
       
       case 'mssql':

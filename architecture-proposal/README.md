@@ -1,8 +1,8 @@
-# DreamBeeSQL Architecture Proposal
+# NOORM Architecture Proposal
 
-## 🎯 What is DreamBeeSQL?
+## 🎯 What is NOORM?
 
-DreamBeeSQL is a **zero-configuration pseudo-ORM** built on Kysely that automatically discovers your database schema and generates TypeScript types, entities, and repositories. No manual entity definitions required!
+NOORM (pronounced "No-ORM") is a **zero-configuration pseudo-ORM** built on Kysely that automatically discovers your database schema and generates TypeScript types, entities, and repositories. No manual entity definitions required!
 
 ## 🚀 Quick Start
 
@@ -18,24 +18,17 @@ DreamBeeSQL is a **zero-configuration pseudo-ORM** built on Kysely that automati
 3. **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migrate from other ORMs
 
 #### For Experienced Developers
-1. **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - System design and vision
-2. **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - 5-component architecture
-3. **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Build your own implementation
-4. **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns and types
+1. **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns and types
+2. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
 
 ## 📚 Documentation Structure
 
-### 🏗️ Core Architecture
-- **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - System design and vision
-- **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - 5-component architecture
-- **[ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams and flow charts
-
-### 🚀 Implementation & Usage
+### 🚀 Core Documentation
 - **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Complete developer guide with examples
 - **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick reference card for common operations
-- **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation guide
 - **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migrate from other ORMs
 - **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns and types
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
 
 ### 📖 Legacy Components (Reference Only)
 *Note: The original 18 components have been moved to the `legacy-components/` directory for reference.*
@@ -43,7 +36,14 @@ DreamBeeSQL is a **zero-configuration pseudo-ORM** built on Kysely that automati
 #### Legacy Components
 - **[legacy-components/](./legacy-components/)** - Original 18-component architecture
 - **[legacy-components/README.md](./legacy-components/README.md)** - Legacy components overview
-- **[COMPONENT_MAPPING.md](./COMPONENT_MAPPING.md)** - Mapping from old to new architecture
+- **[legacy-components/COMPONENT_MAPPING.md](./legacy-components/COMPONENT_MAPPING.md)** - Mapping from old to new architecture
+- **[legacy-components/ARCHITECTURE_OVERVIEW.md](./legacy-components/ARCHITECTURE_OVERVIEW.md)** - System design and vision
+- **[legacy-components/SIMPLIFIED_ARCHITECTURE.md](./legacy-components/SIMPLIFIED_ARCHITECTURE.md)** - 5-component architecture
+- **[legacy-components/IMPLEMENTATION_GUIDE.md](./legacy-components/IMPLEMENTATION_GUIDE.md)** - Implementation details
+- **[legacy-components/ARCHITECTURE_DIAGRAMS.md](./legacy-components/ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams
+- **[legacy-components/QUICK_START.md](./legacy-components/QUICK_START.md)** - Original quick start
+- **[legacy-components/USAGE_EXAMPLES.md](./legacy-components/USAGE_EXAMPLES.md)** - Original usage examples
+- **[legacy-components/implementation-examples/](./legacy-components/implementation-examples/)** - Code examples
 
 ## 🎯 Recommended Reading Order
 
@@ -53,15 +53,13 @@ DreamBeeSQL is a **zero-configuration pseudo-ORM** built on Kysely that automati
 3. **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - If migrating from another ORM
 
 ### For Experienced Developers
-1. **[ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md)** - System design and vision
-2. **[SIMPLIFIED_ARCHITECTURE.md](./SIMPLIFIED_ARCHITECTURE.md)** - 5-component architecture
-3. **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Build your own implementation
-4. **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns and types
+1. **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns and types
+2. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
 
 ### For Implementation
-1. **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation
-2. **[implementation-examples/](./implementation-examples/)** - Code examples and patterns
-3. **[ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams and flow charts
+1. **[legacy-components/IMPLEMENTATION_GUIDE.md](./legacy-components/IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation
+2. **[legacy-components/implementation-examples/](./legacy-components/implementation-examples/)** - Code examples and patterns
+3. **[legacy-components/ARCHITECTURE_DIAGRAMS.md](./legacy-components/ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams and flow charts
 
 ## 🔄 Architecture Evolution
 
@@ -108,14 +106,14 @@ DreamBeeSQL is a **zero-configuration pseudo-ORM** built on Kysely that automati
 
 ### Installation
 ```bash
-npm install dreambeesql
+npm install noorm
 ```
 
 ### Basic Usage
 ```typescript
-import { DreamBeeSQL } from 'dreambeesql'
+import { NOORM } from 'noorm'
 
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: 'localhost',

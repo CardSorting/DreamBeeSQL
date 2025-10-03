@@ -1,28 +1,28 @@
 {
-  "name": "kysely",
-  "version": "0.28.7",
-  "description": "Type safe SQL query builder",
+  "name": "noorm",
+  "version": "1.0.0",
+  "description": "NOORM - No ORM, just magic! Zero-configuration pseudo-ORM built on Kysely",
   "repository": {
     "type": "git",
-    "url": "git://github.com/kysely-org/kysely.git"
+    "url": "git://github.com/your-org/noorm.git"
   },
-  "homepage": "https://kysely.dev",
+  "homepage": "https://noorm.dev",
   "keywords": [
-    "query",
-    "builder",
-    "query builder",
-    "sql",
+    "noorm",
+    "no-orm",
+    "pseudo-orm",
+    "zero-config",
+    "auto-discovery",
     "typescript",
+    "kysely",
     "postgres",
     "postgresql",
     "mysql",
     "sqlite",
     "mssql",
-    "ms sql server",
-    "sql server",
     "type-safe",
-    "type-safety",
-    "plugins"
+    "auto-generated",
+    "schema-discovery"
   ],
   "engines": {
     "node": ">=20.0.0"

@@ -28,7 +28,7 @@ export async function createTestDatabase(dialect: 'sqlite' | 'postgresql' | 'mys
       connection = {
         host: '',
         port: 0,
-        database: config.database,
+        database: (config as any).database,
         username: '',
         password: ''
       }
@@ -36,31 +36,31 @@ export async function createTestDatabase(dialect: 'sqlite' | 'postgresql' | 'mys
       
     case 'postgresql':
       connection = {
-        host: config.host,
-        port: config.port,
-        database: config.database,
-        username: config.username,
-        password: config.password
+        host: (config as any).host,
+        port: (config as any).port,
+        database: (config as any).database,
+        username: (config as any).username,
+        password: (config as any).password
       }
       break
       
     case 'mysql':
       connection = {
-        host: config.host,
-        port: config.port,
-        database: config.database,
-        username: config.username,
-        password: config.password
+        host: (config as any).host,
+        port: (config as any).port,
+        database: (config as any).database,
+        username: (config as any).username,
+        password: (config as any).password
       }
       break
       
     case 'mssql':
       connection = {
-        host: config.host,
-        port: config.port,
-        database: config.database,
-        username: config.username,
-        password: config.password
+        host: (config as any).host,
+        port: (config as any).port,
+        database: (config as any).database,
+        username: (config as any).username,
+        password: (config as any).password
       }
       break
       
@@ -463,16 +463,16 @@ export function getTestConnectionString(dialect: 'sqlite' | 'postgresql' | 'mysq
   
   switch (dialect) {
     case 'sqlite':
-      return config.database
+      return (config as any).database
       
     case 'postgresql':
-      return `postgresql://${config.username}:${config.password}@${config.host}:${config.port}/${config.database}`
+      return `postgresql://${(config as any).username}:${(config as any).password}@${(config as any).host}:${(config as any).port}/${(config as any).database}`
       
     case 'mysql':
-      return `mysql://${config.username}:${config.password}@${config.host}:${config.port}/${config.database}`
+      return `mysql://${(config as any).username}:${(config as any).password}@${(config as any).host}:${(config as any).port}/${(config as any).database}`
       
     case 'mssql':
-      return `mssql://${config.username}:${config.password}@${config.host}:${config.port}/${config.database}`
+      return `mssql://${(config as any).username}:${(config as any).password}@${(config as any).host}:${(config as any).port}/${(config as any).database}`
       
     default:
       throw new Error(`Unsupported dialect: ${dialect}`)

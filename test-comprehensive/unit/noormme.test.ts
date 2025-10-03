@@ -26,7 +26,7 @@ describe('NOORMME Core Functionality', () => {
           
           // Should be marked as initialized
           expect(db).to.have.property('initialized', true)
-        }))
+        })
 
         it('should throw error when getting repository before initialization', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -40,7 +40,7 @@ describe('NOORMME Core Functionality', () => {
           expect(() => {
             newDb.getRepository('users')
           }).to.throw('NOORMME must be initialized before getting repositories')
-        }))
+        })
 
         it('should throw error for non-existent table', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -49,7 +49,7 @@ describe('NOORMME Core Functionality', () => {
           expect(() => {
             db.getRepository('nonexistent_table')
           }).to.throw('Table \'nonexistent_table\' not found in schema')
-        }))
+        })
 
         it('should provide Kysely instance', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -61,7 +61,7 @@ describe('NOORMME Core Functionality', () => {
           expect(typeof kysely.insertInto).to.equal('function')
           expect(typeof kysely.updateTable).to.equal('function')
           expect(typeof kysely.deleteFrom).to.equal('function')
-        }))
+        })
 
         it('should provide performance metrics', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -77,7 +77,7 @@ describe('NOORMME Core Functionality', () => {
           expect(metrics.averageQueryTime).to.be.a('number')
           expect(metrics.cacheHitRate).to.be.a('number')
           expect(metrics.repositoryCount).to.be.a('number')
-        }))
+        })
       })
     }
   })
@@ -96,7 +96,7 @@ describe('NOORMME Core Functionality', () => {
           expect(typeof userRepo.create).to.equal('function')
           expect(typeof userRepo.update).to.equal('function')
           expect(typeof userRepo.delete).to.equal('function')
-        }))
+        })
 
         it('should cache repository instances', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -106,7 +106,7 @@ describe('NOORMME Core Functionality', () => {
           const repo2 = db.getRepository('users')
           
           expect(repo1).to.equal(repo2)
-        }))
+        })
 
         it('should create different repositories for different tables', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -116,7 +116,7 @@ describe('NOORMME Core Functionality', () => {
           const postRepo = db.getRepository('posts')
           
           expect(userRepo).to.not.equal(postRepo)
-        }))
+        })
 
         it('should provide schema information', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -136,7 +136,7 @@ describe('NOORMME Core Functionality', () => {
           expect(tableNames).to.include('users')
           expect(tableNames).to.include('posts')
           expect(tableNames).to.include('comments')
-        }))
+        })
       })
     }
   })
@@ -165,7 +165,7 @@ describe('NOORMME Core Functionality', () => {
               }
             })
           }).to.not.throw()
-        }))
+        })
 
         it('should handle invalid configuration gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -180,7 +180,7 @@ describe('NOORMME Core Functionality', () => {
               }
             })
           }).to.not.throw()
-        }))
+        })
       })
     }
   })
@@ -211,7 +211,7 @@ describe('NOORMME Core Functionality', () => {
           expect(result).to.exist
           expect(result.id).to.equal('transaction-user')
           expect(result.email).to.equal('transaction@example.com')
-        }))
+        })
 
         it('should rollback transactions on error', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -241,7 +241,7 @@ describe('NOORMME Core Functionality', () => {
           const userRepo = db.getRepository('users')
           const user = await userRepo.findById('rollback-user')
           expect(user).to.be.null
-        }))
+        })
       })
     }
   })
@@ -257,7 +257,7 @@ describe('NOORMME Core Functionality', () => {
           expect(result).to.exist
           expect(result[0]).to.have.property('count')
           expect(result[0].count).to.be.a('number')
-        }))
+        })
 
         it('should execute raw SQL with parameters', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -265,7 +265,7 @@ describe('NOORMME Core Functionality', () => {
           
           const result = await db.execute('SELECT * FROM users WHERE active = ?', [true])
           expect(result).to.be.an('array')
-        }))
+        })
       })
     }
   })
@@ -282,7 +282,7 @@ describe('NOORMME Core Functionality', () => {
           
           // Initialization should be fast
           assertions.assertPerformance(duration, 1000, 0.5) // 50% tolerance
-        }))
+        })
 
         it('should handle memory efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -293,7 +293,7 @@ describe('NOORMME Core Functionality', () => {
           
           // Memory usage should be reasonable
           assertions.assertMemoryUsage(delta, 50) // 50MB limit
-        }))
+        })
 
         it('should maintain performance with multiple repositories', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -310,7 +310,7 @@ describe('NOORMME Core Functionality', () => {
           
           // Should be very fast due to caching
           assertions.assertPerformance(duration, 100, 0.2) // 20% tolerance
-        }))
+        })
       })
     }
   })
@@ -331,14 +331,14 @@ describe('NOORMME Core Functionality', () => {
           })
           
           await expect(invalidDb.initialize()).to.be.rejected
-        }))
+        })
 
         it('should handle invalid SQL gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
           await db.initialize()
           
           await expect(db.execute('INVALID SQL QUERY')).to.be.rejected
-        }))
+        })
 
         it('should handle repository operations on closed database', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -348,7 +348,7 @@ describe('NOORMME Core Functionality', () => {
           expect(() => {
             db.getRepository('users')
           }).to.throw('NOORMME must be initialized before getting repositories')
-        }))
+        })
       })
     }
   })
@@ -365,7 +365,7 @@ describe('NOORMME Core Functionality', () => {
           
           // Should be marked as not initialized
           expect(db).to.have.property('initialized', false)
-        }))
+        })
 
         it('should handle multiple close calls gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -376,7 +376,7 @@ describe('NOORMME Core Functionality', () => {
           
           // Second close should not throw
           await expect(db.close()).to.not.be.rejected
-        }))
+        })
       })
     }
   })

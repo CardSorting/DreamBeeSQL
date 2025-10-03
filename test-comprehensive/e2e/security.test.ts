@@ -64,7 +64,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('sql-injection-user')
-        }))
+        })
 
         it('should prevent SQL injection in updates', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -111,7 +111,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('update-injection-user')
-        }))
+        })
 
         it('should prevent SQL injection in deletes', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -159,7 +159,7 @@ describe('Security E2E Tests', () => {
           // Clean up
           await userRepo.delete('delete-injection-user1')
           await userRepo.delete('delete-injection-user2')
-        }))
+        })
 
         it('should prevent SQL injection in complex queries', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -210,7 +210,7 @@ describe('Security E2E Tests', () => {
           // Clean up
           await postRepo.delete('complex-injection-post')
           await userRepo.delete('complex-injection-user')
-        }))
+        })
       })
     }
   })
@@ -266,7 +266,7 @@ describe('Security E2E Tests', () => {
           for (const input of maliciousInputs) {
             await userRepo.delete(input.id)
           }
-        }))
+        })
 
         it('should validate data types properly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -318,7 +318,7 @@ describe('Security E2E Tests', () => {
               expect(error).to.be.instanceOf(Error)
             }
           }
-        }))
+        })
 
         it('should enforce data length limits', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -350,7 +350,7 @@ describe('Security E2E Tests', () => {
             // Expected for extremely long strings
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
       })
     }
   })
@@ -393,7 +393,7 @@ describe('Security E2E Tests', () => {
           // Verify deletion
           const deletedUser = await userRepo.findById('permission-user')
           expect(deletedUser).to.be.null
-        }))
+        })
 
         it('should handle insufficient permissions gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -420,7 +420,7 @@ describe('Security E2E Tests', () => {
             // Might fail due to insufficient permissions
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should prevent unauthorized schema modifications', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -442,7 +442,7 @@ describe('Security E2E Tests', () => {
             // Expected to fail due to insufficient permissions
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
       })
     }
   })
@@ -468,7 +468,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('secure-connection-user')
-        }))
+        })
 
         it('should handle connection timeouts securely', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -495,7 +495,7 @@ describe('Security E2E Tests', () => {
             // Might fail due to timeout
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should prevent connection hijacking', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -520,7 +520,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('hijack-test-user')
-        }))
+        })
       })
     }
   })
@@ -553,7 +553,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('sensitive-user')
-        }))
+        })
 
         it('should prevent data leakage in error messages', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -590,7 +590,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('leak-test-user')
-        }))
+        })
 
         it('should handle data anonymization', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -620,7 +620,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('anonymize-user')
-        }))
+        })
       })
     }
   })
@@ -660,7 +660,7 @@ describe('Security E2E Tests', () => {
             // Might fail due to rate limiting
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should prevent resource exhaustion attacks', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -694,7 +694,7 @@ describe('Security E2E Tests', () => {
             // Might fail due to resource limits
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should handle concurrent access securely', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -728,7 +728,7 @@ describe('Security E2E Tests', () => {
             // Might fail due to concurrency limits
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
       })
     }
   })
@@ -762,7 +762,7 @@ describe('Security E2E Tests', () => {
           // Test delete operation
           const deleted = await userRepo.delete('audit-user')
           expect(deleted).to.be.true
-        }))
+        })
 
         it('should prevent log injection attacks', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -794,7 +794,7 @@ describe('Security E2E Tests', () => {
             // Might fail due to log injection prevention
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should handle sensitive data in logs appropriately', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -816,7 +816,7 @@ describe('Security E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('sensitive-log-user')
-        }))
+        })
       })
     }
   })

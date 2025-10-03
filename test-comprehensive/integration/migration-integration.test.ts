@@ -51,7 +51,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle migration execution', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -82,7 +82,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should create migration files', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -113,7 +113,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle configuration updates', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -144,7 +144,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should provide component access', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -165,7 +165,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })
@@ -217,7 +217,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle relationships after migration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -265,7 +265,7 @@ describe('Migration System Integration', () => {
           await postRepo.delete('rel-migration-post')
           await userRepo.delete('rel-migration-user')
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle transactions after migration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -311,7 +311,7 @@ describe('Migration System Integration', () => {
           // Clean up
           await userRepo.delete('tx-migration-user')
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })
@@ -338,7 +338,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should execute migrations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -363,7 +363,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should get status efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -388,7 +388,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle concurrent migration operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -420,7 +420,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })
@@ -443,7 +443,7 @@ describe('Migration System Integration', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should handle migration execution errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -463,7 +463,7 @@ describe('Migration System Integration', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should handle database connection errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -487,7 +487,7 @@ describe('Migration System Integration', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
       })
     }
   })
@@ -510,7 +510,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should override default configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -540,7 +540,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle partial configuration updates', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -567,7 +567,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })
@@ -602,7 +602,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle NOORMME cache configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -630,7 +630,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle NOORMME performance configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -659,7 +659,7 @@ describe('Migration System Integration', () => {
           
           // Clean up
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })

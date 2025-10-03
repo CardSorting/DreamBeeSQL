@@ -73,7 +73,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should batch load relationships efficiently for medium datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -131,7 +131,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should batch load relationships efficiently for large datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -189,7 +189,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should handle memory efficiently during batch loading', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -240,7 +240,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })
@@ -310,7 +310,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should handle batch loading with different batch sizes', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -381,7 +381,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })
@@ -455,7 +455,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should handle concurrent batch loading with different relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -540,7 +540,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })
@@ -614,7 +614,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should scale better with larger datasets', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -682,7 +682,7 @@ describe('Batch Loading Performance', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })

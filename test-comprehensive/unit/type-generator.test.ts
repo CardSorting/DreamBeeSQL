@@ -38,7 +38,7 @@ describe('Type Generation', () => {
           expect(entityNames).to.include('Users')
           expect(entityNames).to.include('Posts')
           expect(entityNames).to.include('Comments')
-        }))
+        })
 
         it('should generate correct entity interfaces', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -58,7 +58,7 @@ describe('Type Generation', () => {
           expect(interfaceCode).to.include('firstName:')
           expect(interfaceCode).to.include('lastName:')
           expect(interfaceCode).to.include('active:')
-        }))
+        })
 
         it('should generate insert types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -79,7 +79,7 @@ describe('Type Generation', () => {
           
           // Should not include auto-generated fields
           expect(insertType).to.not.include('id:') // Assuming id is auto-generated
-        }))
+        })
 
         it('should generate update types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -98,7 +98,7 @@ describe('Type Generation', () => {
           expect(updateType).to.include('email?:') // Other fields should be optional
           expect(updateType).to.include('firstName?:')
           expect(updateType).to.include('lastName?:')
-        }))
+        })
 
         it('should generate select types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -118,7 +118,7 @@ describe('Type Generation', () => {
           expect(selectType).to.include('firstName:')
           expect(selectType).to.include('lastName:')
           expect(selectType).to.include('active:')
-        }))
+        })
 
         it('should handle nullable columns correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -141,7 +141,7 @@ describe('Type Generation', () => {
           
           // Optional fields should have ?
           expect(interfaceCode).to.include('age?:')
-        }))
+        })
 
         it('should handle different column types correctly', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -162,7 +162,7 @@ describe('Type Generation', () => {
           expect(interfaceCode).to.include('lastName: string')
           expect(interfaceCode).to.include('active: boolean')
           expect(interfaceCode).to.include('age?: number')
-        }))
+        })
       })
     }
   })
@@ -187,7 +187,7 @@ describe('Type Generation', () => {
           // Should generate relationship types for posts
           expect(generatedTypes.interfaces).to.include('PostsUsers')
           expect(generatedTypes.interfaces).to.include('PostsComments')
-        }))
+        })
 
         it('should generate correct relationship type structures', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -206,7 +206,7 @@ describe('Type Generation', () => {
           // Many-to-one relationships should be single objects
           expect(interfaceCode).to.include(': Users')
           expect(interfaceCode).to.include(': Profiles')
-        }))
+        })
 
         it('should handle many-to-many relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -220,7 +220,7 @@ describe('Type Generation', () => {
           
           // Many-to-many relationships should be arrays
           expect(interfaceCode).to.include('Tags[]')
-        }))
+        })
       })
     }
   })
@@ -249,7 +249,7 @@ describe('Type Generation', () => {
           
           // Date types
           expect(interfaceCode).to.include(': Date')
-        }))
+        })
 
         it('should handle custom type mappings', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -271,7 +271,7 @@ describe('Type Generation', () => {
           expect(interfaceCode).to.include(': CustomString')
           expect(interfaceCode).to.include(': CustomNumber')
           expect(interfaceCode).to.include(': CustomBoolean')
-        }))
+        })
 
         it('should handle parameterized types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -287,7 +287,7 @@ describe('Type Generation', () => {
           // The exact mapping depends on the database dialect
           expect(interfaceCode).to.include(': string') // varchar should map to string
           expect(interfaceCode).to.include(': number') // decimal should map to number
-        }))
+        })
 
         it('should default unknown types to any', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -302,7 +302,7 @@ describe('Type Generation', () => {
           // Should not have any 'any' types for our known test schema
           // This test ensures we're not falling back to 'any' unnecessarily
           expect(interfaceCode).to.not.include(': any')
-        }))
+        })
       })
     }
   })
@@ -327,7 +327,7 @@ describe('Type Generation', () => {
           
           expect(interfaceCode).to.include(': MyCustomString')
           expect(interfaceCode).to.include(': MyCustomNumber')
-        }))
+        })
 
         it('should handle empty custom type mappings', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -342,7 +342,7 @@ describe('Type Generation', () => {
           expect(generatedTypes).to.exist
           expect(generatedTypes.entities).to.be.an('array')
           expect(generatedTypes.entities.length).to.be.greaterThan(0)
-        }))
+        })
 
         it('should handle undefined custom type mappings', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -355,7 +355,7 @@ describe('Type Generation', () => {
           expect(generatedTypes).to.exist
           expect(generatedTypes.entities).to.be.an('array')
           expect(generatedTypes.entities.length).to.be.greaterThan(0)
-        }))
+        })
       })
     }
   })
@@ -378,7 +378,7 @@ describe('Type Generation', () => {
           expect(generatedTypes.entities.length).to.equal(0)
           expect(generatedTypes.interfaces).to.be.a('string')
           expect(generatedTypes.types).to.be.a('string')
-        }))
+        })
 
         it('should handle schema with no relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -399,7 +399,7 @@ describe('Type Generation', () => {
           
           // Should still generate relationship types section
           expect(generatedTypes.interfaces).to.include('// Relationship types')
-        }))
+        })
 
         it('should handle tables with no columns', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -430,7 +430,7 @@ describe('Type Generation', () => {
           const emptyTableEntity = generatedTypes.entities.find(e => e.name === 'EmptyTable')
           expect(emptyTableEntity).to.exist
           expect(emptyTableEntity!.interface).to.include('export interface EmptyTable')
-        }))
+        })
 
         it('should handle tables with special characters in names', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -474,7 +474,7 @@ describe('Type Generation', () => {
           expect(specialTableEntity).to.exist
           expect(specialTableEntity!.interface).to.include('export interface UserProfiles')
           expect(specialTableEntity!.interface).to.include('userId:')
-        }))
+        })
       })
     }
   })
@@ -495,7 +495,7 @@ describe('Type Generation', () => {
           
           expect(generatedTypes).to.exist
           expect(duration).to.be.lessThan(1000) // Should complete within 1 second
-        }))
+        })
 
         it('should handle large schemas efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -522,7 +522,7 @@ describe('Type Generation', () => {
           expect(generatedTypes).to.exist
           expect(generatedTypes.entities.length).to.equal(largeSchema.tables.length)
           expect(duration).to.be.lessThan(2000) // Should complete within 2 seconds
-        }))
+        })
       })
     }
   })

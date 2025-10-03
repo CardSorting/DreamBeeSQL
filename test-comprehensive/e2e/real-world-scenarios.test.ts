@@ -163,7 +163,7 @@ describe('Real-World Scenarios E2E Tests', () => {
           }
           
           await userRepo.delete(customer.id)
-        }))
+        })
 
         it('should handle inventory management scenario', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -287,7 +287,7 @@ describe('Real-World Scenarios E2E Tests', () => {
           for (const item of inventoryItems) {
             await postRepo.delete(item.id)
           }
-        }))
+        })
       })
     }
   })
@@ -482,7 +482,7 @@ describe('Real-World Scenarios E2E Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })
@@ -680,7 +680,7 @@ describe('Real-World Scenarios E2E Tests', () => {
           for (const member of teamMembers) {
             await userRepo.delete(member.id)
           }
-        }))
+        })
       })
     }
   })
@@ -904,7 +904,7 @@ describe('Real-World Scenarios E2E Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })

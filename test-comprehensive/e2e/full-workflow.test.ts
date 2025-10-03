@@ -134,7 +134,7 @@ describe('Full Workflow E2E Tests', () => {
           // 11. Verify cleanup
           const deletedUser = await userRepo.findById(user.id)
           expect(deletedUser).to.be.null
-        }))
+        })
 
         it('should handle complete blog workflow', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -261,7 +261,7 @@ describe('Full Workflow E2E Tests', () => {
           for (const author of authors) {
             await userRepo.delete(author.id)
           }
-        }))
+        })
 
         it('should handle complete e-commerce workflow', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -370,7 +370,7 @@ describe('Full Workflow E2E Tests', () => {
           for (const customer of customers) {
             await userRepo.delete(customer.id)
           }
-        }))
+        })
       })
     }
   })
@@ -500,7 +500,7 @@ describe('Full Workflow E2E Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should handle complex content management workflow', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -650,7 +650,7 @@ describe('Full Workflow E2E Tests', () => {
           for (const creator of creators) {
             await userRepo.delete(creator.id)
           }
-        }))
+        })
       })
     }
   })
@@ -747,7 +747,7 @@ describe('Full Workflow E2E Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should handle concurrent workflow operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -822,7 +822,7 @@ describe('Full Workflow E2E Tests', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })

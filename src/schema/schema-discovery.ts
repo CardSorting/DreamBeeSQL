@@ -176,57 +176,27 @@ export class SchemaDiscovery {
       'jsonb': 'any',
       'uuid': 'string',
 
-      // MySQL types
-      'varchar': 'string',
-      'char': 'string',
-      'text': 'string',
+      // MySQL specific types
       'longtext': 'string',
       'mediumtext': 'string',
       'tinytext': 'string',
       'int': 'number',
-      'bigint': 'number',
-      'smallint': 'number',
       'tinyint': 'number',
-      'decimal': 'number',
       'float': 'number',
       'double': 'number',
-      'boolean': 'boolean',
       'bool': 'boolean',
-      'date': 'Date',
       'datetime': 'Date',
-      'timestamp': 'Date',
-      'time': 'Date',
-      'json': 'any',
 
-      // SQLite types
-      'text': 'string',
-      'integer': 'number',
-      'real': 'number',
+      // SQLite specific types
       'blob': 'Buffer',
-      'boolean': 'boolean',
 
-      // MSSQL types
-      'varchar': 'string',
+      // MSSQL specific types
       'nvarchar': 'string',
-      'char': 'string',
       'nchar': 'string',
-      'text': 'string',
       'ntext': 'string',
-      'int': 'number',
-      'bigint': 'number',
-      'smallint': 'number',
-      'tinyint': 'number',
-      'decimal': 'number',
-      'numeric': 'number',
-      'float': 'number',
-      'real': 'number',
       'bit': 'boolean',
-      'date': 'Date',
-      'datetime': 'Date',
       'datetime2': 'Date',
-      'smalldatetime': 'Date',
-      'timestamp': 'Date',
-      'time': 'Date'
+      'smalldatetime': 'Date'
     }
 
     // Handle custom type mappings
@@ -235,14 +205,14 @@ export class SchemaDiscovery {
     }
 
     // Try exact match first
-    if (typeMapping[dbType.toLowerCase()]) {
-      return typeMapping[dbType.toLowerCase()]
+    if ((typeMapping as any)[dbType.toLowerCase()]) {
+      return (typeMapping as any)[dbType.toLowerCase()]
     }
 
     // Handle parameterized types (e.g., varchar(255), decimal(10,2))
     const baseType = dbType.toLowerCase().split('(')[0]
-    if (typeMapping[baseType]) {
-      return typeMapping[baseType]
+    if ((typeMapping as any)[baseType]) {
+      return (typeMapping as any)[baseType]
     }
 
     // Default to any for unknown types

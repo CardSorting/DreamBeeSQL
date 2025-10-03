@@ -33,7 +33,7 @@ describe('Repository Factory', () => {
           // Check that relationship operations exist
           expect(typeof userRepo.findWithRelations).to.equal('function')
           expect(typeof userRepo.loadRelationships).to.equal('function')
-        }))
+        })
 
         it('should create different repositories for different tables', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -45,7 +45,7 @@ describe('Repository Factory', () => {
           expect(userRepo).to.not.equal(postRepo)
           expect(typeof userRepo.findById).to.equal('function')
           expect(typeof postRepo.findById).to.equal('function')
-        }))
+        })
 
         it('should cache repository instances', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -55,7 +55,7 @@ describe('Repository Factory', () => {
           const repo2 = db.getRepository('users')
           
           expect(repo1).to.equal(repo2)
-        }))
+        })
       })
     }
   })
@@ -83,7 +83,7 @@ describe('Repository Factory', () => {
           expect(newUser.firstName).to.equal('New')
           expect(newUser.lastName).to.equal('User')
           expect(newUser.active).to.be.true
-        }))
+        })
 
         it('should find entities by ID', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -95,7 +95,7 @@ describe('Repository Factory', () => {
           expect(user).to.exist
           expect(user!.id).to.equal('user-1')
           expect(user!.email).to.equal('john@example.com')
-        }))
+        })
 
         it('should return null for non-existent entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -105,7 +105,7 @@ describe('Repository Factory', () => {
           
           const user = await userRepo.findById('non-existent-user')
           expect(user).to.be.null
-        }))
+        })
 
         it('should find all entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -122,7 +122,7 @@ describe('Repository Factory', () => {
           expect(userIds).to.include('user-1')
           expect(userIds).to.include('user-2')
           expect(userIds).to.include('user-3')
-        }))
+        })
 
         it('should update entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -147,7 +147,7 @@ describe('Repository Factory', () => {
           const verifyUser = await userRepo.findById('user-1')
           expect(verifyUser!.firstName).to.equal('Updated')
           expect(verifyUser!.lastName).to.equal('Name')
-        }))
+        })
 
         it('should delete entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -173,7 +173,7 @@ describe('Repository Factory', () => {
           // Verify user is deleted
           const deletedUser = await userRepo.findById('delete-user')
           expect(deletedUser).to.be.null
-        }))
+        })
 
         it('should return false when deleting non-existent entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -183,7 +183,7 @@ describe('Repository Factory', () => {
           
           const deleted = await userRepo.delete('non-existent-user')
           expect(deleted).to.be.false
-        }))
+        })
       })
     }
   })
@@ -203,7 +203,7 @@ describe('Repository Factory', () => {
           const user = await (userRepo as any).findByEmail('john@example.com')
           expect(user).to.exist
           expect(user.email).to.equal('john@example.com')
-        }))
+        })
 
         it('should generate findManyBy methods for non-unique columns', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -221,7 +221,7 @@ describe('Repository Factory', () => {
           for (const user of users) {
             expect(user.firstName).to.equal('John')
           }
-        }))
+        })
 
         it('should generate count method', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -234,7 +234,7 @@ describe('Repository Factory', () => {
           const count = await userRepo.count()
           expect(count).to.be.a('number')
           expect(count).to.be.greaterThan(0)
-        }))
+        })
 
         it('should generate exists method', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -249,7 +249,7 @@ describe('Repository Factory', () => {
           
           const notExists = await userRepo.exists('non-existent-user')
           expect(notExists).to.be.false
-        }))
+        })
       })
     }
   })
@@ -270,7 +270,7 @@ describe('Repository Factory', () => {
           // Should have posts relation loaded
           expect(user!.posts).to.exist
           expect(user!.posts).to.be.an('array')
-        }))
+        })
 
         it('should return null for non-existent entities with relations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -280,7 +280,7 @@ describe('Repository Factory', () => {
           
           const user = await userRepo.findWithRelations('non-existent-user', ['posts'])
           expect(user).to.be.null
-        }))
+        })
 
         it('should load relationships for multiple entities', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -299,7 +299,7 @@ describe('Repository Factory', () => {
             expect(user.posts).to.exist
             expect(user.posts).to.be.an('array')
           }
-        }))
+        })
 
         it('should handle empty relations array', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -310,7 +310,7 @@ describe('Repository Factory', () => {
           const user = await userRepo.findWithRelations('user-1', [])
           expect(user).to.exist
           expect(user!.id).to.equal('user-1')
-        }))
+        })
 
         it('should handle non-existent relations gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -324,7 +324,7 @@ describe('Repository Factory', () => {
           
           // Non-existent relation should not be loaded
           expect(user!.nonExistentRelation).to.be.undefined
-        }))
+        })
       })
     }
   })
@@ -369,7 +369,7 @@ describe('Repository Factory', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should handle large batches', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -408,7 +408,7 @@ describe('Repository Factory', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })
@@ -435,7 +435,7 @@ describe('Repository Factory', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should handle connection errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -453,7 +453,7 @@ describe('Repository Factory', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should handle invalid entity data', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -474,7 +474,7 @@ describe('Repository Factory', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
       })
     }
   })
@@ -497,7 +497,7 @@ describe('Repository Factory', () => {
           
           // Should be very fast due to caching
           expect(duration).to.be.lessThan(100) // 100ms max
-        }))
+        })
 
         it('should perform CRUD operations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -545,7 +545,7 @@ describe('Repository Factory', () => {
           })
           
           expect(deleteDuration).to.be.lessThan(500) // 500ms max
-        }))
+        })
 
         it('should handle concurrent operations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -580,7 +580,7 @@ describe('Repository Factory', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })

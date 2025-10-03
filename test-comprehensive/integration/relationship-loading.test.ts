@@ -66,7 +66,7 @@ describe('Relationship Loading Integration', () => {
             await postRepo.delete(post.id)
           }
           await userRepo.delete(user.id)
-        }))
+        })
 
         it('should load users with their comments', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -126,7 +126,7 @@ describe('Relationship Loading Integration', () => {
           }
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
-        }))
+        })
 
         it('should load users with their profiles', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -166,7 +166,7 @@ describe('Relationship Loading Integration', () => {
           // Clean up
           await profileRepo.delete(profile.id)
           await userRepo.delete(user.id)
-        }))
+        })
       })
     }
   })
@@ -213,7 +213,7 @@ describe('Relationship Loading Integration', () => {
           // Clean up
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
-        }))
+        })
 
         it('should load comments with their users', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -261,7 +261,7 @@ describe('Relationship Loading Integration', () => {
           await commentRepo.delete(comment.id)
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
-        }))
+        })
 
         it('should load comments with their posts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -310,7 +310,7 @@ describe('Relationship Loading Integration', () => {
           await commentRepo.delete(comment.id)
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
-        }))
+        })
       })
     }
   })
@@ -391,7 +391,7 @@ describe('Relationship Loading Integration', () => {
           }
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
-        }))
+        })
 
         it('should load tags with their posts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -466,7 +466,7 @@ describe('Relationship Loading Integration', () => {
           }
           await tagRepo.delete(tag.id)
           await userRepo.delete(user.id)
-        }))
+        })
       })
     }
   })
@@ -542,7 +542,7 @@ describe('Relationship Loading Integration', () => {
             await postRepo.delete(post.id)
           }
           await userRepo.delete(user.id)
-        }))
+        })
 
         it('should load posts with users and comments', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -603,7 +603,7 @@ describe('Relationship Loading Integration', () => {
           }
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
-        }))
+        })
       })
     }
   })
@@ -672,7 +672,7 @@ describe('Relationship Loading Integration', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should batch load relationships for multiple posts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -723,7 +723,7 @@ describe('Relationship Loading Integration', () => {
             await postRepo.delete(post.id)
           }
           await userRepo.delete(user.id)
-        }))
+        })
 
         it('should handle large batch sizes efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -780,7 +780,7 @@ describe('Relationship Loading Integration', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })
@@ -830,7 +830,7 @@ describe('Relationship Loading Integration', () => {
             await postRepo.delete(post.id)
           }
           await userRepo.delete(user.id)
-        }))
+        })
 
         it('should handle concurrent relationship loading', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -892,7 +892,7 @@ describe('Relationship Loading Integration', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })

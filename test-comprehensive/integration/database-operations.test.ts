@@ -62,7 +62,7 @@ describe('Database Operations Integration', () => {
           // Verify deletion
           const deletedUser = await userRepo.findById('crud-user')
           expect(deletedUser).to.be.null
-        }))
+        })
 
         it('should handle batch operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -112,7 +112,7 @@ describe('Database Operations Integration', () => {
             const deletedUser = await userRepo.findById(user.id)
             expect(deletedUser).to.be.null
           }
-        }))
+        })
 
         it('should handle complex data types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -140,7 +140,7 @@ describe('Database Operations Integration', () => {
           
           // Clean up
           await userRepo.delete('complex-user')
-        }))
+        })
       })
     }
   })
@@ -195,7 +195,7 @@ describe('Database Operations Integration', () => {
             await postRepo.delete(post.id)
           }
           await userRepo.delete(user.id)
-        }))
+        })
 
         it('should load many-to-one relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -233,7 +233,7 @@ describe('Database Operations Integration', () => {
           // Clean up
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
-        }))
+        })
 
         it('should load nested relationships', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -294,7 +294,7 @@ describe('Database Operations Integration', () => {
           }
           await postRepo.delete(post.id)
           await userRepo.delete(user.id)
-        }))
+        })
 
         it('should batch load relationships efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -352,7 +352,7 @@ describe('Database Operations Integration', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })
@@ -414,7 +414,7 @@ describe('Database Operations Integration', () => {
           // Clean up
           await postRepo.delete('tx-post')
           await userRepo.delete('tx-user')
-        }))
+        })
 
         it('should rollback failed transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -447,7 +447,7 @@ describe('Database Operations Integration', () => {
           // User should not exist after rollback
           const user = await userRepo.findById('rollback-user')
           expect(user).to.be.null
-        }))
+        })
 
         it('should handle nested transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -497,7 +497,7 @@ describe('Database Operations Integration', () => {
           
           // Clean up
           await userRepo.delete('nested-user')
-        }))
+        })
       })
     }
   })
@@ -543,7 +543,7 @@ describe('Database Operations Integration', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should execute raw SQL queries', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -576,7 +576,7 @@ describe('Database Operations Integration', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
 
         it('should execute complex queries with joins', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -630,7 +630,7 @@ describe('Database Operations Integration', () => {
             await postRepo.delete(post.id)
           }
           await userRepo.delete(user.id)
-        }))
+        })
       })
     }
   })
@@ -749,7 +749,7 @@ describe('Database Operations Integration', () => {
           expect(deleteDuration).to.be.lessThan(5000) // 5 seconds max
           
           expect(allUsers.length).to.be.greaterThanOrEqual(100)
-        }))
+        })
 
         it('should handle concurrent operations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -792,7 +792,7 @@ describe('Database Operations Integration', () => {
           for (const user of users) {
             await userRepo.delete(user.id)
           }
-        }))
+        })
       })
     }
   })

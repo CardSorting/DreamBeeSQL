@@ -71,7 +71,7 @@ describe('Transaction Handling Integration', () => {
           // Clean up
           await postRepo.delete('tx-post')
           await userRepo.delete('tx-user')
-        }))
+        })
 
         it('should rollback failed transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -121,7 +121,7 @@ describe('Transaction Handling Integration', () => {
           
           expect(user).to.be.null
           expect(post).to.be.null
-        }))
+        })
 
         it('should handle transaction with multiple operations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -199,7 +199,7 @@ describe('Transaction Handling Integration', () => {
           }
           await postRepo.delete('complex-post')
           await userRepo.delete('complex-user')
-        }))
+        })
       })
     }
   })
@@ -255,7 +255,7 @@ describe('Transaction Handling Integration', () => {
           
           // Clean up
           await userRepo.delete('nested-user')
-        }))
+        })
 
         it('should rollback nested transactions on error', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -308,7 +308,7 @@ describe('Transaction Handling Integration', () => {
           
           expect(user).to.be.null
           expect(post).to.be.null
-        }))
+        })
 
         it('should handle complex nested transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -401,7 +401,7 @@ describe('Transaction Handling Integration', () => {
             await postRepo.delete(post.id)
           }
           await userRepo.delete('complex-nested-user')
-        }))
+        })
       })
     }
   })
@@ -453,7 +453,7 @@ describe('Transaction Handling Integration', () => {
           // Clean up
           await postRepo.delete('repo-post')
           await userRepo.delete('repo-user')
-        }))
+        })
 
         it('should handle repository operations with transaction rollback', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -497,7 +497,7 @@ describe('Transaction Handling Integration', () => {
           
           expect(user).to.be.null
           expect(post).to.be.null
-        }))
+        })
 
         it('should handle repository updates within transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -535,7 +535,7 @@ describe('Transaction Handling Integration', () => {
           
           // Clean up
           await userRepo.delete('update-user')
-        }))
+        })
       })
     }
   })
@@ -584,7 +584,7 @@ describe('Transaction Handling Integration', () => {
           
           // Clean up
           await userRepo.delete('perf-user')
-        }))
+        })
 
         it('should handle concurrent transactions efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -634,7 +634,7 @@ describe('Transaction Handling Integration', () => {
           for (let i = 0; i < 5; i++) {
             await userRepo.delete(`concurrent-user-${i}`)
           }
-        }))
+        })
 
         it('should handle large transactions efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -697,7 +697,7 @@ describe('Transaction Handling Integration', () => {
             await postRepo.delete(`large-post-${i}`)
             await userRepo.delete(`large-user-${i}`)
           }
-        }))
+        })
       })
     }
   })
@@ -734,7 +734,7 @@ describe('Transaction Handling Integration', () => {
           const originalUser = await userRepo.findById('user-1')
           expect(originalUser).to.exist
           expect(originalUser!.email).to.equal('john@example.com')
-        }))
+        })
 
         it('should handle invalid SQL in transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -752,7 +752,7 @@ describe('Transaction Handling Integration', () => {
             // Expected SQL error
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should handle connection errors in transactions', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -779,7 +779,7 @@ describe('Transaction Handling Integration', () => {
             // Expected connection error
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
       })
     }
   })
@@ -850,7 +850,7 @@ describe('Transaction Handling Integration', () => {
           // Clean up
           await userRepo.delete('isolation-user-1')
           await userRepo.delete('isolation-user-2')
-        }))
+        })
 
         it('should handle transaction conflicts gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -908,7 +908,7 @@ describe('Transaction Handling Integration', () => {
           
           // Clean up
           await userRepo.delete('conflict-user')
-        }))
+        })
       })
     }
   })

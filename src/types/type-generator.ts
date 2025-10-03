@@ -223,57 +223,27 @@ export class TypeGenerator {
       'jsonb': 'any',
       'uuid': 'string',
 
-      // MySQL types
-      'varchar': 'string',
-      'char': 'string',
-      'text': 'string',
+      // MySQL specific types
       'longtext': 'string',
       'mediumtext': 'string',
       'tinytext': 'string',
       'int': 'number',
-      'bigint': 'number',
-      'smallint': 'number',
       'tinyint': 'number',
-      'decimal': 'number',
       'float': 'number',
       'double': 'number',
-      'boolean': 'boolean',
       'bool': 'boolean',
-      'date': 'Date',
       'datetime': 'Date',
-      'timestamp': 'Date',
-      'time': 'Date',
-      'json': 'any',
 
-      // SQLite types
-      'text': 'string',
-      'integer': 'number',
-      'real': 'number',
+      // SQLite specific types
       'blob': 'Buffer',
-      'boolean': 'boolean',
 
-      // MSSQL types
-      'varchar': 'string',
+      // MSSQL specific types
       'nvarchar': 'string',
-      'char': 'string',
       'nchar': 'string',
-      'text': 'string',
       'ntext': 'string',
-      'int': 'number',
-      'bigint': 'number',
-      'smallint': 'number',
-      'tinyint': 'number',
-      'decimal': 'number',
-      'numeric': 'number',
-      'float': 'number',
-      'real': 'number',
       'bit': 'boolean',
-      'date': 'Date',
-      'datetime': 'Date',
       'datetime2': 'Date',
-      'smalldatetime': 'Date',
-      'timestamp': 'Date',
-      'time': 'Date'
+      'smalldatetime': 'Date'
     }
 
     // Try exact match first

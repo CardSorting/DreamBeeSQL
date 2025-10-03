@@ -2,7 +2,8 @@
  * End-to-end tests for error handling and recovery
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'chai'
+import { describe, it, before, after } from 'mocha'
+import { expect } from 'chai'
 import { withTestDatabase, performanceHelper } from '../setup/test-helpers.js'
 import { getEnabledDatabases } from '../setup/test-config.js'
 
@@ -38,7 +39,7 @@ describe('Error Handling E2E Tests', () => {
             expect(error).to.be.instanceOf(Error)
             expect(error.message).to.include('connection')
           }
-        }))
+        })
 
         it('should handle database connection timeouts', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -80,7 +81,7 @@ describe('Error Handling E2E Tests', () => {
           const recoveredUser = await userRepo.findById('recovery-user')
           
           expect(recoveredUser).to.exist
-          expect(recoveredUser!.email).to.equal('recovery@example.com')
+          expect((recoveredUser as any)!.email).to.equal('recovery@example.com')
           
           // Clean up
           await userRepo.delete('recovery-user')
@@ -236,7 +237,7 @@ describe('Error Handling E2E Tests', () => {
                 .insertInto('posts')
                 .values({
                   id: 'tx-rollback-post',
-                  userId: user.id,
+                  userId: (user as any).id,
                   title: 'Transaction Rollback Post',
                   content: 'This post should be rolled back',
                   published: true
@@ -249,7 +250,7 @@ describe('Error Handling E2E Tests', () => {
             expect.fail('Should have thrown an error')
           } catch (error) {
             expect(error).to.be.instanceOf(Error)
-            expect(error.message).to.equal('Transaction rollback test')
+            expect((error as Error).message).to.equal('Transaction rollback test')
           }
           
           // Verify post was not created
@@ -300,7 +301,7 @@ describe('Error Handling E2E Tests', () => {
             expect.fail('Should have thrown an error')
           } catch (error) {
             expect(error).to.be.instanceOf(Error)
-            expect(error.message).to.equal('Inner transaction error')
+            expect((error as Error).message).to.equal('Inner transaction error')
           }
           
           // Verify user was not created (outer transaction rolled back)
@@ -335,7 +336,7 @@ describe('Error Handling E2E Tests', () => {
             expect.fail('Should have thrown an error')
           } catch (error) {
             expect(error).to.be.instanceOf(Error)
-            expect(error.message).to.equal('Transaction timeout simulation')
+            expect((error as Error).message).to.equal('Transaction timeout simulation')
           }
           
           // Verify user was not created
@@ -367,7 +368,7 @@ describe('Error Handling E2E Tests', () => {
           
           // Try to load non-existent relationship
           try {
-            await userRepo.findWithRelations(user.id, ['nonExistentRelation'])
+            await userRepo.findWithRelations((user as any).id, ['nonExistentRelation'])
             // Should not throw error, just return user without the relationship
           } catch (error) {
             expect.fail('Should not throw error for non-existent relationships')
@@ -395,7 +396,7 @@ describe('Error Handling E2E Tests', () => {
           
           const post = await postRepo.create({
             id: 'invalid-rel-post',
-            userId: user.id,
+            userId: (user as any).id,
             title: 'Invalid Rel Post',
             content: 'This post has invalid relationship data',
             published: true
@@ -406,12 +407,12 @@ describe('Error Handling E2E Tests', () => {
           await kysely
             .updateTable('posts')
             .set({ userId: 'invalid-user-id' })
-            .where('id', '=', post.id)
+            .where('id', '=', (post as any).id)
             .execute()
           
           // Try to load relationship with corrupted data
           try {
-            await userRepo.findWithRelations(user.id, ['posts'])
+            await userRepo.findWithRelations((user as any).id, ['posts'])
             // Should handle gracefully
           } catch (error) {
             // May or may not throw error depending on implementation
@@ -430,7 +431,7 @@ describe('Error Handling E2E Tests', () => {
           const userRepo = db.getRepository('users')
           
           // Create users
-          const users = []
+          const users: any[] = []
           for (let i = 0; i < 5; i++) {
             const user = await userRepo.create({
               id: `batch-rel-error-user-${i}`,
@@ -439,12 +440,12 @@ describe('Error Handling E2E Tests', () => {
               lastName: 'User',
               active: true
             })
-            users.push(user)
+            users.push(user as any)
           }
           
           // Try to batch load relationships with some invalid data
           try {
-            await userRepo.loadRelationships(users, ['posts'])
+            await userRepo.loadRelationships(users as any[], ['posts'])
             // Should handle gracefully
           } catch (error) {
             // May or may not throw error depending on implementation
@@ -453,7 +454,7 @@ describe('Error Handling E2E Tests', () => {
           
           // Clean up
           for (const user of users) {
-            await userRepo.delete(user.id)
+            await userRepo.delete((user as any).id)
           }
         }))
       })
@@ -624,7 +625,7 @@ describe('Error Handling E2E Tests', () => {
             expect.fail('Should have thrown an error')
           } catch (error) {
             expect(error).to.be.instanceOf(Error)
-            expect(error.message).to.equal('Performance test error')
+            expect((error as Error).message).to.equal('Performance test error')
           }
         }))
 
@@ -636,14 +637,14 @@ describe('Error Handling E2E Tests', () => {
           
           // Test memory monitoring with errors
           try {
-            const { delta } = await memoryHelper.measureMemory(async () => {
+            const { delta } = await performanceHelper.measure('memory-test', async () => {
               // Simulate an error during memory measurement
               throw new Error('Memory test error')
             })
             expect.fail('Should have thrown an error')
           } catch (error) {
             expect(error).to.be.instanceOf(Error)
-            expect(error.message).to.equal('Memory test error')
+            expect((error as Error).message).to.equal('Memory test error')
           }
         }))
 
@@ -656,7 +657,7 @@ describe('Error Handling E2E Tests', () => {
           // Test resource exhaustion
           try {
             // Create many users to test resource limits
-            const users = []
+            const users: any[] = []
             for (let i = 0; i < 1000; i++) {
               const user = await userRepo.create({
                 id: `resource-exhaustion-user-${i}`,
@@ -665,7 +666,7 @@ describe('Error Handling E2E Tests', () => {
                 lastName: 'User',
                 active: true
               })
-              users.push(user)
+              users.push(user as any)
             }
             
             // Should handle large datasets gracefully
@@ -673,7 +674,7 @@ describe('Error Handling E2E Tests', () => {
             
             // Clean up
             for (const user of users) {
-              await userRepo.delete(user.id)
+              await userRepo.delete((user as any).id)
             }
           } catch (error) {
             // May throw error due to resource limits
@@ -711,7 +712,7 @@ describe('Error Handling E2E Tests', () => {
                 .insertInto('posts')
                 .values({
                   id: 'recovery-post',
-                  userId: user.id,
+                  userId: (user as any).id,
                   title: 'Recovery Post',
                   content: 'This post should be created',
                   published: true
@@ -724,7 +725,7 @@ describe('Error Handling E2E Tests', () => {
             expect.fail('Should have thrown an error')
           } catch (error) {
             expect(error).to.be.instanceOf(Error)
-            expect(error.message).to.equal('Partial failure simulation')
+            expect((error as Error).message).to.equal('Partial failure simulation')
           }
           
           // Verify user still exists but post was not created
@@ -745,7 +746,7 @@ describe('Error Handling E2E Tests', () => {
           const userRepo = db.getRepository('users')
           
           // Test concurrent operations with some failures
-          const promises = []
+          const promises: Promise<any>[] = []
           
           // Mix of successful and failing operations
           for (let i = 0; i < 10; i++) {
@@ -788,7 +789,7 @@ describe('Error Handling E2E Tests', () => {
           
           // Clean up successful operations
           for (const user of successful) {
-            await userRepo.delete(user.id)
+            await userRepo.delete((user as any).id)
           }
         }))
 
@@ -810,7 +811,7 @@ describe('Error Handling E2E Tests', () => {
           
           const post = await postRepo.create({
             id: 'consistency-post',
-            userId: user.id,
+            userId: (user as any).id,
             title: 'Consistency Post',
             content: 'This post should maintain consistency',
             published: true
@@ -823,14 +824,14 @@ describe('Error Handling E2E Tests', () => {
               await trx
                 .updateTable('users')
                 .set({ firstName: 'Updated' })
-                .where('id', '=', user.id)
+                .where('id', '=', (user as any).id)
                 .execute()
               
               // Update post
               await trx
                 .updateTable('posts')
                 .set({ title: 'Updated Post' })
-                .where('id', '=', post.id)
+                .where('id', '=', (post as any).id)
                 .execute()
               
               // Force an error
@@ -839,15 +840,15 @@ describe('Error Handling E2E Tests', () => {
             expect.fail('Should have thrown an error')
           } catch (error) {
             expect(error).to.be.instanceOf(Error)
-            expect(error.message).to.equal('Consistency test error')
+            expect((error as Error).message).to.equal('Consistency test error')
           }
           
           // Verify data consistency (both updates should be rolled back)
           const updatedUser = await userRepo.findById('consistency-user')
-          expect(updatedUser!.firstName).to.equal('Consistency') // Should be original value
+          expect((updatedUser as any)!.firstName).to.equal('Consistency') // Should be original value
           
           const updatedPost = await postRepo.findById('consistency-post')
-          expect(updatedPost!.title).to.equal('Consistency Post') // Should be original value
+          expect((updatedPost as any)!.title).to.equal('Consistency Post') // Should be original value
           
           // Clean up
           await postRepo.delete('consistency-post')

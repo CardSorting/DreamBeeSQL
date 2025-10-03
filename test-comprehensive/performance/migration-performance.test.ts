@@ -35,7 +35,7 @@ describe('Migration Performance', () => {
           
           // Should be reasonably fast
           expect(duration).to.be.lessThan(5000) // 5 seconds max
-        }))
+        })
 
         it('should handle memory efficiently during initialization', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -54,7 +54,7 @@ describe('Migration Performance', () => {
           
           // Memory usage should be reasonable
           expect(delta.heapUsed).to.be.lessThan(50) // 50MB limit
-        }))
+        })
 
         it('should handle multiple initializations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -81,7 +81,7 @@ describe('Migration Performance', () => {
           
           // Should be reasonably fast even with multiple initializations
           expect(duration).to.be.lessThan(10000) // 10 seconds max
-        }))
+        })
       })
     }
   })
@@ -109,7 +109,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(1000) // 1 second max
           
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle concurrent status requests efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -137,7 +137,7 @@ describe('Migration Performance', () => {
           expect(results.length).to.equal(10)
           
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should cache status information efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -163,7 +163,7 @@ describe('Migration Performance', () => {
           expect(secondDuration).to.be.lessThan(firstDuration)
           
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })
@@ -191,7 +191,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(10000) // 10 seconds max
           
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle memory efficiently during migration execution', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -212,7 +212,7 @@ describe('Migration Performance', () => {
           expect(delta.heapUsed).to.be.lessThan(100) // 100MB limit
           
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle multiple migration executions efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -237,7 +237,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(1000) // 1 second max
           
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })
@@ -273,7 +273,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(2000) // 2 seconds max
           
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle multiple migration file creations efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -309,7 +309,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(5000) // 5 seconds max
           
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })
@@ -341,7 +341,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(100) // 100ms max
           
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should retrieve configuration efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -364,7 +364,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(50) // 50ms max
           
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })
@@ -393,7 +393,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(50) // 50ms max
           
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })
@@ -418,7 +418,7 @@ describe('Migration Performance', () => {
           
           // Should be reasonably fast
           expect(duration).to.be.lessThan(1000) // 1 second max
-        }))
+        })
 
         it('should handle multiple cleanups efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -439,7 +439,7 @@ describe('Migration Performance', () => {
           
           // Should be reasonably fast even with multiple cleanups
           expect(duration).to.be.lessThan(2000) // 2 seconds max
-        }))
+        })
       })
     }
   })
@@ -474,7 +474,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(2000) // 2 seconds max
           
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle resource constraints efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -503,7 +503,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(3000) // 3 seconds max
           
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })
@@ -537,7 +537,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(2000) // 2 seconds max
           
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle performance monitoring efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -565,7 +565,7 @@ describe('Migration Performance', () => {
           expect(duration).to.be.lessThan(2000) // 2 seconds max
           
           await migrationManager.cleanup()
-        }))
+        })
       })
     }
   })

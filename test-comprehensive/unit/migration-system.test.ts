@@ -34,7 +34,7 @@ describe('Migration System', () => {
           expect(typeof migrationManager.migrate).to.equal('function')
           expect(typeof migrationManager.createMigration).to.equal('function')
           expect(typeof migrationManager.getStatus).to.equal('function')
-        }))
+        })
 
         it('should initialize migration system', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -45,7 +45,7 @@ describe('Migration System', () => {
           })
           
           await expect(migrationManager.initialize()).to.not.be.rejected
-        }))
+        })
 
         it('should get migration status', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -69,7 +69,7 @@ describe('Migration System', () => {
           expect(status.totalFiles).to.be.a('number')
           expect(status.appliedMigrations).to.be.a('number')
           expect(status.pendingMigrations).to.be.a('number')
-        }))
+        })
 
         it('should check if migrations are up to date', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -83,7 +83,7 @@ describe('Migration System', () => {
           const isUpToDate = await migrationManager.isUpToDate()
           
           expect(isUpToDate).to.be.a('boolean')
-        }))
+        })
 
         it('should get pending migrations count', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -98,7 +98,7 @@ describe('Migration System', () => {
           
           expect(pendingCount).to.be.a('number')
           expect(pendingCount).to.be.at.least(0)
-        }))
+        })
 
         it('should get configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -117,7 +117,7 @@ describe('Migration System', () => {
           expect(retrievedConfig.migrationsDirectory).to.equal(config.migrationsDirectory)
           expect(retrievedConfig.migrationTimeout).to.equal(config.migrationTimeout)
           expect(retrievedConfig.maxConcurrentMigrations).to.equal(config.maxConcurrentMigrations)
-        }))
+        })
 
         it('should update configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -137,7 +137,7 @@ describe('Migration System', () => {
           const updatedConfig = migrationManager.getConfig()
           expect(updatedConfig.migrationTimeout).to.equal(newConfig.migrationTimeout)
           expect(updatedConfig.maxConcurrentMigrations).to.equal(newConfig.maxConcurrentMigrations)
-        }))
+        })
 
         it('should get component instances', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -153,7 +153,7 @@ describe('Migration System', () => {
           expect(components).to.have.property('core')
           expect(components).to.have.property('resourceManager')
           expect(components).to.have.property('logger')
-        }))
+        })
 
         it('should cleanup resources', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -167,7 +167,7 @@ describe('Migration System', () => {
           
           // Should not throw
           await expect(migrationManager.cleanup()).to.not.be.rejected
-        }))
+        })
       })
     }
   })
@@ -198,7 +198,7 @@ describe('Migration System', () => {
           expect(result.failed).to.be.a('number')
           expect(result.duration).to.be.a('number')
           expect(result.duration).to.be.at.least(0)
-        }))
+        })
 
         it('should handle no pending migrations', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -219,7 +219,7 @@ describe('Migration System', () => {
           expect(result.success).to.be.true
           expect(result.executed).to.equal(0)
           expect(result.failed).to.equal(0)
-        }))
+        })
 
         it('should handle migration errors gracefully', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -241,7 +241,7 @@ describe('Migration System', () => {
             // Expected error for non-existent directory
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
       })
     }
   })
@@ -272,7 +272,7 @@ describe('Migration System', () => {
           expect(fileName).to.exist
           expect(fileName).to.be.a('string')
           expect(fileName).to.include('test_migration')
-        }))
+        })
 
         it('should handle migration creation errors', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -290,7 +290,7 @@ describe('Migration System', () => {
             // Expected error for invalid directory
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
       })
     }
   })
@@ -312,7 +312,7 @@ describe('Migration System', () => {
           
           // Initialization should be reasonably fast
           expect(duration).to.be.lessThan(5000) // 5 seconds max
-        }))
+        })
 
         it('should get status efficiently', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -330,7 +330,7 @@ describe('Migration System', () => {
           
           // Status check should be very fast
           expect(duration).to.be.lessThan(1000) // 1 second max
-        }))
+        })
 
         it('should handle concurrent status checks', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -356,7 +356,7 @@ describe('Migration System', () => {
           expect(results).to.be.an('array')
           expect(results.length).to.equal(10)
           expect(duration).to.be.lessThan(2000) // 2 seconds max
-        }))
+        })
       })
     }
   })
@@ -388,7 +388,7 @@ describe('Migration System', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should handle invalid migration directory', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -404,7 +404,7 @@ describe('Migration System', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
 
         it('should handle invalid migration content', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -423,7 +423,7 @@ describe('Migration System', () => {
             // Expected error
             expect(error).to.be.instanceOf(Error)
           }
-        }))
+        })
       })
     }
   })
@@ -442,7 +442,7 @@ describe('Migration System', () => {
           expect(config.migrationsDirectory).to.equal('./migrations')
           expect(config.migrationTimeout).to.equal(30000)
           expect(config.maxConcurrentMigrations).to.equal(3)
-        }))
+        })
 
         it('should override default configuration', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -468,7 +468,7 @@ describe('Migration System', () => {
           expect(config.retryDelay).to.equal(customConfig.retryDelay)
           expect(config.logLevel).to.equal(customConfig.logLevel)
           expect(config.enableConsole).to.equal(customConfig.enableConsole)
-        }))
+        })
 
         it('should handle partial configuration updates', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -491,7 +491,7 @@ describe('Migration System', () => {
           // Other config should remain unchanged
           expect(config.migrationsDirectory).to.equal('./test-migrations')
           expect(config.maxConcurrentMigrations).to.equal(3)
-        }))
+        })
       })
     }
   })
@@ -519,7 +519,7 @@ describe('Migration System', () => {
           
           // Should be able to cleanup
           await migrationManager.cleanup()
-        }))
+        })
 
         it('should handle NOORMME configuration changes', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -542,7 +542,7 @@ describe('Migration System', () => {
           // Migration manager should still work
           const status = await migrationManager.getStatus()
           expect(status).to.exist
-        }))
+        })
       })
     }
   })

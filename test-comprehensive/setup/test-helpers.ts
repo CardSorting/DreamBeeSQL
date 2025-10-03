@@ -10,7 +10,7 @@ import { getTestConfig, testTimeouts } from './test-config.js'
  * Test helper class for common testing operations
  */
 export class TestHelper {
-  private testDatabases: Map<string, TestDatabase> = new Map()
+  public testDatabases: Map<string, TestDatabase> = new Map()
   
   /**
    * Create and setup a test database

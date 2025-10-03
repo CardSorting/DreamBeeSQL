@@ -72,7 +72,7 @@ describe('Multi-Database Integration', () => {
       // Clean up
       await sqliteUserRepo.delete('multi-sqlite-user')
       await postgresUserRepo.delete('multi-postgres-user')
-    }))
+        })
 
     it('should handle relationships across different databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
@@ -148,7 +148,7 @@ describe('Multi-Database Integration', () => {
       await sqliteUserRepo.delete('sqlite-rel-user')
       await postgresPostRepo.delete('postgres-rel-post')
       await postgresUserRepo.delete('postgres-rel-user')
-    }))
+        })
 
     it('should handle transactions across different databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
@@ -221,7 +221,7 @@ describe('Multi-Database Integration', () => {
       // Clean up
       await sqliteUserRepo.delete('sqlite-tx-user')
       await postgresUserRepo.delete('postgres-tx-user')
-    }))
+        })
   })
 
   describe('Performance Across Databases', () => {
@@ -285,7 +285,7 @@ describe('Multi-Database Integration', () => {
         await sqliteUserRepo.delete(`sqlite-perf-user-${i}`)
         await postgresUserRepo.delete(`postgres-perf-user-${i}`)
       }
-    }))
+        })
 
     it('should handle concurrent operations across databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
@@ -348,7 +348,7 @@ describe('Multi-Database Integration', () => {
         await sqliteUserRepo.delete(`sqlite-concurrent-user-${i}`)
         await postgresUserRepo.delete(`postgres-concurrent-user-${i}`)
       }
-    }))
+        })
   })
 
   describe('Schema Consistency', () => {
@@ -384,7 +384,7 @@ describe('Multi-Database Integration', () => {
       const postgresRelationshipNames = postgresSchema.relationships.map(r => r.name).sort()
       
       expect(sqliteRelationshipNames).to.deep.equal(postgresRelationshipNames)
-    }))
+        })
 
     it('should handle different column types across databases', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
@@ -435,7 +435,7 @@ describe('Multi-Database Integration', () => {
       // Clean up
       await sqliteUserRepo.delete('sqlite-types-user')
       await postgresUserRepo.delete('postgres-types-user')
-    }))
+        })
   })
 
   describe('Error Handling Across Databases', () => {
@@ -489,7 +489,7 @@ describe('Multi-Database Integration', () => {
       // Clean up
       await sqliteUserRepo.delete('sqlite-error-user')
       await postgresUserRepo.delete('sqlite-error-user')
-    }))
+        })
 
     it('should handle connection errors independently', withMultipleDatabases(['sqlite', 'postgresql'], async (testDatabases) => {
       if (testDatabases.size < 2) {
@@ -545,7 +545,7 @@ describe('Multi-Database Integration', () => {
       
       // Clean up PostgreSQL
       await postgresUserRepo.delete('postgres-conn-user')
-    }))
+        })
   })
 
   describe('Migration System Across Databases', () => {
@@ -594,6 +594,6 @@ describe('Multi-Database Integration', () => {
       // Clean up
       await sqliteMigrationManager.cleanup()
       await postgresMigrationManager.cleanup()
-    }))
+        })
   })
 })

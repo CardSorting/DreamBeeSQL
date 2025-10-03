@@ -58,7 +58,7 @@ describe('Compatibility E2E Tests', () => {
         // Clean up
         await userRepo.delete('postgres-user')
       }
-    }))
+      })
 
     it('should handle MySQL-specific features gracefully', withTestDatabase('mysql', async (testDb) => {
       const { db } = testDb
@@ -82,7 +82,7 @@ describe('Compatibility E2E Tests', () => {
         // Clean up
         await userRepo.delete('mysql-user')
       }
-    }))
+      })
 
     it('should handle SQLite-specific features gracefully', withTestDatabase('sqlite', async (testDb) => {
       const { db } = testDb
@@ -106,7 +106,7 @@ describe('Compatibility E2E Tests', () => {
         // Clean up
         await userRepo.delete('sqlite-user')
       }
-    }))
+      })
   })
 
   describe('Node.js Version Compatibility', () => {
@@ -282,7 +282,7 @@ describe('Compatibility E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('driver-test-user')
-        }))
+        })
 
         it('should handle driver-specific connection options', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -299,7 +299,7 @@ describe('Compatibility E2E Tests', () => {
             .execute()
           
           expect(result).to.be.an('array')
-        }))
+        })
 
         it('should handle driver-specific data types', withTestDatabase(dialect, async (testDb) => {
           const { db } = testDb
@@ -325,7 +325,7 @@ describe('Compatibility E2E Tests', () => {
           
           // Clean up
           await userRepo.delete('datatype-test-user')
-        }))
+        })
       })
     }
   })

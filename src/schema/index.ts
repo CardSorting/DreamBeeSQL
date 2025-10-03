@@ -29,7 +29,5 @@ export { SQLiteConstraintDiscovery } from './dialects/sqlite/discovery/sqlite-co
 export { SQLiteSchemaIntrospector } from './dialects/sqlite/introspection/sqlite-schema-introspector.js'
 export { SQLiteTableBuilder } from './dialects/sqlite/builders/sqlite-table-builder.js'
 
-// Legacy exports for backward compatibility
-export { TableDiscoveryService } from './services/table-discovery.service.js'
-export { RelationshipDiscoveryService } from './services/relationship-discovery.service.js'
-export { ViewDiscoveryService } from './services/view-discovery.service.js'
+// Schema Builders
+export * from './builders/index.js'

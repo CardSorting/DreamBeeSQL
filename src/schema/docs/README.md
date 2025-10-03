@@ -39,6 +39,7 @@ The schema discovery system has been refactored from a monolithic approach to a 
 
 ```
 src/schema/
+├── builders/                       # Schema builders and executors
 ├── core/                           # Shared components
 │   ├── coordinators/               # Central coordination
 │   ├── discovery/                  # Generic discovery services
@@ -50,7 +51,10 @@ src/schema/
 │   ├── sqlite/                     # SQLite implementation
 │   ├── mysql/                      # MySQL (future)
 │   └── mssql/                      # MSSQL (future)
-└── services/                       # Legacy compatibility
+├── docs/                           # Documentation
+├── index.ts                        # Main exports
+├── schema-discovery.ts             # Schema discovery entry point
+└── schema.ts                       # Core schema functionality
 ```
 
 ## Core Components

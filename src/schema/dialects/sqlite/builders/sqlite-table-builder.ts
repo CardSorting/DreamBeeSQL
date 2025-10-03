@@ -1,5 +1,5 @@
 import type { Kysely } from '../../../../kysely.js'
-import { CreateTableBuilder } from '../../../../schema/create-table-builder.js'
+import { CreateTableBuilder } from '../../../../schema/builders/create-table-builder.js'
 
 /**
  * SQLite-specific table builder with enhanced features

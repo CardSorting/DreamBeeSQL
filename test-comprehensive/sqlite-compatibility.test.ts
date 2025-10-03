@@ -1,9 +1,9 @@
 import { describe, it, before, after, beforeEach } from 'mocha'
 import { expect } from 'chai'
 // @ts-ignore - TypeScript has issues with module resolution but tests run successfully
-import { NOORMME } from '../../src/noormme.js'
+import { NOORMME } from '../dist/esm/noormme.js'
 // @ts-ignore - TypeScript has issues with module resolution but tests run successfully
-import { NOORMConfig } from '../../src/types/index.js'
+import { NOORMConfig } from '../dist/esm/types/index.js'
 import path from 'path'
 import fs from 'fs'
 
@@ -45,7 +45,7 @@ describe('SQLite Compatibility Tests', () => {
         database: testDbPath,
         host: '',
         port: 0,
-        user: '',
+        username: '',
         password: ''
       },
       logging: {
@@ -65,7 +65,8 @@ describe('SQLite Compatibility Tests', () => {
     it('should handle empty database introspection', async () => {
       await noormme.initialize()
       
-      const tables = await noormme.getTables()
+      const schemaInfo = await noormme.getSchemaInfo()
+      const tables = schemaInfo.tables
       expect(tables).to.be.an('array')
       expect(tables).to.have.length(0)
     })
@@ -81,7 +82,8 @@ describe('SQLite Compatibility Tests', () => {
         )
       `)
       
-      const tables = await noormme.getTables()
+      const schemaInfo = await noormme.getSchemaInfo()
+      const tables = schemaInfo.tables
       expect(tables).to.be.an('array')
       expect(tables).to.have.length(1)
       expect(tables[0].name).to.equal('test_table')
@@ -103,7 +105,8 @@ describe('SQLite Compatibility Tests', () => {
         )
       `)).to.not.be.rejected
 
-      const tables = await noormme.getTables()
+      const schemaInfo = await noormme.getSchemaInfo()
+      const tables = schemaInfo.tables
       expect(tables).to.have.length(1)
       expect(tables[0].name).to.equal('users')
     })
@@ -229,7 +232,8 @@ describe('SQLite Compatibility Tests', () => {
         )
       `)).to.not.be.rejected
 
-      const tables = await noormme.getTables()
+      const schemaInfo = await noormme.getSchemaInfo()
+      const tables = schemaInfo.tables
       expect(tables).to.have.length(2)
     })
 
@@ -258,7 +262,8 @@ describe('SQLite Compatibility Tests', () => {
       `)).to.be.rejected
 
       // But the tables should still exist
-      const tables = await noormme.getTables()
+      const schemaInfo = await noormme.getSchemaInfo()
+      const tables = schemaInfo.tables
       expect(tables).to.have.length(2)
     })
   })
@@ -367,7 +372,8 @@ describe('SQLite Compatibility Tests', () => {
       const newNoormme = new NOORMME(config)
       await newNoormme.initialize()
 
-      const tables = await newNoormme.getTables()
+      const schemaInfo = await newNoormme.getSchemaInfo()
+      const tables = schemaInfo.tables
       expect(tables).to.have.length(1)
       
       const table = tables[0]
@@ -393,7 +399,8 @@ describe('SQLite Compatibility Tests', () => {
       const newNoormme = new NOORMME(config)
       await newNoormme.initialize()
 
-      const tables = await newNoormme.getTables()
+      const schemaInfo = await newNoormme.getSchemaInfo()
+      const tables = schemaInfo.tables
       const table = tables[0]
       
       expect(table.columns).to.be.an('array')

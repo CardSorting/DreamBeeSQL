@@ -1,9 +1,9 @@
 import { describe, it, before, after, beforeEach } from 'mocha'
 import { expect } from 'chai'
 // @ts-ignore - TypeScript has issues with module resolution but tests run successfully
-import { NOORMME } from '../../src/noormme.js'
+import { NOORMME } from '../dist/esm/noormme.js'
 // @ts-ignore - TypeScript has issues with module resolution but tests run successfully
-import { NOORMConfig } from '../../src/types/index.js'
+import { NOORMConfig } from '../dist/esm/types/index.js'
 import path from 'path'
 import fs from 'fs'
 
@@ -42,7 +42,7 @@ describe('SQLite Foreign Key Constraints - Targeted Tests', () => {
         database: testDbPath,
         host: '',
         port: 0,
-        user: '',
+        username: '',
         password: ''
       },
       logging: {

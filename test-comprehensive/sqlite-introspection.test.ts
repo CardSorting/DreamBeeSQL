@@ -20,18 +20,21 @@ import fs from 'fs'
  */
 
 describe('SQLite Database Introspection - Targeted Tests', () => {
-  let noormme: NOORMME
+  let noormme: any
   let testDbPath: string
-  let config: NOORMConfig
+  let config: any
 
   before(async () => {
     // Dynamic imports
+    // @ts-ignore - TypeScript has issues with module resolution but tests run successfully
     const noormmeModule = await import('../../dist/esm/noormme.js')
+    // @ts-ignore - TypeScript has issues with module resolution but tests run successfully
     const typesModule = await import('../../dist/esm/types/index.js')
+    // @ts-ignore - TypeScript has issues with module resolution but tests run successfully
     const introspectorModule = await import('../../dist/esm/dialect/database-introspector.js')
     
-    NOORMME = noormmeModule.NOORMME
-    NOORMConfig = typesModule.NOORMConfig
+    const NOORMME = noormmeModule.NOORMME
+    const NOORMConfig = typesModule.NOORMConfig
     DatabaseIntrospector = introspectorModule.DatabaseIntrospector
     
     testDbPath = path.join(__dirname, `test-sqlite-introspection-${Date.now()}.db`)
@@ -50,7 +53,7 @@ describe('SQLite Database Introspection - Targeted Tests', () => {
         database: testDbPath,
         host: '',
         port: 0,
-        user: '',
+        username: '',
         password: ''
       },
       logging: {
@@ -191,17 +194,17 @@ describe('SQLite Database Introspection - Targeted Tests', () => {
       expect(schema).to.have.length(7)
       
       // Check specific columns
-      const idColumn = schema.find(col => col.name === 'id')
+      const idColumn = schema.find((col: any) => col.name === 'id')
       expect(idColumn).to.exist
       expect(idColumn.type).to.equal('INTEGER')
       expect(idColumn.pk).to.equal(1) // Primary key flag
       
-      const nameColumn = schema.find(col => col.name === 'name')
+      const nameColumn = schema.find((col: any) => col.name === 'name')
       expect(nameColumn).to.exist
       expect(nameColumn.type).to.equal('TEXT')
       expect(nameColumn.notnull).to.equal(1)
       
-      const emailColumn = schema.find(col => col.name === 'email')
+      const emailColumn = schema.find((col: any) => col.name === 'email')
       expect(emailColumn).to.exist
       expect(emailColumn.type).to.equal('TEXT')
     })
@@ -280,7 +283,7 @@ describe('SQLite Database Introspection - Targeted Tests', () => {
           `)
           
           if (sqliteTables.length > 0) {
-            return sqliteTables.map(t => ({ name: t.name }))
+            return sqliteTables.map((t: any) => ({ name: t.name }))
           }
         } catch (error) {
           // Fallback to other databases if needed
@@ -323,7 +326,7 @@ describe('SQLite Database Introspection - Targeted Tests', () => {
             const result = await noormme.execute(query)
             if (result.length > 0) {
               console.log(`Found tables using ${name} introspection`)
-              return result.map(t => ({ name: t.name }))
+              return result.map((t: any) => ({ name: t.name }))
             }
           } catch (error: any) {
             console.log(`${name} introspection failed: ${error.message}`)
@@ -375,7 +378,7 @@ describe('SQLite Database Introspection - Targeted Tests', () => {
       const testDbPath2 = path.join(__dirname, `test-sqlite-success-${Date.now()}.db`)
       const config2 = {
         dialect: 'sqlite',
-        connection: { database: testDbPath2, host: '', port: 0, user: '', password: '' },
+        connection: { database: testDbPath2, host: '', port: 0, username: '', password: '' },
         logging: { level: 'error', enabled: true }
       }
       

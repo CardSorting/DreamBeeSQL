@@ -1,7 +1,7 @@
 import { describe, it, before, after, beforeEach } from 'mocha'
 import { expect } from 'chai'
-import { NOORMME } from '../../src/noormme.js'
-import { NOORMConfig } from '../../src/types/index.js'
+import { NOORMME } from '../dist/esm/noormme.js'
+import { NOORMConfig } from '../dist/esm/types/index.js'
 import path from 'path'
 import fs from 'fs'
 
@@ -40,7 +40,7 @@ describe('SQLite Syntax Compatibility - Targeted Tests', () => {
         database: testDbPath,
         host: '',
         port: 0,
-        user: '',
+        username: '',
         password: ''
       },
       logging: {

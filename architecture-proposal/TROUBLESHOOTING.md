@@ -1,17 +1,17 @@
-# DreamBeeSQL Troubleshooting Guide
+# NOORM Troubleshooting Guide
 
 ## 🚨 Common Issues
 
 ### 1. Initialization Issues
 
-#### "DreamBeeSQL not initialized"
+#### "NOORM not initialized"
 ```typescript
 // ❌ Wrong - Using repository before initialization
-const db = new DreamBeeSQL(config)
+const db = new NOORM(config)
 const userRepo = db.getRepository('users') // Error!
 
 // ✅ Correct - Initialize first
-const db = new DreamBeeSQL(config)
+const db = new NOORM(config)
 await db.initialize()
 const userRepo = db.getRepository('users')
 ```
@@ -19,7 +19,7 @@ const userRepo = db.getRepository('users')
 #### "Database connection failed"
 ```typescript
 // ❌ Wrong - Invalid connection config
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: 'localhost',
@@ -31,7 +31,7 @@ const db = new DreamBeeSQL({
 })
 
 // ✅ Correct - Check connection details
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: process.env.DB_HOST || 'localhost',
@@ -184,7 +184,7 @@ const posts = await db
 #### "Invalid configuration"
 ```typescript
 // ❌ Wrong - Invalid config
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'invalid_dialect',
   connection: {
     host: '',
@@ -196,7 +196,7 @@ const db = new DreamBeeSQL({
 })
 
 // ✅ Correct - Validate config
-function validateConfig(config: DreamBeeSQLConfig): void {
+function validateConfig(config: NOORMConfig): void {
   if (!['postgresql', 'mysql', 'sqlite', 'mssql'].includes(config.dialect)) {
     throw new Error('Invalid dialect')
   }
@@ -226,20 +226,20 @@ const config = {
 }
 
 validateConfig(config)
-const db = new DreamBeeSQL(config)
+const db = new NOORM(config)
 ```
 
-## 🔧 Debugging Techniques
+## 🔧 Quick Debugging
 
 ### 1. Enable Debug Logging
 
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   // ... config
   logging: {
     level: 'debug',
     enabled: true,
-    file: './dreambeesql.log'
+    file: './noorm.log'
   }
 })
 
@@ -294,9 +294,9 @@ console.log('Performance metrics:', {
 
 ```typescript
 // Test connection before initializing
-async function testConnection(config: DreamBeeSQLConfig): Promise<boolean> {
+async function testConnection(config: NOORMConfig): Promise<boolean> {
   try {
-    const db = new DreamBeeSQL(config)
+    const db = new NOORM(config)
     await db.initialize()
     
     // Test basic query
@@ -317,14 +317,14 @@ if (!isConnected) {
 }
 ```
 
-## 🛠️ Common Solutions
+## 🛠️ Quick Solutions
 
 ### 1. Schema Issues
 
 #### Problem: Tables not discovered
 ```typescript
 // Solution: Check database permissions
-const db = new DreamBeeSQL({
+const db = new NOORM({
   // ... config
   introspection: {
     includeViews: true,
@@ -346,7 +346,7 @@ const db = new DreamBeeSQL({
 #### Problem: Type generation fails
 ```typescript
 // Solution: Check custom type mappings
-const db = new DreamBeeSQL({
+const db = new NOORM({
   // ... config
   introspection: {
     customTypeMappings: {
@@ -371,7 +371,7 @@ await db.refreshSchema()
 #### Problem: Slow schema discovery
 ```typescript
 // Solution: Cache schema
-const db = new DreamBeeSQL({
+const db = new NOORM({
   // ... config
   cache: {
     ttl: 600000, // 10 minutes
@@ -400,7 +400,7 @@ db.updateConfig({
 #### Problem: High memory usage
 ```typescript
 // Solution: Configure connection pooling
-const db = new DreamBeeSQL({
+const db = new NOORM({
   // ... config
   connection: {
     // ... connection config
@@ -417,60 +417,10 @@ const db = new DreamBeeSQL({
 ```typescript
 // Solution: Proper cleanup
 process.on('SIGTERM', async () => {
-  console.log('Shutting down DreamBeeSQL...')
+  console.log('Shutting down NOORM...')
   await db.close()
   process.exit(0)
 })
-```
-
-## 🔍 Advanced Debugging
-
-### 1. Query Analysis
-
-```typescript
-// Analyze query performance
-const startTime = Date.now()
-const users = await userRepo.findAll()
-const endTime = Date.now()
-
-console.log(`Query took ${endTime - startTime}ms`)
-
-// Check query plan (PostgreSQL)
-const plan = await db.query(`
-  EXPLAIN ANALYZE 
-  SELECT * FROM users
-`)
-console.log('Query plan:', plan)
-```
-
-### 2. Cache Analysis
-
-```typescript
-// Check cache performance
-const cacheStats = await db.getCacheStats()
-console.log('Cache stats:', {
-  hitRate: cacheStats.hitRate,
-  totalEntries: cacheStats.totalEntries,
-  memoryUsage: cacheStats.memoryUsage
-})
-
-// Clear cache if needed
-db.clearCache()
-```
-
-### 3. Relationship Analysis
-
-```typescript
-// Check relationship loading
-const user = await userRepo.findById(id)
-console.log('User before relationships:', user)
-
-await userRepo.loadRelationships(user, ['posts'])
-console.log('User after relationships:', user)
-
-// Check relationship metadata
-const relationships = await db.getRelationships('users')
-console.log('User relationships:', relationships)
 ```
 
 ## 📊 Performance Monitoring

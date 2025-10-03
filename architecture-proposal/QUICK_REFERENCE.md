@@ -1,11 +1,11 @@
-# DreamBeeSQL Quick Reference
+# NOORM Quick Reference
 
 ## 🚀 Setup (30 seconds)
 
 ```typescript
-import { DreamBeeSQL } from 'dreambeesql'
+import { NOORM } from 'noorm'
 
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: 'localhost',
@@ -38,9 +38,6 @@ const user = await userRepo.findById(id)
 
 // All records
 const users = await userRepo.findAll()
-
-// Custom query
-const user = await userRepo.findByEmail('john@example.com')
 ```
 
 ### Update
@@ -61,9 +58,6 @@ await userRepo.delete(user.id)
 // Single relationship
 const userWithPosts = await userRepo.findWithRelations(user.id, ['posts'])
 
-// Multiple relationships
-const userWithAll = await userRepo.findWithRelations(user.id, ['posts', 'profile'])
-
 // Nested relationships
 const userWithNested = await userRepo.findWithRelations(user.id, ['posts.comments'])
 ```
@@ -78,7 +72,7 @@ await userRepo.loadRelationships(users, ['posts'])
 
 ### Basic Config
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: { /* connection */ }
 })
@@ -86,7 +80,7 @@ const db = new DreamBeeSQL({
 
 ### Advanced Config
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: { /* connection */ },
   introspection: {
@@ -113,18 +107,6 @@ const activeUsers = await db
   .where('active', '=', true)
   .selectAll()
   .execute()
-```
-
-### Repository Methods
-```typescript
-// Add to repository class
-async findActiveUsers(): Promise<User[]> {
-  return this.db
-    .selectFrom('users')
-    .where('active', '=', true)
-    .selectAll()
-    .execute()
-}
 ```
 
 ## 🎯 Common Patterns
@@ -159,29 +141,10 @@ try {
 }
 ```
 
-### Schema Monitoring
-```typescript
-db.onSchemaChange((changes) => {
-  console.log('Schema changes:', changes)
-})
-
-await db.startSchemaMonitoring()
-```
-
 ## 📝 TypeScript Types
 
 ### Auto-generated Types
 ```typescript
-// Row types
-interface UserRow {
-  id: string
-  email: string
-  first_name: string | null
-  last_name: string | null
-  created_at: Date | null
-  updated_at: Date | null
-}
-
 // Entity types
 interface User {
   id: string
@@ -197,7 +160,7 @@ interface User {
 
 ### Custom Type Mappings
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   // ... config
   introspection: {
     customTypeMappings: {
@@ -210,7 +173,7 @@ const db = new DreamBeeSQL({
 
 ## 🚨 Common Issues
 
-### "DreamBeeSQL not initialized"
+### "NOORM not initialized"
 ```typescript
 // ❌ Wrong
 const userRepo = db.getRepository('users')
@@ -255,21 +218,11 @@ await userRepo.loadRelationships(users, ['posts'])
 
 ### Caching
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   // ... config
   cache: {
     ttl: 300000, // 5 minutes
     maxSize: 1000
-  }
-})
-```
-
-### Query Optimization
-```typescript
-db.updateConfig({
-  performance: {
-    enableQueryOptimization: true,
-    enableBatchLoading: true
   }
 })
 ```
@@ -279,7 +232,7 @@ db.updateConfig({
 ### PostgreSQL
 ```typescript
 npm install pg
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: { /* config */ }
 })
@@ -288,7 +241,7 @@ const db = new DreamBeeSQL({
 ### MySQL
 ```typescript
 npm install mysql2
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'mysql',
   connection: { /* config */ }
 })
@@ -297,7 +250,7 @@ const db = new DreamBeeSQL({
 ### SQLite
 ```typescript
 npm install better-sqlite3
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'sqlite',
   connection: {
     database: './myapp.db'
@@ -305,28 +258,18 @@ const db = new DreamBeeSQL({
 })
 ```
 
-### MSSQL
-```typescript
-npm install tedious
-const db = new DreamBeeSQL({
-  dialect: 'mssql',
-  connection: { /* config */ }
-})
-```
-
 ## 📚 API Reference
 
-### DreamBeeSQL Class
+### NOORM Class
 ```typescript
-class DreamBeeSQL {
-  constructor(config: DreamBeeSQLConfig)
+class NOORM {
+  constructor(config: NOORMConfig)
   async initialize(): Promise<void>
   getRepository<T>(tableName: string): T
-  getEntity<T>(tableName: string): T
   onSchemaChange(callback: (changes: SchemaChange[]) => void): void
   async refreshSchema(): Promise<RefreshResult>
   async getSchemaInfo(): Promise<SchemaInfo>
-  updateConfig(updates: Partial<DreamBeeSQLConfig>): void
+  updateConfig(updates: Partial<NOORMConfig>): void
   async close(): Promise<void>
 }
 ```
@@ -370,7 +313,7 @@ try {
 
 ### 4. Configure for Production
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: process.env.DB_HOST,

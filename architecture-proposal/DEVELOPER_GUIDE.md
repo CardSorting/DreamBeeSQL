@@ -1,16 +1,16 @@
-# DreamBeeSQL Developer Guide
+# NOORM Developer Guide
 
-## 🎯 What is DreamBeeSQL?
+## 🎯 What is NOORM?
 
-DreamBeeSQL is a **zero-configuration pseudo-ORM** built on Kysely that automatically discovers your database schema and generates TypeScript types, entities, and repositories. No manual entity definitions required!
+NOORM is a **zero-configuration pseudo-ORM** that automatically discovers your database schema and generates TypeScript types, entities, and repositories. No manual entity definitions required!
 
 ## 🚀 Quick Start (2 minutes)
 
 ```typescript
-import { DreamBeeSQL } from 'dreambeesql'
+import { NOORM } from 'noorm'
 
 // 1. Connect to your existing database
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: 'localhost',
@@ -29,31 +29,20 @@ const userRepo = db.getRepository('users')
 const users = await userRepo.findAll()
 ```
 
-**That's it!** DreamBeeSQL automatically:
+**That's it!** NOORM automatically:
 - ✅ Discovers all tables and relationships
 - ✅ Generates TypeScript types
-- ✅ Creates entity classes with decorators
-- ✅ Builds repository classes with CRUD operations
+- ✅ Creates repository classes with CRUD operations
 - ✅ Provides full IntelliSense support
 
-## 📚 Documentation Navigation
+## 📚 Guide Structure
 
-### For New Developers
-1. **[Quick Start](#quick-start-2-minutes)** - Get running in 2 minutes
-2. **[Basic Usage](#basic-usage)** - Common operations
-3. **[Configuration](#configuration)** - Setup options
-4. **[Examples](#examples)** - Real-world patterns
-
-### For Experienced Developers
-1. **[Architecture Overview](./ARCHITECTURE_OVERVIEW.md)** - System design
-2. **[Implementation Guide](./IMPLEMENTATION_GUIDE.md)** - Build your own
-3. **[API Reference](#api-reference)** - Complete API docs
-4. **[Advanced Features](#advanced-features)** - Power user features
-
-### For Migration
-1. **[Migration Guide](#migration-guide)** - From other ORMs
-2. **[Troubleshooting](#troubleshooting)** - Common issues
-3. **[Performance Tips](#performance-tips)** - Optimization
+1. **[Basic Usage](#basic-usage)** - CRUD operations and relationships
+2. **[Configuration](#configuration)** - Setup options
+3. **[Examples](#examples)** - Real-world patterns
+4. **[API Reference](#api-reference)** - Complete API docs
+5. **[Migration Guide](#migration-guide)** - From other ORMs
+6. **[Troubleshooting](#troubleshooting)** - Common issues
 
 ## 🔧 Basic Usage
 
@@ -85,23 +74,14 @@ await userRepo.delete(user.id)
 // Load user with posts
 const userWithPosts = await userRepo.findWithRelations(user.id, ['posts'])
 
-// Load post with comments and user
-const postWithAll = await postRepo.findWithRelations(post.id, ['comments', 'user'])
-
-// Nested relationships
+// Load nested relationships
 const userWithNested = await userRepo.findWithRelations(user.id, ['posts.comments'])
 ```
 
 ### Custom Queries
 
 ```typescript
-// Find by email
-const user = await userRepo.findByEmail('john@example.com')
-
-// Find recent posts
-const recentPosts = await postRepo.findRecentPosts(10)
-
-// Complex queries with Kysely
+// Using Kysely for complex queries
 const activeUsers = await db
   .selectFrom('users')
   .where('active', '=', true)
@@ -114,7 +94,7 @@ const activeUsers = await db
 ### Basic Configuration
 
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: 'localhost',
@@ -129,7 +109,7 @@ const db = new DreamBeeSQL({
 ### Advanced Configuration
 
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: { /* connection config */ },
   introspection: {
@@ -153,7 +133,7 @@ const db = new DreamBeeSQL({
 ### Environment Configuration
 
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: process.env.DB_HOST,
@@ -170,13 +150,8 @@ const db = new DreamBeeSQL({
 ### Blog Application
 
 ```typescript
-// Database schema
-// users (id, email, first_name, last_name, created_at)
-// posts (id, title, content, user_id, created_at)
-// comments (id, content, post_id, user_id, created_at)
-
 // Initialize
-const db = new DreamBeeSQL({ /* config */ })
+const db = new NOORM({ /* config */ })
 await db.initialize()
 
 // Get repositories
@@ -209,42 +184,6 @@ const postWithComments = await postRepo.findWithRelations(post.id, ['comments.us
 console.log(`Post "${postWithComments.title}" has ${postWithComments.comments?.length} comments`)
 ```
 
-### E-commerce Application
-
-```typescript
-// Database schema
-// products (id, name, price, description, created_at)
-// orders (id, user_id, total, status, created_at)
-// order_items (id, order_id, product_id, quantity, price)
-
-// Initialize
-const db = new DreamBeeSQL({ /* config */ })
-await db.initialize()
-
-// Get repositories
-const productRepo = db.getRepository('products')
-const orderRepo = db.getRepository('orders')
-const orderItemRepo = db.getRepository('order_items')
-
-// Create order
-const order = await orderRepo.create({
-  userId: 'user-123',
-  total: 99.99,
-  status: 'pending'
-})
-
-// Add items
-await orderItemRepo.create({
-  orderId: order.id,
-  productId: 'product-1',
-  quantity: 2,
-  price: 49.99
-})
-
-// Load order with items and products
-const orderWithItems = await orderRepo.findWithRelations(order.id, ['orderItems.product'])
-```
-
 ## 🔄 Migration Guide
 
 ### From TypeORM
@@ -263,7 +202,7 @@ export class User {
   posts: Post[]
 }
 
-// After (DreamBeeSQL)
+// After (NOORM)
 // No entity definition needed!
 const userRepo = db.getRepository('users')
 const user = await userRepo.findById(id)
@@ -279,7 +218,7 @@ const user = await prisma.user.findUnique({
   include: { posts: true }
 })
 
-// After (DreamBeeSQL)
+// After (NOORM)
 const userRepo = db.getRepository('users')
 const user = await userRepo.findWithRelations(id, ['posts'])
 ```
@@ -292,7 +231,7 @@ const user = await User.findByPk(id, {
   include: [Post]
 })
 
-// After (DreamBeeSQL)
+// After (NOORM)
 const userRepo = db.getRepository('users')
 const user = await userRepo.findWithRelations(id, ['posts'])
 ```
@@ -301,7 +240,7 @@ const user = await userRepo.findWithRelations(id, ['posts'])
 
 ### Common Issues
 
-#### 1. "DreamBeeSQL not initialized"
+#### 1. "NOORM not initialized"
 ```typescript
 // ❌ Wrong
 const userRepo = db.getRepository('users')
@@ -332,7 +271,7 @@ const user = await userRepo.findWithRelations(id, ['posts'])
 ### Debug Mode
 
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   // ... config
   logging: {
     level: 'debug',
@@ -374,7 +313,7 @@ await userRepo.loadRelationships(users, ['posts'])
 ### 2. Configure Caching
 
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   // ... config
   cache: {
     ttl: 300000, // 5 minutes
@@ -397,18 +336,17 @@ db.updateConfig({
 
 ## 🔧 API Reference
 
-### DreamBeeSQL Class
+### NOORM Class
 
 ```typescript
-class DreamBeeSQL {
-  constructor(config: DreamBeeSQLConfig)
+class NOORM {
+  constructor(config: NOORMConfig)
   async initialize(): Promise<void>
   getRepository<T>(tableName: string): T
-  getEntity<T>(tableName: string): T
   onSchemaChange(callback: (changes: SchemaChange[]) => void): void
   async refreshSchema(): Promise<RefreshResult>
   async getSchemaInfo(): Promise<SchemaInfo>
-  updateConfig(updates: Partial<DreamBeeSQLConfig>): void
+  updateConfig(updates: Partial<NOORMConfig>): void
   async close(): Promise<void>
 }
 ```
@@ -427,17 +365,13 @@ interface BaseRepository<T, TRow> {
   // Relationships
   async findWithRelations(id: any, relations: string[]): Promise<T | null>
   async loadRelationships(entities: T[], relations: string[]): Promise<void>
-  
-  // Custom queries
-  async findByEmail(email: string): Promise<T | null>
-  async findRecent(limit: number): Promise<T[]>
 }
 ```
 
 ### Configuration Types
 
 ```typescript
-interface DreamBeeSQLConfig {
+interface NOORMConfig {
   dialect: 'postgresql' | 'mysql' | 'sqlite' | 'mssql'
   connection: ConnectionConfig
   introspection?: IntrospectionConfig
@@ -502,7 +436,7 @@ await db.startSchemaMonitoring()
 ### Custom Type Mappings
 
 ```typescript
-const db = new DreamBeeSQL({
+const db = new NOORM({
   // ... config
   introspection: {
     customTypeMappings: {
@@ -537,11 +471,11 @@ console.log('Average time:', metrics.averageQueryTime)
 
 ```typescript
 // ✅ Good
-const db = new DreamBeeSQL(config)
+const db = new NOORM(config)
 await db.initialize()
 
 // ❌ Bad
-const db = new DreamBeeSQL(config)
+const db = new NOORM(config)
 // Forgot to initialize!
 ```
 
@@ -578,7 +512,7 @@ const user = await userRepo.findById(id) // What if this fails?
 
 ```typescript
 // ✅ Good
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: process.env.DB_HOST,
@@ -598,7 +532,7 @@ const db = new DreamBeeSQL({
 })
 
 // ❌ Bad
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: 'localhost',
@@ -616,8 +550,8 @@ const db = new DreamBeeSQL({
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/dreambeesql.git
-cd dreambeesql
+git clone https://github.com/your-org/noorm.git
+cd noorm
 
 # Install dependencies
 npm install
@@ -655,4 +589,4 @@ npm run dev
 
 ---
 
-**Ready to get started?** Jump to the [Quick Start](#quick-start-2-minutes) section and have DreamBeeSQL running in 2 minutes!
+**Ready to get started?** Jump to the [Quick Start](#quick-start-2-minutes) section and have NOORM running in 2 minutes!

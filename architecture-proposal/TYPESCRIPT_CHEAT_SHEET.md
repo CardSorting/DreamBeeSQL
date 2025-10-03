@@ -1,8 +1,8 @@
-# DreamBeeSQL TypeScript Cheat Sheet
+# NOORM TypeScript Cheat Sheet
 
 ## 🎯 Auto-Generated Types
 
-DreamBeeSQL automatically generates TypeScript types from your database schema. No manual type definitions required!
+NOORM automatically generates TypeScript types from your database schema. No manual type definitions required!
 
 ### Basic Types
 
@@ -110,13 +110,6 @@ interface UserWithProfile extends User {
   profile: Profile
 }
 
-// User with all relationships
-interface UserWithAll extends User {
-  posts: Post[]
-  profile: Profile
-  comments: Comment[]
-}
-
 // Post with user and comments
 interface PostWithRelations extends Post {
   user: User
@@ -182,7 +175,6 @@ interface UserRepository extends BaseRepository<User, UserRow> {
   findActiveUsers(): Promise<User[]>
   findWithPosts(id: string): Promise<UserWithPosts | null>
   findWithProfile(id: string): Promise<UserWithProfile | null>
-  findWithAll(id: string): Promise<UserWithAll | null>
 }
 
 // Post Repository
@@ -190,24 +182,21 @@ interface PostRepository extends BaseRepository<Post, PostRow> {
   findByUserId(userId: string): Promise<Post[]>
   findRecentPosts(limit: number): Promise<Post[]>
   findWithComments(id: string): Promise<PostWithRelations | null>
-  findWithUser(id: string): Promise<PostWithRelations | null>
 }
 
 // Comment Repository
 interface CommentRepository extends BaseRepository<Comment, CommentRow> {
   findByPostId(postId: string): Promise<Comment[]>
   findByUserId(userId: string): Promise<Comment[]>
-  findWithPost(id: string): Promise<CommentWithRelations | null>
-  findWithUser(id: string): Promise<CommentWithRelations | null>
 }
 ```
 
 ## 🎨 Configuration Types
 
-### DreamBeeSQL Config
+### NOORM Config
 
 ```typescript
-interface DreamBeeSQLConfig {
+interface NOORMConfig {
   dialect: 'postgresql' | 'mysql' | 'sqlite' | 'mssql'
   connection: ConnectionConfig
   introspection?: IntrospectionConfig
@@ -311,7 +300,7 @@ type Pick<T, K extends keyof T> = {
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 ```
 
-### DreamBeeSQL Specific Types
+### NOORM Specific Types
 
 ```typescript
 // Insertable type (excludes auto-generated fields)
@@ -446,30 +435,6 @@ type RelationshipNames<T> = {
 }[keyof T]
 ```
 
-### Template Literal Types
-
-```typescript
-// Relationship path type
-type RelationshipPath = 
-  | 'posts'
-  | 'profile'
-  | 'comments'
-  | 'posts.comments'
-  | 'posts.user'
-  | 'comments.post'
-  | 'comments.user'
-
-// Nested relationship type
-type NestedRelationship<T, P extends string> = 
-  P extends `${infer R}.${infer S}` ? 
-    T extends { [K in R]: infer U } ? 
-      U extends any[] ? 
-        U[0] extends { [K in S]: infer V } ? V : never :
-      U extends { [K in S]: infer V } ? V : never :
-    never :
-  T extends { [K in P]: infer U } ? U : never
-```
-
 ## 🔍 Type Utilities
 
 ### Validation Types
@@ -500,21 +465,21 @@ function createUUID(uuid: string): UUID {
 
 ```typescript
 // Custom error types
-class DreamBeeSQLError extends Error {
+class NOORMError extends Error {
   constructor(message: string, public code: string) {
     super(message)
-    this.name = 'DreamBeeSQLError'
+    this.name = 'NOORMError'
   }
 }
 
-class ValidationError extends DreamBeeSQLError {
+class ValidationError extends NOORMError {
   constructor(message: string, public field: string) {
     super(message, 'VALIDATION_ERROR')
     this.name = 'ValidationError'
   }
 }
 
-class NotFoundError extends DreamBeeSQLError {
+class NotFoundError extends NOORMError {
   constructor(resource: string, id: string) {
     super(`${resource} with id ${id} not found`, 'NOT_FOUND')
     this.name = 'NotFoundError'

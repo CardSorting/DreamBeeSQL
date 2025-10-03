@@ -1,8 +1,8 @@
-# DreamBeeSQL Migration Guide
+# NOORM Migration Guide
 
 ## 🎯 Overview
 
-This guide helps you migrate from existing ORMs to DreamBeeSQL. DreamBeeSQL's zero-configuration approach means you can often migrate with minimal code changes while gaining automatic type safety and schema discovery.
+This guide helps you migrate from existing ORMs to NOORM. NOORM's zero-configuration approach means you can often migrate with minimal code changes while gaining automatic type safety and schema discovery.
 
 ## 🚀 Migration Benefits
 
@@ -12,28 +12,23 @@ This guide helps you migrate from existing ORMs to DreamBeeSQL. DreamBeeSQL's ze
 - **Performance** - Built on Kysely for optimal SQL generation
 - **Type Safety** - Compile-time checking for all operations
 
-## 📋 Migration Checklist
+## 📋 Quick Migration Checklist
 
 ### Pre-Migration
 - [ ] Backup your database
 - [ ] Document current ORM usage patterns
-- [ ] Identify custom queries and relationships
 - [ ] Plan testing strategy
-- [ ] Set up development environment
 
 ### During Migration
-- [ ] Install DreamBeeSQL
+- [ ] Install NOORM
 - [ ] Configure database connection
 - [ ] Replace ORM imports
 - [ ] Update query syntax
 - [ ] Test functionality
-- [ ] Update error handling
 
 ### Post-Migration
 - [ ] Run comprehensive tests
 - [ ] Update documentation
-- [ ] Monitor performance
-- [ ] Train team on new patterns
 - [ ] Remove old ORM dependencies
 
 ## 🔄 From TypeORM
@@ -60,11 +55,11 @@ const connection = await createConnection({
 const userRepository = connection.getRepository(User)
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
-import { DreamBeeSQL } from 'dreambeesql'
+import { NOORM } from 'noorm'
 
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: 'localhost',
@@ -97,46 +92,15 @@ export class User {
   @Column({ nullable: true })
   lastName?: string
 
-  @CreateDateColumn()
-  createdAt: Date
-
-  @UpdateDateColumn()
-  updatedAt: Date
-
   @OneToMany(() => Post, post => post.user)
   posts: Post[]
 }
-
-@Entity('posts')
-export class Post {
-  @PrimaryGeneratedColumn('uuid')
-  id: string
-
-  @Column()
-  title: string
-
-  @Column({ nullable: true })
-  content?: string
-
-  @ManyToOne(() => User, user => user.posts)
-  @JoinColumn({ name: 'user_id' })
-  user: User
-
-  @Column()
-  user_id: string
-
-  @CreateDateColumn()
-  createdAt: Date
-
-  @UpdateDateColumn()
-  updatedAt: Date
-}
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
 // No entity definitions needed!
-// DreamBeeSQL auto-generates entities from your database schema
+// NOORM auto-generates entities from your database schema
 
 // Auto-generated types are available:
 interface User {
@@ -147,16 +111,6 @@ interface User {
   createdAt?: Date
   updatedAt?: Date
   posts?: Post[]
-}
-
-interface Post {
-  id: string
-  title: string
-  content?: string
-  user_id: string
-  createdAt?: Date
-  updatedAt?: Date
-  user?: User
 }
 ```
 
@@ -174,7 +128,6 @@ const savedUser = await userRepository.save(user)
 // Read
 const user = await userRepository.findOne({ where: { id } })
 const users = await userRepository.find()
-const userByEmail = await userRepository.findOne({ where: { email } })
 
 // Update
 user.firstName = 'Johnny'
@@ -184,7 +137,7 @@ const updatedUser = await userRepository.save(user)
 await userRepository.remove(user)
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
 // Create
 const user = await userRepo.create({
@@ -196,7 +149,6 @@ const user = await userRepo.create({
 // Read
 const user = await userRepo.findById(id)
 const users = await userRepo.findAll()
-const userByEmail = await userRepo.findByEmail('john@example.com')
 
 // Update
 user.firstName = 'Johnny'
@@ -215,30 +167,12 @@ const user = await userRepository.findOne({
   where: { id },
   relations: ['posts']
 })
-
-// Load post with user
-const post = await postRepository.findOne({
-  where: { id },
-  relations: ['user']
-})
-
-// Load nested relationships
-const user = await userRepository.findOne({
-  where: { id },
-  relations: ['posts', 'posts.comments']
-})
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
 // Load user with posts
 const user = await userRepo.findWithRelations(id, ['posts'])
-
-// Load post with user
-const post = await postRepo.findWithRelations(id, ['user'])
-
-// Load nested relationships
-const user = await userRepo.findWithRelations(id, ['posts.comments'])
 ```
 
 ### Custom Queries
@@ -249,38 +183,17 @@ const user = await userRepo.findWithRelations(id, ['posts.comments'])
 const users = await userRepository
   .createQueryBuilder('user')
   .where('user.active = :active', { active: true })
-  .andWhere('user.createdAt > :date', { date: new Date('2024-01-01') })
-  .orderBy('user.createdAt', 'DESC')
   .getMany()
-
-// Raw SQL
-const users = await userRepository.query(
-  'SELECT * FROM users WHERE active = $1 AND created_at > $2',
-  [true, new Date('2024-01-01')]
-)
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
 // Using Kysely (included)
 const users = await db
   .selectFrom('users')
   .where('active', '=', true)
-  .where('created_at', '>', new Date('2024-01-01'))
-  .orderBy('created_at', 'desc')
   .selectAll()
   .execute()
-
-// Custom repository methods
-async findActiveUsers(): Promise<User[]> {
-  return this.db
-    .selectFrom('users')
-    .where('active', '=', true)
-    .where('created_at', '>', new Date('2024-01-01'))
-    .orderBy('created_at', 'desc')
-    .selectAll()
-    .execute()
-}
 ```
 
 ## 🔄 From Prisma
@@ -300,11 +213,11 @@ const prisma = new PrismaClient({
 })
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
-import { DreamBeeSQL } from 'dreambeesql'
+import { NOORM } from 'noorm'
 
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: 'localhost',
@@ -327,32 +240,14 @@ model User {
   email     String   @unique
   firstName String?
   lastName  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   posts     Post[]
-  profile   Profile?
-
-  @@map("users")
-}
-
-model Post {
-  id        String   @id @default(uuid())
-  title     String
-  content   String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("posts")
 }
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
 // No schema definitions needed!
-// DreamBeeSQL discovers schema from your existing database
-// Types are auto-generated from the actual database structure
+// NOORM discovers schema from your existing database
 ```
 
 ### CRUD Operations
@@ -371,7 +266,6 @@ const user = await prisma.user.create({
 // Read
 const user = await prisma.user.findUnique({ where: { id } })
 const users = await prisma.user.findMany()
-const userByEmail = await prisma.user.findUnique({ where: { email } })
 
 // Update
 const updatedUser = await prisma.user.update({
@@ -383,7 +277,7 @@ const updatedUser = await prisma.user.update({
 await prisma.user.delete({ where: { id } })
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
 // Create
 const user = await userRepo.create({
@@ -395,7 +289,6 @@ const user = await userRepo.create({
 // Read
 const user = await userRepo.findById(id)
 const users = await userRepo.findAll()
-const userByEmail = await userRepo.findByEmail('john@example.com')
 
 // Update
 user.firstName = 'Johnny'
@@ -414,86 +307,12 @@ const user = await prisma.user.findUnique({
   where: { id },
   include: { posts: true }
 })
-
-// Load post with user
-const post = await prisma.post.findUnique({
-  where: { id },
-  include: { user: true }
-})
-
-// Load nested relationships
-const user = await prisma.user.findUnique({
-  where: { id },
-  include: {
-    posts: {
-      include: {
-        comments: true
-      }
-    }
-  }
-})
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
 // Load user with posts
 const user = await userRepo.findWithRelations(id, ['posts'])
-
-// Load post with user
-const post = await postRepo.findWithRelations(id, ['user'])
-
-// Load nested relationships
-const user = await userRepo.findWithRelations(id, ['posts.comments'])
-```
-
-### Transactions
-
-#### Before (Prisma)
-```typescript
-const result = await prisma.$transaction(async (tx) => {
-  const user = await tx.user.create({
-    data: {
-      email: 'john@example.com',
-      firstName: 'John',
-      lastName: 'Doe'
-    }
-  })
-
-  const profile = await tx.profile.create({
-    data: {
-      userId: user.id,
-      bio: 'Software developer'
-    }
-  })
-
-  return { user, profile }
-})
-```
-
-#### After (DreamBeeSQL)
-```typescript
-const result = await db.transaction().execute(async (trx) => {
-  const user = await trx
-    .insertInto('users')
-    .values({
-      email: 'john@example.com',
-      first_name: 'John',
-      last_name: 'Doe'
-    })
-    .returningAll()
-    .executeTakeFirstOrThrow()
-
-  const profile = await trx
-    .insertInto('profiles')
-    .values({
-      user_id: user.id,
-      bio: 'Software developer'
-    })
-    .returningAll()
-    .executeTakeFirstOrThrow()
-
-  return { user, profile }
-})
 ```
 
 ## 🔄 From Sequelize
@@ -515,11 +334,11 @@ const sequelize = new Sequelize('myapp', 'user', 'password', {
 await sequelize.authenticate()
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
-import { DreamBeeSQL } from 'dreambeesql'
+import { NOORM } from 'noorm'
 
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: 'localhost',
@@ -544,8 +363,6 @@ export class User extends Model {
   public email!: string
   public firstName?: string
   public lastName?: string
-  public readonly createdAt!: Date
-  public readonly updatedAt!: Date
 }
 
 User.init({
@@ -558,14 +375,6 @@ User.init({
     type: DataTypes.STRING,
     allowNull: false,
     unique: true
-  },
-  firstName: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  lastName: {
-    type: DataTypes.STRING,
-    allowNull: true
   }
 }, {
   sequelize,
@@ -573,10 +382,10 @@ User.init({
 })
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
 // No model definitions needed!
-// DreamBeeSQL auto-generates models from your database schema
+// NOORM auto-generates models from your database schema
 ```
 
 ### CRUD Operations
@@ -593,7 +402,6 @@ const user = await User.create({
 // Read
 const user = await User.findByPk(id)
 const users = await User.findAll()
-const userByEmail = await User.findOne({ where: { email } })
 
 // Update
 user.firstName = 'Johnny'
@@ -603,7 +411,7 @@ await user.save()
 await user.destroy()
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
 // Create
 const user = await userRepo.create({
@@ -615,7 +423,6 @@ const user = await userRepo.create({
 // Read
 const user = await userRepo.findById(id)
 const users = await userRepo.findAll()
-const userByEmail = await userRepo.findByEmail('john@example.com')
 
 // Update
 user.firstName = 'Johnny'
@@ -633,150 +440,20 @@ await userRepo.delete(user.id)
 const user = await User.findByPk(id, {
   include: [Post]
 })
-
-// Load post with user
-const post = await Post.findByPk(id, {
-  include: [User]
-})
-
-// Load nested relationships
-const user = await User.findByPk(id, {
-  include: [{
-    model: Post,
-    include: [Comment]
-  }]
-})
 ```
 
-#### After (DreamBeeSQL)
+#### After (NOORM)
 ```typescript
 // Load user with posts
 const user = await userRepo.findWithRelations(id, ['posts'])
-
-// Load post with user
-const post = await postRepo.findWithRelations(id, ['user'])
-
-// Load nested relationships
-const user = await userRepo.findWithRelations(id, ['posts.comments'])
-```
-
-## 🔄 From Drizzle
-
-### Basic Setup
-
-#### Before (Drizzle)
-```typescript
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
-import { users, posts } from './schema'
-
-const client = postgres('postgresql://user:password@localhost:5432/myapp')
-const db = drizzle(client)
-```
-
-#### After (DreamBeeSQL)
-```typescript
-import { DreamBeeSQL } from 'dreambeesql'
-
-const db = new DreamBeeSQL({
-  dialect: 'postgresql',
-  connection: {
-    host: 'localhost',
-    port: 5432,
-    database: 'myapp',
-    username: 'user',
-    password: 'password'
-  }
-})
-
-await db.initialize()
-```
-
-### Schema Definitions
-
-#### Before (Drizzle)
-```typescript
-import { pgTable, uuid, varchar, timestamp } from 'drizzle-orm/pg-core'
-
-export const users = pgTable('users', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  email: varchar('email', { length: 255 }).notNull().unique(),
-  firstName: varchar('first_name', { length: 100 }),
-  lastName: varchar('last_name', { length: 100 }),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
-})
-
-export const posts = pgTable('posts', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  title: varchar('title', { length: 255 }).notNull(),
-  content: varchar('content'),
-  userId: uuid('user_id').notNull().references(() => users.id),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
-})
-```
-
-#### After (DreamBeeSQL)
-```typescript
-// No schema definitions needed!
-// DreamBeeSQL discovers schema from your existing database
-```
-
-### CRUD Operations
-
-#### Before (Drizzle)
-```typescript
-// Create
-const user = await db.insert(users).values({
-  email: 'john@example.com',
-  firstName: 'John',
-  lastName: 'Doe'
-}).returning()
-
-// Read
-const user = await db.select().from(users).where(eq(users.id, id))
-const users = await db.select().from(users)
-const userByEmail = await db.select().from(users).where(eq(users.email, email))
-
-// Update
-const updatedUser = await db.update(users)
-  .set({ firstName: 'Johnny' })
-  .where(eq(users.id, id))
-  .returning()
-
-// Delete
-await db.delete(users).where(eq(users.id, id))
-```
-
-#### After (DreamBeeSQL)
-```typescript
-// Create
-const user = await userRepo.create({
-  email: 'john@example.com',
-  firstName: 'John',
-  lastName: 'Doe'
-})
-
-// Read
-const user = await userRepo.findById(id)
-const users = await userRepo.findAll()
-const userByEmail = await userRepo.findByEmail('john@example.com')
-
-// Update
-user.firstName = 'Johnny'
-const updatedUser = await userRepo.update(user)
-
-// Delete
-await userRepo.delete(user.id)
 ```
 
 ## 🛠️ Migration Steps
 
-### Step 1: Install DreamBeeSQL
+### Step 1: Install NOORM
 
 ```bash
-npm install dreambeesql
+npm install noorm
 npm uninstall typeorm # or your current ORM
 ```
 
@@ -784,7 +461,7 @@ npm uninstall typeorm # or your current ORM
 
 ```typescript
 // Replace your current ORM configuration
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql', // or 'mysql', 'sqlite', 'mssql'
   connection: {
     host: process.env.DB_HOST,
@@ -823,87 +500,6 @@ const user = await userRepo.findOne({
 const user = await userRepo.findWithRelations(id, ['posts'])
 ```
 
-### Step 5: Update Custom Queries
-
-```typescript
-// Before (TypeORM Query Builder)
-const users = await userRepo
-  .createQueryBuilder('user')
-  .where('user.active = :active', { active: true })
-  .getMany()
-
-// After (Kysely)
-const users = await db
-  .selectFrom('users')
-  .where('active', '=', true)
-  .selectAll()
-  .execute()
-```
-
-## 🧪 Testing Migration
-
-### Unit Tests
-
-```typescript
-describe('User Repository', () => {
-  let db: DreamBeeSQL
-  let userRepo: any
-
-  beforeEach(async () => {
-    db = new DreamBeeSQL({
-      dialect: 'sqlite',
-      connection: {
-        database: ':memory:'
-      }
-    })
-    await db.initialize()
-    userRepo = db.getRepository('users')
-  })
-
-  afterEach(async () => {
-    await db.close()
-  })
-
-  it('should create and find users', async () => {
-    const user = await userRepo.create({
-      email: 'test@example.com',
-      firstName: 'Test',
-      lastName: 'User'
-    })
-
-    expect(user.id).toBeDefined()
-    expect(user.email).toBe('test@example.com')
-
-    const foundUser = await userRepo.findById(user.id)
-    expect(foundUser).toEqual(user)
-  })
-})
-```
-
-### Integration Tests
-
-```typescript
-describe('User-Post Relationships', () => {
-  it('should load user with posts', async () => {
-    const user = await userRepo.create({
-      email: 'test@example.com',
-      firstName: 'Test',
-      lastName: 'User'
-    })
-
-    const post = await postRepo.create({
-      title: 'Test Post',
-      content: 'Test content',
-      userId: user.id
-    })
-
-    const userWithPosts = await userRepo.findWithRelations(user.id, ['posts'])
-    expect(userWithPosts.posts).toHaveLength(1)
-    expect(userWithPosts.posts[0].id).toBe(post.id)
-  })
-})
-```
-
 ## 🚨 Common Migration Issues
 
 ### 1. Naming Conventions
@@ -916,12 +512,12 @@ user.firstName
 // Database uses snake_case
 user.first_name
 
-// DreamBeeSQL handles this automatically
+// NOORM handles this automatically
 ```
 
 #### Solution: Use consistent naming
 ```typescript
-// DreamBeeSQL auto-maps between camelCase and snake_case
+// NOORM auto-maps between camelCase and snake_case
 const user = await userRepo.create({
   firstName: 'John', // Maps to first_name in database
   lastName: 'Doe'    // Maps to last_name in database
@@ -936,14 +532,14 @@ const user = await userRepo.create({
 user.id: string // UUID
 user.createdAt: Date
 
-// DreamBeeSQL
+// NOORM
 user.id: string // Auto-detected from database
 user.createdAt?: Date // Optional based on database schema
 ```
 
 #### Solution: Use auto-generated types
 ```typescript
-// DreamBeeSQL generates types from your actual database schema
+// NOORM generates types from your actual database schema
 interface User {
   id: string
   email: string
@@ -964,7 +560,7 @@ const user = await userRepo.findOne({
   relations: ['posts', 'profile']
 })
 
-// DreamBeeSQL
+// NOORM
 const user = await userRepo.findWithRelations(id, ['posts', 'profile'])
 ```
 
@@ -975,46 +571,13 @@ const users = await userRepo.findAll()
 await userRepo.loadRelationships(users, ['posts', 'profile'])
 ```
 
-### 4. Custom Queries
-
-#### Issue: Different query syntax
-```typescript
-// TypeORM Query Builder
-const users = await userRepo
-  .createQueryBuilder('user')
-  .leftJoinAndSelect('user.posts', 'post')
-  .where('user.active = :active', { active: true })
-  .getMany()
-
-// DreamBeeSQL with Kysely
-const users = await db
-  .selectFrom('users')
-  .leftJoin('posts', 'posts.user_id', 'users.id')
-  .where('users.active', '=', true)
-  .selectAll()
-  .execute()
-```
-
-#### Solution: Use Kysely for complex queries
-```typescript
-// Custom repository method
-async findActiveUsersWithPosts(): Promise<User[]> {
-  return this.db
-    .selectFrom('users')
-    .leftJoin('posts', 'posts.user_id', 'users.id')
-    .where('users.active', '=', true)
-    .selectAll()
-    .execute()
-}
-```
-
 ## 📊 Performance Considerations
 
 ### 1. Connection Pooling
 
 ```typescript
 // Configure connection pooling
-const db = new DreamBeeSQL({
+const db = new NOORM({
   dialect: 'postgresql',
   connection: {
     host: 'localhost',
@@ -1035,7 +598,7 @@ const db = new DreamBeeSQL({
 
 ```typescript
 // Enable caching
-const db = new DreamBeeSQL({
+const db = new NOORM({
   // ... config
   cache: {
     ttl: 300000, // 5 minutes
@@ -1055,37 +618,6 @@ db.updateConfig({
     maxBatchSize: 100
   }
 })
-```
-
-## 🔍 Migration Validation
-
-### 1. Data Integrity
-
-```typescript
-// Compare data before and after migration
-const beforeData = await oldOrm.query('SELECT COUNT(*) FROM users')
-const afterData = await db.query('SELECT COUNT(*) FROM users')
-
-expect(afterData).toEqual(beforeData)
-```
-
-### 2. Performance Testing
-
-```typescript
-// Benchmark query performance
-const startTime = Date.now()
-const users = await userRepo.findAll()
-const endTime = Date.now()
-
-console.log(`Query took ${endTime - startTime}ms`)
-```
-
-### 3. Type Safety
-
-```typescript
-// Verify TypeScript compilation
-const user: User = await userRepo.findById(id)
-// Should have full IntelliSense support
 ```
 
 ## 🎯 Post-Migration Checklist
@@ -1110,9 +642,8 @@ const user: User = await userRepo.findById(id)
 
 - [Developer Guide](./DEVELOPER_GUIDE.md) - Comprehensive usage guide
 - [Quick Reference](./QUICK_REFERENCE.md) - Common operations
-- [API Reference](#api-reference) - Complete API documentation
-- [Examples](./implementation-examples/) - Working code examples
+- [Troubleshooting](./TROUBLESHOOTING.md) - Common issues and solutions
 
 ---
 
-**Ready to migrate?** Start with the [Quick Start Guide](./QUICK_START.md) and follow this migration guide step by step!
+**Ready to migrate?** Start with the [Quick Start Guide](./README.md) and follow this migration guide step by step!

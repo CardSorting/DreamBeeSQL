@@ -2,105 +2,79 @@
 
 ## 🎯 What is NOORM?
 
-NOORM (pronounced "No-ORM") is a **zero-configuration pseudo-ORM** built on Kysely that automatically discovers your database schema and generates TypeScript types, entities, and repositories. No manual entity definitions required!
+NOORM (pronounced "No-ORM") is a **zero-configuration pseudo-ORM** that automatically discovers your database schema and generates TypeScript types, entities, and repositories. No manual entity definitions required!
+
+**Key Benefits:**
+- ✅ Works with any existing database
+- ✅ Auto-generates TypeScript types
+- ✅ Zero configuration required
+- ✅ Built on Kysely for optimal SQL generation
 
 ## 🚀 Quick Start
 
-### Get Started in 2 Minutes
-1. **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Complete developer guide with examples
-2. **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick reference card for common operations
+```typescript
+import { NOORM } from 'noorm'
 
-### 📚 Documentation Navigation
+const db = new NOORM({
+  dialect: 'postgresql',
+  connection: {
+    host: 'localhost',
+    port: 5432,
+    database: 'myapp',
+    username: 'user',
+    password: 'password'
+  }
+})
 
-#### For New Developers
-1. **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Start here! Complete guide with examples
-2. **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick reference for common operations
-3. **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migrate from other ORMs
+await db.initialize()
+const userRepo = db.getRepository('users')
+const users = await userRepo.findAll()
+```
 
-#### For Experienced Developers
-1. **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns and types
-2. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
+## 📚 Documentation
 
-## 📚 Documentation Structure
-
-### 🚀 Core Documentation
-- **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Complete developer guide with examples
-- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick reference card for common operations
+### Essential Reading
+- **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Complete guide with examples
+- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Common operations
 - **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migrate from other ORMs
-- **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns and types
+
+### Advanced Topics
+- **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns
 - **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
 
-### 📖 Legacy Components (Reference Only)
-*Note: The original 18 components have been moved to the `legacy-components/` directory for reference.*
+### Implementation Resources
+- **[legacy-components/](./legacy-components/)** - Original architecture details
+- **[legacy-components/IMPLEMENTATION_GUIDE.md](./legacy-components/IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation
 
-#### Legacy Components
-- **[legacy-components/](./legacy-components/)** - Original 18-component architecture
-- **[legacy-components/README.md](./legacy-components/README.md)** - Legacy components overview
-- **[legacy-components/COMPONENT_MAPPING.md](./legacy-components/COMPONENT_MAPPING.md)** - Mapping from old to new architecture
-- **[legacy-components/ARCHITECTURE_OVERVIEW.md](./legacy-components/ARCHITECTURE_OVERVIEW.md)** - System design and vision
-- **[legacy-components/SIMPLIFIED_ARCHITECTURE.md](./legacy-components/SIMPLIFIED_ARCHITECTURE.md)** - 5-component architecture
-- **[legacy-components/IMPLEMENTATION_GUIDE.md](./legacy-components/IMPLEMENTATION_GUIDE.md)** - Implementation details
-- **[legacy-components/ARCHITECTURE_DIAGRAMS.md](./legacy-components/ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams
-- **[legacy-components/QUICK_START.md](./legacy-components/QUICK_START.md)** - Original quick start
-- **[legacy-components/USAGE_EXAMPLES.md](./legacy-components/USAGE_EXAMPLES.md)** - Original usage examples
-- **[legacy-components/implementation-examples/](./legacy-components/implementation-examples/)** - Code examples
+## 🏗️ Architecture Overview
 
-## 🎯 Recommended Reading Order
+NOORM uses a simplified 5-component architecture that's easy to understand and implement:
 
-### For New Developers
-1. **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Start here! Complete guide with examples
-2. **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick reference for common operations
-3. **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - If migrating from another ORM
+1. **Schema Discovery** - Automatically introspects database structure
+2. **Type Generation** - Creates TypeScript types from schema
+3. **Repository Factory** - Generates repository classes with CRUD operations
+4. **Relationship Engine** - Handles foreign key relationships
+5. **Query Builder** - Uses Kysely for SQL generation
 
-### For Experienced Developers
-1. **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns and types
-2. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
+## 🎯 Implementation Phases
 
-### For Implementation
-1. **[legacy-components/IMPLEMENTATION_GUIDE.md](./legacy-components/IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation
-2. **[legacy-components/implementation-examples/](./legacy-components/implementation-examples/)** - Code examples and patterns
-3. **[legacy-components/ARCHITECTURE_DIAGRAMS.md](./legacy-components/ARCHITECTURE_DIAGRAMS.md)** - Visual diagrams and flow charts
+### Phase 1: Core Functionality
+- [x] Schema discovery and introspection
+- [x] Basic type generation
+- [x] Simple repository pattern
+- [ ] Basic relationship support
 
-## 🔄 Architecture Evolution
+### Phase 2: Advanced Features
+- [ ] Complex relationships (many-to-many)
+- [ ] Custom validation rules
+- [ ] Performance optimizations
+- [ ] Migration tools
 
-### Original Architecture (18 Components)
-- Complex but comprehensive
-- Detailed specifications
-- Good for understanding all aspects
-- Harder to implement and maintain
-
-### Simplified Architecture (5 Components)
-- Easier to understand and implement
-- Consolidated related functionality
-- Clearer responsibilities
-- Better developer experience
-
-### Migration Path
-1. **Phase 1**: Implement simplified architecture
-2. **Phase 2**: Add advanced features from original components
-3. **Phase 3**: Optimize and enhance based on usage
-
-## 🎨 Key Features
-
-### 1. **Zero Configuration**
-- Works with any existing database
-- No manual entity definitions
-- Automatic schema discovery
-
-### 2. **Type Safety**
-- Full TypeScript support
-- Auto-generated types
-- Compile-time checking
-
-### 3. **Performance**
-- Smart caching
-- Lazy loading
-- Query optimization
-
-### 4. **Developer Experience**
-- IntelliSense support
-- Clear error messages
-- Comprehensive documentation
+### Phase 3: Enterprise Features
+- [ ] Multi-tenant support
+- [ ] Advanced caching
+- [ ] Performance monitoring
+- [ ] Cloud integrations
 
 ## 🚀 Getting Started
 
@@ -129,79 +103,19 @@ const userRepo = db.getRepository('users')
 const users = await userRepo.findAll()
 ```
 
-## 📊 Benefits
-
-### Developer Experience
-- **Zero Configuration** - Works with any existing database
-- **Type Safety** - Full TypeScript support with auto-generated types
-- **IntelliSense** - Complete autocomplete support
-- **Clear Errors** - Actionable error messages
-
-### Performance
-- **Fast Discovery** - Quick schema introspection
-- **Smart Caching** - Optimized query performance
-- **Lazy Loading** - Load relationships on demand
-- **Query Optimization** - Built on Kysely for optimal SQL
-
-### Reliability
-- **Schema Evolution** - Automatic adaptation to database changes
-- **Error Recovery** - Graceful degradation
-- **Type Safety** - Compile-time checking
-- **Comprehensive Testing** - Full test coverage
-
-## 🔮 Roadmap
-
-### Short Term
-- Advanced relationship types (many-to-many)
-- Custom validation rules
-- Performance monitoring
-- Migration tools
-
-### Medium Term
-- GraphQL integration
-- Real-time subscriptions
-- Advanced caching strategies
-- Multi-tenant support
-
-### Long Term
-- Cloud-native features
-- Advanced analytics
-- Machine learning integration
-- Enterprise features
-
 ## 🤝 Contributing
 
-### Development Setup
-1. Clone repository
-2. Install dependencies
-3. Run tests
-4. Start development
-
-### Guidelines
-- Follow TypeScript best practices
-- Maintain test coverage
-- Update documentation
-- Follow semantic versioning
-
-### Code Review
-- Automated testing
-- Manual review
-- Performance testing
-- Documentation review
+1. Read the [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)
+2. Check [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for common issues
+3. Follow TypeScript best practices
+4. Maintain test coverage
+5. Update documentation
 
 ## 📞 Support
 
-### Documentation
-- **[DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)** - Complete developer guide
-- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick reference card
-- **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - Migration from other ORMs
-- **[TYPESCRIPT_CHEAT_SHEET.md](./TYPESCRIPT_CHEAT_SHEET.md)** - TypeScript patterns
-
-### Community
-- GitHub issues for bugs and features
-- Discussions for questions and ideas
-- Pull requests for contributions
-- Documentation improvements
+- **Documentation** - All guides in this directory
+- **GitHub Issues** - Bug reports and feature requests
+- **Discussions** - Questions and community help
 
 ---
 

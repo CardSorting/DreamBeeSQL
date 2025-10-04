@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/noormme)](https://www.npmjs.com/package/noormme)
 [![npm downloads](https://img.shields.io/npm/dm/noormme)](https://www.npmjs.com/package/noormme)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-green)](https://nodejs.org/)
 
@@ -259,7 +259,7 @@ npm test
 
 ## 📄 License
 
-Apache 2.0
+Apache 2.0 License - see [LICENSE](LICENSE) file for details.
 
 ## 🎉 Start Today
 

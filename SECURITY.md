@@ -2,7 +2,16 @@
 
 ## Overview
 
-NOORMME (NO-ORM for Normies) takes security seriously. This document outlines the security measures implemented in the project and provides best practices for secure usage.
+NOORMME (NO-ORM for Normies) takes a **security-first approach** to database operations. This document outlines the comprehensive security measures implemented and provides best practices for secure usage.
+
+## 🛡️ Security-First Design
+
+NOORMME is designed with **defense in depth**:
+
+1. **Automatic validation** of all dynamic identifiers
+2. **Safe alternatives** to dangerous methods
+3. **Comprehensive documentation** with secure examples
+4. **Built-in protection** against common vulnerabilities
 
 ## Security Features
 
@@ -10,27 +19,41 @@ NOORMME (NO-ORM for Normies) takes security seriously. This document outlines th
 
 NOORMME implements multiple layers of protection against SQL injection attacks:
 
-#### Parameterized Queries (Built-in Protection)
-- All user-provided values are automatically handled as parameterized queries by Kysely
-- Values are never directly interpolated into SQL strings
+#### Layer 1: Parameterized Queries (Built-in)
+- All user-provided **values** are automatically parameterized by Kysely
+- Values are never interpolated into SQL strings
 - Database drivers handle proper escaping and type conversion
 
-#### Dynamic Reference Validation (NEW)
-For scenarios where table/column names come from user input, NOORMME now includes validation:
+#### Layer 2: Automatic Identifier Validation (NEW)
+All dynamic **identifiers** (table/column names) are automatically validated:
 
 ```typescript
-// ✅ Safe: Built-in validation prevents SQL injection
+// ✅ Automatic validation prevents SQL injection
 import { sql } from 'kysely'
 
-const userColumn = req.query.sortBy // User input
-sql.ref(userColumn)  // Automatically validated for dangerous patterns
+const userColumn = req.query.sortBy
+sql.ref(userColumn)  // ✅ Automatically validated!
+// Throws error for: "id; DROP TABLE users--"
 
-// ✅ Even safer: Use whitelisting
+// ✅ Best practice: Also use whitelisting
 const allowedColumns = ['name', 'email', 'created_at']
 if (!allowedColumns.includes(userColumn)) {
   throw new Error('Invalid column')
 }
-sql.ref(userColumn)
+sql.ref(userColumn)  // ✅ Double protection
+```
+
+#### Layer 3: Safe Helper Functions (NEW)
+Use safe alternatives instead of raw SQL:
+
+```typescript
+import { safeOrderDirection, safeLimit } from 'noormme/util/security'
+
+// ❌ Old dangerous way:
+sql`SELECT * FROM users ORDER BY name ${sql.raw(req.query.dir)}`
+
+// ✅ New safe way:
+sql`SELECT * FROM users ORDER BY name ${safeOrderDirection(req.query.dir)}`
 ```
 
 #### Validation Rules
@@ -301,10 +324,50 @@ Validates migration names
 - Length ≤ 100 characters
 - Alphanumeric, underscores, hyphens only
 
+## Safe Alternatives to Dangerous Methods
+
+### Instead of sql.raw() - Use Safe Helpers
+
+NOORMME provides safe alternatives in `noormme/util/safe-sql-helpers`:
+
+```typescript
+import { safeOrderDirection, safeLimit, safeOffset } from 'noormme/util/safe-sql-helpers'
+
+// ❌ Dangerous:
+const direction = req.query.dir  // Could be "; DROP TABLE users--"
+sql`SELECT * FROM users ORDER BY name ${sql.raw(direction)}`
+
+// ✅ Safe:
+const direction = req.query.dir
+sql`SELECT * FROM users ORDER BY name ${safeOrderDirection(direction)}`  // Validates ASC/DESC only
+```
+
+### Safe Pagination
+```typescript
+import { safeLimit, safeOffset } from 'noormme/util/safe-sql-helpers'
+
+const page = req.query.page
+const limit = req.query.limit
+
+sql`SELECT * FROM users LIMIT ${safeLimit(limit)} OFFSET ${safeOffset((page - 1) * limit)}`
+```
+
+### Safe Sorting with Whitelist
+```typescript
+import { safeOrderBy } from 'noormme/util/safe-sql-helpers'
+
+const allowedColumns = ['name', 'email', 'created_at']
+const orderClauses = [
+  { column: req.query.sort, direction: req.query.dir }
+]
+
+sql`SELECT * FROM users ORDER BY ${safeOrderBy(orderClauses, allowedColumns)}`
+```
+
 ## Known Limitations
 
 1. **Type Coercion**: TypeScript types don't prevent runtime injection - always validate at runtime
-2. **Raw SQL**: `sql.raw()` and `sql.lit()` bypass validation - use only with trusted input
+2. **Intentionally Unsafe Methods**: `sql.raw()` and `sql.lit()` are deliberately unsafe for edge cases - use safe alternatives instead
 3. **File Permissions**: NOORMME doesn't set file permissions - configure your OS appropriately
 4. **Encryption at Rest**: SQLite encryption requires extensions (SQLCipher) - not built-in
 

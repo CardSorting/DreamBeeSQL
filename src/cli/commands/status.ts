@@ -2,6 +2,13 @@ import chalk from 'chalk'
 import { NOORMME } from '../../noormme.js'
 import { promises as fs } from 'fs'
 import * as path from 'path'
+import { NOORMConfig, SchemaInfo, TableInfo } from '../../types/index.js'
+
+interface IndexRecommendation {
+  table: string
+  column: string
+  reason: string
+}
 
 export async function status(options: {
   database?: string
@@ -156,7 +163,7 @@ export async function status(options: {
       
       if (indexRecs.recommendations.length > 0) {
         console.log(chalk.yellow(`  📊 ${indexRecs.recommendations.length} recommendations available:`))
-      indexRecs.recommendations.slice(0, 5).forEach((rec: any, index: number) => {
+      indexRecs.recommendations.slice(0, 5).forEach((rec: IndexRecommendation, index: number) => {
         console.log(chalk.gray(`    ${index + 1}. ${rec.table}.${rec.column} - ${rec.reason}`))
       })
         
@@ -236,12 +243,12 @@ export async function status(options: {
 
 async function getAutomationStatus(db: NOORMME) {
   try {
-    const config = (db as any).config
+    const config = (db as unknown as { config: NOORMConfig }).config
     return {
-      autoOptimization: config.performance?.enableAutoOptimization ?? true,
+      autoOptimization: config.automation?.enableAutoOptimization ?? true,
       queryAnalysis: config.performance?.enableQueryOptimization ?? true,
-      autoIndexing: config.performance?.enableAutoIndexing ?? true,
-      schemaMonitoring: config.watch?.enabled ?? false
+      autoIndexing: config.automation?.enableIndexRecommendations ?? true,
+      schemaMonitoring: config.automation?.enableSchemaWatcher ?? false
     }
   } catch {
     return {
@@ -253,7 +260,7 @@ async function getAutomationStatus(db: NOORMME) {
   }
 }
 
-async function generateRecommendations(db: NOORMME, schemaInfo: any): Promise<string[]> {
+async function generateRecommendations(db: NOORMME, schemaInfo: SchemaInfo): Promise<string[]> {
   const recommendations: string[] = []
   
   try {
@@ -289,11 +296,11 @@ async function generateRecommendations(db: NOORMME, schemaInfo: any): Promise<st
     // }
     
     // Check for tables without indexes
-    const tablesWithoutIndexes = schemaInfo.tables.filter((table: any) => 
+    const tablesWithoutIndexes = schemaInfo.tables.filter((table: TableInfo) => 
       table.indexes.length === 0 && table.columns.length > 1
     )
     if (tablesWithoutIndexes.length > 0) {
-      recommendations.push(`Consider adding indexes to tables: ${tablesWithoutIndexes.map((t: any) => t.name).join(', ')}`)
+      recommendations.push(`Consider adding indexes to tables: ${tablesWithoutIndexes.map((t: TableInfo) => t.name).join(', ')}`)
     }
     
   } catch (error) {

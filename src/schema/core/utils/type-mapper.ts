@@ -73,7 +73,7 @@ export class TypeMapper {
       return this.typeMapping[baseType as keyof typeof this.typeMapping]
     }
 
-    // Default to any for unknown types
-    return 'any'
+    // Default to unknown for unknown types
+    return 'unknown'
   }
 }

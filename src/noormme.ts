@@ -7,7 +7,7 @@ import { RepositoryFactory } from './repository/repository-factory.js'
 import { RelationshipEngine } from './relationships/relationship-engine.js'
 import { CacheManager } from './cache/cache-manager.js'
 import { Logger } from './logging/logger.js'
-import { NOORMConfig, SchemaInfo, Repository, RelationshipInfo } from './types/index.js'
+import { NOORMConfig, SchemaInfo, Repository, RelationshipInfo, SchemaChange } from './types/index.js'
 import { NoormError } from './errors/NoormError.js'
 import { config as loadDotenv } from 'dotenv'
 import { SchemaWatcher, WatchOptions } from './watch/schema-watcher.js'
@@ -25,7 +25,7 @@ const globalInitLock = new Map<string, Promise<void>>()
 export class NOORMME {
   private db: Kysely<any>
   private config: NOORMConfig
-  private dialect: any
+  private dialect: Dialect
   private schemaDiscovery: SchemaDiscovery
   private typeGenerator: TypeGenerator
   private repositoryFactory: RepositoryFactory
@@ -415,7 +415,7 @@ export class NOORMME {
   /**
    * Register callback for schema changes
    */
-  onSchemaChange(callback: (changes: any[]) => void): void {
+  onSchemaChange(callback: (changes: SchemaChange[]) => void): void {
     if (!this.schemaWatcher) {
       this.schemaWatcher = new SchemaWatcher(
         this.db,

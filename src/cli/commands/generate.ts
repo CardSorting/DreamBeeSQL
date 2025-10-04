@@ -229,12 +229,12 @@ function mapColumnToTsType(column: ColumnInfo): string {
 
   // JSON types
   if (type.includes('json')) {
-    return 'Record<string, any>'
+    return 'Record<string, unknown>'
   }
 
   // Array types
   if (type.includes('array') || type.includes('[]')) {
-    return 'any[]'
+    return 'unknown[]'
   }
 
   // UUID types
@@ -248,12 +248,12 @@ function mapColumnToTsType(column: ColumnInfo): string {
 
 function getPrimaryKeyType(table: TableInfo): string {
   if (!table.primaryKey || table.primaryKey.length === 0) {
-    return 'any'
+    return 'unknown'
   }
 
   if (table.primaryKey.length === 1) {
     const pkColumn = table.columns.find(col => col.name === table.primaryKey![0])
-    return pkColumn ? mapColumnToTsType(pkColumn) : 'any'
+    return pkColumn ? mapColumnToTsType(pkColumn) : 'unknown'
   }
 
   // Composite primary key

@@ -95,7 +95,7 @@ export interface ColumnInfo {
   name: string
   type: string
   nullable: boolean
-  defaultValue?: any
+  defaultValue?: unknown
   isPrimaryKey: boolean
   isAutoIncrement: boolean
   maxLength?: number
@@ -154,19 +154,19 @@ export interface EntityType {
 
 export interface Repository<T> {
   // CRUD operations
-  findById(id: any): Promise<T | null>
+  findById(id: string | number): Promise<T | null>
   findAll(): Promise<T[]>
   create(data: Partial<T>): Promise<T>
   update(entity: T): Promise<T>
-  delete(id: any): Promise<boolean>
+  delete(id: string | number): Promise<boolean>
 
   // Relationships
-  findWithRelations(id: any, relations: string[]): Promise<T | null>
+  findWithRelations(id: string | number, relations: string[]): Promise<T | null>
   loadRelationships(entities: T[], relations: string[]): Promise<void>
 
   // Utility methods
   count(): Promise<number>
-  exists(id: any): Promise<boolean>
+  exists(id: string | number): Promise<boolean>
 
   // Pagination
   paginate(options: {
@@ -190,17 +190,17 @@ export interface Repository<T> {
   }>
 
   // Relationship counting
-  withCount(id: any, relationships: string[]): Promise<T & Record<string, number>>
+  withCount(id: string | number, relationships: string[]): Promise<T & Record<string, number>>
 
   // Custom finders (auto-generated from schema)
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface SchemaChange {
   type: 'table_added' | 'table_removed' | 'column_added' | 'column_removed' | 'column_modified'
   table: string
   column?: string
-  details?: any
+  details?: unknown
 }
 
 export interface RefreshResult {

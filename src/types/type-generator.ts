@@ -1,4 +1,4 @@
-import { SchemaInfo, GeneratedTypes, EntityType, IntrospectionConfig, ColumnInfo, RelationshipInfo } from '../types'
+import { SchemaInfo, GeneratedTypes, EntityType, IntrospectionConfig, ColumnInfo, RelationshipInfo, TableInfo } from '../types'
 
 /**
  * Type generation system that creates TypeScript types from database schema
@@ -38,7 +38,7 @@ export class TypeGenerator {
   /**
    * Generate entity type for a table
    */
-  private generateEntityType(table: any): EntityType {
+  private generateEntityType(table: TableInfo): EntityType {
     const entityName = this.toPascalCase(table.name)
     const tableName = table.name
 
@@ -67,7 +67,7 @@ export class TypeGenerator {
   /**
    * Generate main entity interface
    */
-  private generateEntityInterface(table: any, entityName: string): string {
+  private generateEntityInterface(table: TableInfo, entityName: string): string {
     let interfaceCode = `export interface ${entityName} {\n`
 
     // Add primary key columns first
@@ -102,7 +102,7 @@ export class TypeGenerator {
   /**
    * Generate insert type
    */
-  private generateInsertType(table: any, entityName: string): string {
+  private generateInsertType(table: TableInfo, entityName: string): string {
     let insertType = `export type ${entityName}Insert = {\n`
 
     for (const column of table.columns) {
@@ -121,7 +121,7 @@ export class TypeGenerator {
   /**
    * Generate update type
    */
-  private generateUpdateType(table: any, entityName: string): string {
+  private generateUpdateType(table: TableInfo, entityName: string): string {
     let updateType = `export type ${entityName}Update = {\n`
 
     for (const column of table.columns) {
@@ -137,7 +137,7 @@ export class TypeGenerator {
   /**
    * Generate select type
    */
-  private generateSelectType(table: any, entityName: string): string {
+  private generateSelectType(table: TableInfo, entityName: string): string {
     let selectType = `export type ${entityName}Select = {\n`
 
     for (const column of table.columns) {
@@ -219,8 +219,8 @@ export class TypeGenerator {
       'timestamp': 'Date',
       'timestamptz': 'Date',
       'time': 'Date',
-      'json': 'any',
-      'jsonb': 'any',
+      'json': 'Record<string, unknown>',
+      'jsonb': 'Record<string, unknown>',
       'uuid': 'string',
 
       // MySQL specific types
@@ -257,8 +257,8 @@ export class TypeGenerator {
       return typeMapping[baseType]
     }
 
-    // Default to any for unknown types
-    return 'any'
+    // Default to unknown for unknown types
+    return 'unknown'
   }
 
   /**
@@ -273,7 +273,7 @@ export class TypeGenerator {
   /**
    * Get relationship type name
    */
-  private getRelationshipType(relationship: any): string {
+  private getRelationshipType(relationship: RelationshipInfo): string {
     const targetEntityName = this.toPascalCase(relationship.toTable)
     
     switch (relationship.type) {

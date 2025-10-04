@@ -117,24 +117,10 @@ export class SqliteIntrospector extends DatabaseIntrospector {
     }
 
     return tablesResult.map(({ name, sql, type }) => {
-      // // Try to find the name of the column that has `autoincrement` 🤦
-      let autoIncrementCol = sql
-        ?.split(/[\(\),]/)
-        ?.find((it) => it.toLowerCase().includes('autoincrement'))
-        ?.trimStart()
-        ?.split(/\s+/)?.[0]
-        ?.replace(/["`]/g, '')
-
+      // Enhanced auto-increment detection
+      const autoIncrementInfo = this.detectAutoIncrement(sql, columnsByTable[name] ?? [])
+      
       const columns = columnsByTable[name] ?? []
-
-      // Otherwise, check for an INTEGER PRIMARY KEY
-      // https://www.sqlite.org/autoinc.html
-      if (!autoIncrementCol) {
-        const pkCols = columns.filter((r) => r.pk > 0)
-        if (pkCols.length === 1 && pkCols[0].type.toLowerCase() === 'integer') {
-          autoIncrementCol = pkCols[0].name
-        }
-      }
 
       return {
         name: name,
@@ -143,12 +129,127 @@ export class SqliteIntrospector extends DatabaseIntrospector {
           name: col.name,
           dataType: col.type,
           isNullable: !col.notnull,
-          isAutoIncrementing: col.name === autoIncrementCol,
+          isAutoIncrementing: autoIncrementInfo.isAutoIncrement && col.name === autoIncrementInfo.columnName,
           hasDefaultValue: col.dflt_value != null,
           comment: undefined,
+          // Enhanced SQLite-specific metadata
+          isPrimaryKey: col.pk > 0,
+          columnIndex: col.cid,
+          defaultValue: col.dflt_value,
+          autoIncrementType: autoIncrementInfo.type,
         })),
+        // Additional table-level metadata
+        autoIncrementColumn: autoIncrementInfo.columnName,
+        hasAutoIncrement: autoIncrementInfo.isAutoIncrement,
+        autoIncrementType: autoIncrementInfo.type,
+        primaryKeyColumns: columns.filter(col => col.pk > 0).map(col => col.name),
+        uniqueConstraints: this.extractUniqueConstraints(sql),
+        checkConstraints: this.extractCheckConstraints(sql),
       }
     })
+  }
+
+  /**
+   * Enhanced auto-increment detection for SQLite
+   */
+  private detectAutoIncrement(sql: string | undefined, columns: PragmaTableInfo[]): {
+    isAutoIncrement: boolean
+    columnName: string | null
+    type: 'autoincrement' | 'rowid' | 'none'
+  } {
+    if (!sql) {
+      return { isAutoIncrement: false, columnName: null, type: 'none' }
+    }
+
+    // Method 1: Check for explicit AUTOINCREMENT keyword
+    const autoIncrementMatch = sql.match(/(\w+)\s+INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT/i)
+    if (autoIncrementMatch) {
+      return {
+        isAutoIncrement: true,
+        columnName: autoIncrementMatch[1].replace(/["`]/g, ''),
+        type: 'autoincrement'
+      }
+    }
+
+    // Method 2: Check for INTEGER PRIMARY KEY (implicit auto-increment)
+    const integerPkMatch = sql.match(/(\w+)\s+INTEGER\s+PRIMARY\s+KEY/i)
+    if (integerPkMatch) {
+      return {
+        isAutoIncrement: true,
+        columnName: integerPkMatch[1].replace(/["`]/g, ''),
+        type: 'rowid'
+      }
+    }
+
+    // Method 3: Check columns for INTEGER PRIMARY KEY
+    const pkColumns = columns.filter((col: PragmaTableInfo) => col.pk > 0)
+    if (pkColumns.length === 1) {
+      const pkCol = pkColumns[0]
+      if (pkCol.type.toLowerCase() === 'integer') {
+        return {
+          isAutoIncrement: true,
+          columnName: pkCol.name,
+          type: 'rowid'
+        }
+      }
+    }
+
+    // Method 4: Check for rowid usage (SQLite's implicit primary key)
+    const hasExplicitPk = columns.some((col: PragmaTableInfo) => col.pk > 0)
+    if (!hasExplicitPk) {
+      return {
+        isAutoIncrement: true,
+        columnName: 'rowid',
+        type: 'rowid'
+      }
+    }
+
+    return { isAutoIncrement: false, columnName: null, type: 'none' }
+  }
+
+  /**
+   * Extract unique constraints from SQL
+   */
+  private extractUniqueConstraints(sql: string | undefined): string[] {
+    if (!sql) return []
+    
+    const constraints: string[] = []
+    const uniqueMatches = sql.match(/UNIQUE\s*\(([^)]+)\)/gi)
+    
+    if (uniqueMatches) {
+      for (const match of uniqueMatches) {
+        const columnsMatch = match.match(/\(([^)]+)\)/)
+        if (columnsMatch) {
+          const columns = columnsMatch[1]
+            .split(',')
+            .map(col => col.trim().replace(/["`]/g, ''))
+          constraints.push(...columns)
+        }
+      }
+    }
+
+    return constraints
+  }
+
+  /**
+   * Extract check constraints from SQL
+   */
+  private extractCheckConstraints(sql: string | undefined): string[] {
+    if (!sql) return []
+    
+    const constraints: string[] = []
+    const checkMatches = sql.match(/CHECK\s*\(([^)]+)\)/gi)
+    
+    if (checkMatches) {
+      for (const match of checkMatches) {
+        const conditionMatch = match.match(/\(([^)]+)\)/)
+        if (conditionMatch) {
+          constraints.push(conditionMatch[1])
+        }
+      }
+    }
+
+    return constraints
   }
 
   async getColumns(tableName: string): Promise<ColumnMetadata[]> {

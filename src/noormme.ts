@@ -12,6 +12,8 @@ import { NoormError } from './errors/NoormError.js'
 import { config as loadDotenv } from 'dotenv'
 import { SchemaWatcher, WatchOptions } from './watch/schema-watcher.js'
 import { QueryAnalyzer, QueryAnalyzerOptions } from './performance/query-analyzer.js'
+import { SQLiteAutoOptimizer } from './dialect/sqlite/sqlite-auto-optimizer.js'
+import { SQLiteAutoIndexer } from './dialect/sqlite/sqlite-auto-indexer.js'
 
 // Global initialization lock to prevent concurrent initialization
 const globalInitLock = new Map<string, Promise<void>>()
@@ -32,6 +34,8 @@ export class NOORMME {
   private logger: Logger
   private schemaWatcher: SchemaWatcher | null = null
   private queryAnalyzer: QueryAnalyzer | null = null
+  private sqliteAutoOptimizer: SQLiteAutoOptimizer | null = null
+  private sqliteAutoIndexer: SQLiteAutoIndexer | null = null
   private initialized = false
   private repositories = new Map<string, Repository<any>>()
   private instanceId: string
@@ -155,6 +159,18 @@ export class NOORMME {
         }
       )
 
+      // Initialize SQLite-specific auto-optimization features
+      if (this.config.dialect === 'sqlite') {
+        this.sqliteAutoOptimizer = SQLiteAutoOptimizer.getInstance(this.logger)
+        this.sqliteAutoIndexer = SQLiteAutoIndexer.getInstance(this.logger)
+        
+        // Apply automatic optimizations if enabled (default: true)
+        const enableAutoOptimization = (this.config.performance as any)?.enableAutoOptimization !== false
+        if (enableAutoOptimization) {
+          await this.applySQLiteAutoOptimizations()
+        }
+      }
+
       this.initialized = true
       this.logger.info('NOORMME initialized successfully!')
 
@@ -169,6 +185,101 @@ export class NOORMME {
    */
   isInitialized(): boolean {
     return this.initialized
+  }
+
+  /**
+   * Apply SQLite auto-optimizations
+   */
+  private async applySQLiteAutoOptimizations(): Promise<void> {
+    if (!this.sqliteAutoOptimizer) return
+
+    try {
+      this.logger.info('Applying SQLite auto-optimizations...')
+      
+      const config = this.sqliteAutoOptimizer.getDefaultConfig()
+      const result = await this.sqliteAutoOptimizer.optimizeDatabase(this.db, config)
+      
+      if (result.appliedOptimizations.length > 0) {
+        this.logger.info(`Applied ${result.appliedOptimizations.length} SQLite optimizations`)
+        result.appliedOptimizations.forEach(opt => this.logger.debug(`  ✓ ${opt}`))
+      }
+      
+      if (result.recommendations.length > 0) {
+        this.logger.info(`Generated ${result.recommendations.length} recommendations`)
+        result.recommendations.forEach(rec => this.logger.debug(`  💡 ${rec}`))
+      }
+      
+      if (result.warnings.length > 0) {
+        this.logger.warn(`Found ${result.warnings.length} warnings`)
+        result.warnings.forEach(warning => this.logger.warn(`  ⚠️ ${warning}`))
+      }
+      
+    } catch (error) {
+      this.logger.warn('Failed to apply SQLite auto-optimizations:', error)
+    }
+  }
+
+  /**
+   * Get SQLite optimization recommendations
+   */
+  async getSQLiteOptimizations(): Promise<any> {
+    if (this.config.dialect !== 'sqlite' || !this.sqliteAutoOptimizer) {
+      throw new NoormError('SQLite optimizations are only available for SQLite databases')
+    }
+
+    const config = this.sqliteAutoOptimizer.getDefaultConfig()
+    return await this.sqliteAutoOptimizer.optimizeDatabase(this.db, config)
+  }
+
+  /**
+   * Get SQLite index recommendations
+   */
+  async getSQLiteIndexRecommendations(options?: {
+    minFrequency?: number
+    slowQueryThreshold?: number
+    includePartialIndexes?: boolean
+    maxRecommendations?: number
+  }): Promise<any> {
+    if (this.config.dialect !== 'sqlite' || !this.sqliteAutoIndexer) {
+      throw new NoormError('SQLite index recommendations are only available for SQLite databases')
+    }
+
+    return await this.sqliteAutoIndexer.analyzeAndRecommend(this.db, options)
+  }
+
+  /**
+   * Record query for SQLite auto-indexing analysis
+   */
+  recordQuery(query: string, executionTime: number, table?: string): void {
+    if (this.config.dialect === 'sqlite' && this.sqliteAutoIndexer) {
+      this.sqliteAutoIndexer.recordQuery(query, executionTime, table)
+    }
+    
+    if (this.queryAnalyzer) {
+      this.queryAnalyzer.recordQuery(query, executionTime, undefined, table)
+    }
+  }
+
+  /**
+   * Get SQLite performance metrics
+   */
+  async getSQLitePerformanceMetrics(): Promise<any> {
+    if (this.config.dialect !== 'sqlite' || !this.sqliteAutoOptimizer) {
+      throw new NoormError('SQLite performance metrics are only available for SQLite databases')
+    }
+
+    return await this.sqliteAutoOptimizer.analyzeDatabase(this.db)
+  }
+
+  /**
+   * Get SQLite backup recommendations
+   */
+  async getSQLiteBackupRecommendations(): Promise<string[]> {
+    if (this.config.dialect !== 'sqlite' || !this.sqliteAutoOptimizer) {
+      throw new NoormError('SQLite backup recommendations are only available for SQLite databases')
+    }
+
+    return await this.sqliteAutoOptimizer.getBackupRecommendations(this.db)
   }
 
 

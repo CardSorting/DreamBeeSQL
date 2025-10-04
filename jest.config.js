@@ -2,10 +2,12 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/tests'],
+  roots: ['<rootDir>/tests', '<rootDir>/src'],
   testMatch: [
     '**/tests/**/*.test.ts',
-    '**/tests/**/*.spec.ts'
+    '**/tests/**/*.spec.ts',
+    '**/src/**/*.test.ts',
+    '**/src/**/*.spec.ts'
   ],
   transform: {
     '^.+\\.ts$': 'ts-jest',
@@ -40,5 +42,8 @@ module.exports = {
         target: 'ES2022'
       }
     }
+  },
+  testEnvironmentOptions: {
+    customExportConditions: ['node', 'node-addons']
   }
 }

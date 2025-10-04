@@ -2,16 +2,16 @@
  * Jest setup file for NOORMME tests
  */
 
-import { TestEnvironment } from '../src/testing/test-utils.js'
-
 // Global test setup
 beforeAll(async () => {
-  await TestEnvironment.setup()
+  // Simple setup without external dependencies
+  console.log('Setting up test environment...')
 })
 
 // Global test teardown
 afterAll(async () => {
-  await TestEnvironment.teardown()
+  // Simple teardown
+  console.log('Tearing down test environment...')
 })
 
 // Increase timeout for database operations

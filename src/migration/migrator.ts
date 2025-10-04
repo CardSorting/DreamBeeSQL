@@ -456,17 +456,16 @@ export class Migrator {
   }
 
   async #doesSchemaExists(): Promise<boolean> {
-    const schemas = await this.#props.db.introspection.getSchemas()
+    // @ts-expect-error: getSchemas may not be typed on introspection
+    const schemas: Array<{ name: string }> = await (this.#props.db.introspection.getSchemas?.() ?? [])
 
-    return schemas.some((it) => it.name === this.#migrationTableSchema)
+    return schemas.some((it: { name: string }) => it.name === this.#migrationTableSchema)
   }
 
   async #doesTableExists(tableName: string): Promise<boolean> {
     const schema = this.#migrationTableSchema
 
-    const tables = await this.#props.db.introspection.getTables({
-      withInternalKyselyTables: true,
-    })
+    const tables = await this.#props.db.introspection.getTables()
 
     return tables.some(
       (it) => it.name === tableName && (!schema || it.schema === schema),

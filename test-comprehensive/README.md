@@ -55,10 +55,7 @@ test-comprehensive/
 - ✅ Performance optimization
 
 ### Database Support
-- ✅ PostgreSQL
-- ✅ MySQL
 - ✅ SQLite
-- ✅ MSSQL (basic support)
 
 ### Advanced Features
 - ✅ Batch loading for performance
@@ -106,14 +103,6 @@ The test suite automatically sets up test databases for each supported dialect:
 - No setup required
 - Fastest for unit tests
 
-### PostgreSQL
-```bash
-# Start PostgreSQL (Docker)
-docker run --name postgres-test -e POSTGRES_PASSWORD=test -p 5432:5432 -d postgres
-
-# Set environment variable
-export TEST_DATABASE_URL="postgresql://postgres:test@localhost:5432/postgres"
-```
 
 ### MySQL
 ```bash

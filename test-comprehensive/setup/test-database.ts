@@ -7,7 +7,7 @@ import { getTestConfig, getDatabaseConfig, isDatabaseEnabled } from './test-conf
 import { sql } from '../../src/raw-builder/sql.js'
 
 export interface TestDatabase {
-  dialect: 'sqlite' | 'postgresql' | 'mysql' | 'mssql'
+  dialect: 'sqlite'
   connection: any
   db: NOORMME
 }
@@ -15,7 +15,7 @@ export interface TestDatabase {
 /**
  * Create a test database instance for a specific dialect
  */
-export async function createTestDatabase(dialect: 'sqlite' | 'postgresql' | 'mysql' | 'mssql'): Promise<TestDatabase> {
+export async function createTestDatabase(dialect: 'sqlite'): Promise<TestDatabase> {
   if (!isDatabaseEnabled(dialect)) {
     throw new Error(`Database dialect ${dialect} is not enabled for testing`)
   }
@@ -40,35 +40,6 @@ export async function createTestDatabase(dialect: 'sqlite' | 'postgresql' | 'mys
       }
       break
       
-    case 'postgresql':
-      connection = {
-        host: (config as any).host,
-        port: (config as any).port,
-        database: (config as any).database,
-        username: (config as any).username,
-        password: (config as any).password
-      }
-      break
-      
-    case 'mysql':
-      connection = {
-        host: (config as any).host,
-        port: (config as any).port,
-        database: (config as any).database,
-        username: (config as any).username,
-        password: (config as any).password
-      }
-      break
-      
-    case 'mssql':
-      connection = {
-        host: (config as any).host,
-        port: (config as any).port,
-        database: (config as any).database,
-        username: (config as any).username,
-        password: (config as any).password
-      }
-      break
       
     default:
       throw new Error(`Unsupported dialect: ${dialect}`)
@@ -129,31 +100,8 @@ export async function cleanupTestDatabase(testDb: TestDatabase): Promise<void> {
     
     const kysely = db.getKysely()
     
-    if (dialect === 'postgresql') {
-      // PostgreSQL cleanup - drop all tables in public schema
-      await sql`
-        DO $$ 
-        DECLARE 
-            r RECORD;
-        BEGIN
-            FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
-                EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
-            END LOOP;
-        END $$;
-      `.execute(kysely)
-      
-      // Also drop any sequences
-      await sql`
-        DO $$ 
-        DECLARE 
-            r RECORD;
-        BEGIN
-            FOR r IN (SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public') LOOP
-                EXECUTE 'DROP SEQUENCE IF EXISTS ' || quote_ident(r.sequence_name) || ' CASCADE';
-            END LOOP;
-        END $$;
-      `.execute(kysely)
-    } else if (dialect === 'sqlite') {
+    // SQLite cleanup - drop all tables
+    if (dialect === 'sqlite') {
       // SQLite cleanup - drop all tables
       const tables = await kysely
         .selectFrom('sqlite_master')
@@ -466,15 +414,6 @@ export function getConnectionString(dialect: string, config: any): string {
   switch (dialect) {
     case 'sqlite':
       return config.database
-      
-    case 'postgresql':
-      return `postgresql://${(config as any).username}:${(config as any).password}@${(config as any).host}:${(config as any).port}/${(config as any).database}`
-      
-    case 'mysql':
-      return `mysql://${(config as any).username}:${(config as any).password}@${(config as any).host}:${(config as any).port}/${(config as any).database}`
-      
-    case 'mssql':
-      return `mssql://${(config as any).username}:${(config as any).password}@${(config as any).host}:${(config as any).port}/${(config as any).database}`
       
     default:
       throw new Error(`Unsupported dialect: ${dialect}`)

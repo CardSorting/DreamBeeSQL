@@ -9,30 +9,6 @@ export interface TestConfig {
       enabled: boolean
       database: string
     }
-    postgresql: {
-      enabled: boolean
-      host: string
-      port: number
-      database: string
-      username: string
-      password: string
-    }
-    mysql: {
-      enabled: boolean
-      host: string
-      port: number
-      database: string
-      username: string
-      password: string
-    }
-    mssql: {
-      enabled: boolean
-      host: string
-      port: number
-      database: string
-      username: string
-      password: string
-    }
   }
   
   // Test execution configuration
@@ -76,30 +52,6 @@ export const defaultTestConfig: TestConfig = {
       enabled: true,
       database: ':memory:'
     },
-    postgresql: {
-      enabled: process.env.TEST_POSTGRESQL === 'true',
-      host: process.env.POSTGRES_HOST || 'localhost',
-      port: parseInt(process.env.POSTGRES_PORT || '5432'),
-      database: process.env.POSTGRES_DB || 'noorm_test',
-      username: process.env.POSTGRES_USER || 'postgres',
-      password: process.env.POSTGRES_PASSWORD || 'password'
-    },
-    mysql: {
-      enabled: process.env.TEST_MYSQL === 'true',
-      host: process.env.MYSQL_HOST || 'localhost',
-      port: parseInt(process.env.MYSQL_PORT || '3306'),
-      database: process.env.MYSQL_DB || 'noorm_test',
-      username: process.env.MYSQL_USER || 'root',
-      password: process.env.MYSQL_PASSWORD || 'password'
-    },
-    mssql: {
-      enabled: process.env.TEST_MSSQL === 'true',
-      host: process.env.MSSQL_HOST || 'localhost',
-      port: parseInt(process.env.MSSQL_PORT || '1433'),
-      database: process.env.MSSQL_DB || 'noorm_test',
-      username: process.env.MSSQL_USER || 'sa',
-      password: process.env.MSSQL_PASSWORD || 'Password123!'
-    }
   },
   
   execution: {
@@ -144,7 +96,7 @@ export function getTestConfig(): TestConfig {
 /**
  * Check if a database dialect is enabled for testing
  */
-export function isDatabaseEnabled(dialect: 'sqlite' | 'postgresql' | 'mysql' | 'mssql'): boolean {
+export function isDatabaseEnabled(dialect: 'sqlite'): boolean {
   const config = getTestConfig()
   return config.database[dialect].enabled
 }
@@ -152,14 +104,11 @@ export function isDatabaseEnabled(dialect: 'sqlite' | 'postgresql' | 'mysql' | '
 /**
  * Get enabled database dialects
  */
-export function getEnabledDatabases(): Array<'sqlite' | 'postgresql' | 'mysql' | 'mssql'> {
+export function getEnabledDatabases(): Array<'sqlite'> {
   const config = getTestConfig()
-  const enabled: Array<'sqlite' | 'postgresql' | 'mysql' | 'mssql'> = []
+  const enabled: Array<'sqlite'> = []
   
   if (config.database.sqlite.enabled) enabled.push('sqlite')
-  if (config.database.postgresql.enabled) enabled.push('postgresql')
-  if (config.database.mysql.enabled) enabled.push('mysql')
-  if (config.database.mssql.enabled) enabled.push('mssql')
   
   return enabled
 }
@@ -167,7 +116,7 @@ export function getEnabledDatabases(): Array<'sqlite' | 'postgresql' | 'mysql' |
 /**
  * Get database connection configuration for a dialect
  */
-export function getDatabaseConfig(dialect: 'sqlite' | 'postgresql' | 'mysql' | 'mssql') {
+export function getDatabaseConfig(dialect: 'sqlite') {
   const config = getTestConfig()
   return config.database[dialect]
 }

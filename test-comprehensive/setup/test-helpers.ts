@@ -15,7 +15,7 @@ export class TestHelper {
   /**
    * Create and setup a test database
    */
-  async createTestDatabase(dialect: 'sqlite' | 'postgresql' | 'mysql' | 'mssql'): Promise<TestDatabase> {
+  async createTestDatabase(dialect: 'sqlite'): Promise<TestDatabase> {
     // Clean up existing database if it exists
     const existing = this.testDatabases.get(dialect)
     if (existing) {
@@ -31,7 +31,7 @@ export class TestHelper {
   /**
    * Get an existing test database
    */
-  getTestDatabase(dialect: 'sqlite' | 'postgresql' | 'mysql' | 'mssql'): TestDatabase | undefined {
+  getTestDatabase(dialect: 'sqlite'): TestDatabase | undefined {
     return this.testDatabases.get(dialect)
   }
   
@@ -59,7 +59,7 @@ export const testHelper = new TestHelper()
  * Test wrapper that automatically handles database setup and cleanup
  */
 export function withTestDatabase<T>(
-  dialect: 'sqlite' | 'postgresql' | 'mysql' | 'mssql',
+  dialect: 'sqlite',
   testFn: (testDb: TestDatabase) => Promise<T>
 ): () => Promise<T> {
   return async () => {
@@ -79,7 +79,7 @@ export function withTestDatabase<T>(
  * Test wrapper for multiple databases
  */
 export function withMultipleDatabases<T>(
-  dialects: Array<'sqlite' | 'postgresql' | 'mysql' | 'mssql'>,
+  dialects: Array<'sqlite'>,
   testFn: (testDatabases: Map<string, TestDatabase>) => Promise<T>
 ): () => Promise<T> {
   return async () => {

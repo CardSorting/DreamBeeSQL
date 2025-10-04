@@ -111,7 +111,7 @@ interface ComprehensiveReport {
  * Tests complex business scenarios and analytics
  */
 class RealWorldScenariosTestSuite {
-  private enabledDatabases: ('sqlite' | 'postgresql' | 'mysql' | 'mssql')[]
+  private enabledDatabases: ('sqlite')[]
 
   constructor() {
     this.enabledDatabases = getEnabledDatabases()
@@ -877,7 +877,7 @@ class RealWorldScenariosTestSuite {
   /**
    * Run all tests for a specific database dialect
    */
-  async runTestsForDialect(dialect: 'sqlite' | 'postgresql' | 'mysql' | 'mssql'): Promise<void> {
+  async runTestsForDialect(dialect: 'sqlite'): Promise<void> {
     describe(`${dialect.toUpperCase()}`, () => {
       it('should handle complete e-commerce customer journey', withTestDatabase(dialect, async (testDb) => {
         const { db } = testDb

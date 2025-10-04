@@ -13,11 +13,11 @@ import { db } from '../db/noormme';
 
 export function NoormmeAdapter(): Adapter {
   return {
-    async createUser(user: { id?: string; name?: string | null; email?: string; emailVerified?: Date | null; image?: string | null }) {
+    async createUser(user: Omit<AdapterUser, 'id'>) {
       const userRepo = db.getRepository('users');
       
       const userData = {
-        id: user.id || crypto.randomUUID(),
+        id: crypto.randomUUID(),
         name: user.name,
         email: user.email || '',
         email_verified: user.emailVerified ? user.emailVerified.toISOString() : null,
@@ -26,45 +26,45 @@ export function NoormmeAdapter(): Adapter {
         updated_at: new Date().toISOString(),
       };
 
-      const createdUser = await userRepo.create(userData);
+      const createdUser = await userRepo.create(userData) as Record<string, unknown>;
 
       return {
-        id: createdUser.id,
-        name: createdUser.name,
-        email: createdUser.email,
-        emailVerified: createdUser.email_verified ? new Date(createdUser.email_verified) : null,
-        image: createdUser.image,
+        id: createdUser.id as string,
+        name: createdUser.name as string | null,
+        email: createdUser.email as string,
+        emailVerified: createdUser.email_verified ? new Date(createdUser.email_verified as string) : null,
+        image: createdUser.image as string | null,
       };
     },
 
-    async getUser(id) {
+    async getUser(id: string) {
       const userRepo = db.getRepository('users');
-      const user = await userRepo.findById(id);
+      const user = await userRepo.findById(id) as Record<string, unknown> | null;
       
       if (!user) return null;
 
       return {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        emailVerified: user.email_verified ? new Date(user.email_verified) : null,
-        image: user.image,
+        id: user.id as string,
+        name: user.name as string | null,
+        email: user.email as string,
+        emailVerified: user.email_verified ? new Date(user.email_verified as string) : null,
+        image: user.image as string | null,
       };
     },
 
-    async getUserByEmail(email) {
+    async getUserByEmail(email: string) {
       const userRepo = db.getRepository('users');
-      const users = await userRepo.findManyByEmail(email);
+      const users = await userRepo.findManyByEmail(email) as Record<string, unknown>[] | null;
       
       if (!users || users.length === 0) return null;
-      const user = users[0];
+      const user = users[0] as Record<string, unknown>;
 
       return {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        emailVerified: user.email_verified ? new Date(user.email_verified) : null,
-        image: user.image,
+        id: user.id as string,
+        name: user.name as string | null,
+        email: user.email as string,
+        emailVerified: user.email_verified ? new Date(user.email_verified as string) : null,
+        image: user.image as string | null,
       };
     },
 

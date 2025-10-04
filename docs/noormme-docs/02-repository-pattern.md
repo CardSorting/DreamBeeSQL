@@ -71,32 +71,75 @@ await userRepo.delete('123');
 
 ## Custom Finder Methods
 
-Based on the production implementation, Noormme repositories support custom finder methods:
+Noormme automatically generates custom finder methods based on your table schema. These methods are available at runtime and provide type-safe access to your data:
 
 ### Email-based Finders
 
 ```typescript
-// Find users by email
+// Find users by email (automatically generated for 'email' column)
 const users = await userRepo.findManyByEmail('john@example.com');
 const user = users && users.length > 0 ? users[0] : null;
+
+// Real-world usage from DreamBeesArt
+async getUserByEmail(email: string) {
+  const userRepo = db.getRepository('users');
+  const users = await userRepo.findManyByEmail(email);
+  return users && users.length > 0 ? users[0] : null;
+}
 ```
 
 ### Name-based Finders
 
 ```typescript
-// Find roles by name
+// Find roles by name (automatically generated for 'name' column)
 const roles = await roleRepo.findManyByName('admin');
 const role = roles && roles.length > 0 ? roles[0] : null;
+
+// Real-world usage from RBAC system
+async function assignRoleToUser(userId: string, roleName: string) {
+  const rolesRepo = getRepository('roles');
+  const roles = await rolesRepo.findManyByName(roleName);
+  if (!roles || roles.length === 0) {
+    throw new Error(`Role '${roleName}' not found`);
+  }
+  return roles[0];
+}
 ```
 
-### User ID-based Finders
+### ID-based Finders
 
 ```typescript
-// Find user roles by user ID
+// Find user roles by user ID (automatically generated for 'user_id' column)
 const userRoles = await userRolesRepo.findManyByUserId('123');
 
-// Find role permissions by role ID
+// Find role permissions by role ID (automatically generated for 'role_id' column)
 const rolePermissions = await rolePermissionsRepo.findManyByRoleId('456');
+
+// Real-world usage from RBAC system
+async function getUserRoles(userId: string) {
+  const userRolesRepo = getRepository('user_roles');
+  const existingUserRoles = await userRolesRepo.findManyByUserId(userId);
+  return existingUserRoles;
+}
+```
+
+### Automatic Method Generation
+
+Noormme automatically generates finder methods based on your table columns:
+
+- `findManyBy[ColumnName]()` - Returns array of records
+- `findOneBy[ColumnName]()` - Returns single record or null
+- `findBy[ColumnName]()` - Alias for findOneBy[ColumnName]()
+
+**Example for a `users` table with columns: `id`, `email`, `name`, `created_at`**
+```typescript
+const userRepo = db.getRepository('users');
+
+// All these methods are automatically available:
+await userRepo.findManyByEmail('john@example.com');
+await userRepo.findManyByName('John Doe');
+await userRepo.findOneByEmail('john@example.com');
+await userRepo.findById('123'); // Special case for primary key
 ```
 
 ## Real-World Examples
@@ -256,12 +299,18 @@ export async function assignPermissionToRole(roleName: string, permissionName: s
 - `update(id: string, data: any)` - Update an existing record
 - `delete(id: string)` - Delete a record (if supported)
 
-### Custom Finder Methods
+### Automatically Generated Custom Finder Methods
+
+Noormme automatically generates these methods based on your table schema:
 
 - `findManyByEmail(email: string)` - Find records by email field
 - `findManyByName(name: string)` - Find records by name field
-- `findManyByUserId(userId: string)` - Find records by user ID
-- `findManyByRoleId(roleId: string)` - Find records by role ID
+- `findManyByUserId(userId: string)` - Find records by user_id field
+- `findManyByRoleId(roleId: string)` - Find records by role_id field
+- `findManyBy[ColumnName](value: any)` - Find records by any column
+- `findOneBy[ColumnName](value: any)` - Find single record by any column
+
+**Note:** Custom finder methods are generated at runtime based on your actual table schema. The methods available depend on your table columns.
 
 ## Best Practices
 

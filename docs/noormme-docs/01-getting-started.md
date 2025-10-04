@@ -84,6 +84,40 @@ export const getSchemaInfo = () => db.getSchemaInfo();
 
 // Export optimization recommendations
 export const getOptimizationRecommendations = () => db.getSQLiteOptimizations();
+
+// Export health check and monitoring
+export const healthCheck = async () => {
+  try {
+    const start = Date.now();
+    const usersRepo = db.getRepository('users');
+    await usersRepo.findAll({ limit: 1 });
+    const responseTime = Date.now() - start;
+    
+    return {
+      healthy: true,
+      responseTime,
+      timestamp: new Date().toISOString(),
+      connectionPool: getConnectionStats()
+    };
+  } catch (error) {
+    return {
+      healthy: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString(),
+      connectionPool: getConnectionStats()
+    };
+  }
+};
+
+// Export connection statistics
+export const getConnectionStats = () => {
+  return {
+    database: 'SQLite',
+    dialect: 'noormme',
+    timestamp: new Date().toISOString(),
+    status: dbInitialized ? 'connected' : 'disconnected'
+  };
+};
 ```
 
 ## Configuration Options
@@ -144,6 +178,10 @@ const user = await userRepo.findById('123');
 const users = await userRepo.findAll({ limit: 10 });
 const newUser = await userRepo.create(userData);
 const updatedUser = await userRepo.update('123', updateData);
+
+// Custom finder methods (automatically generated)
+const usersByEmail = await userRepo.findManyByEmail('john@example.com');
+const userByEmail = await userRepo.findOneByEmail('john@example.com');
 ```
 
 ### Kysely Integration

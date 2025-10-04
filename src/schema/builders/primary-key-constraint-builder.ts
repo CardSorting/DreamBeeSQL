@@ -1,5 +1,5 @@
-import { OperationNodeSource } from '../operation-node/operation-node-source.js'
-import { PrimaryKeyConstraintNode } from '../operation-node/primary-key-constraint-node.js'
+import { OperationNodeSource } from '../../operation-node/operation-node-source.js'
+import { PrimaryKeyConstraintNode } from '../../operation-node/primary-key-constraint-node.js'
 
 export class PrimaryKeyConstraintBuilder implements OperationNodeSource {
   readonly #node: PrimaryKeyConstraintNode

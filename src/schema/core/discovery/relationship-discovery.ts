@@ -106,11 +106,11 @@ export class RelationshipDiscovery {
     // 2. Composite primary key
     // 3. No other data columns
     
-    const hasOnlyFkColumns = table.columns.every(col => 
-      col.isPrimaryKey || table.foreignKeys.some(fk => fk.column === col.name)
+    const hasOnlyFkColumns = table.columns.every(col =>
+      (col.isPrimaryKey ?? false) || (table.foreignKeys.some(fk => fk.column === col.name) ?? false)
     )
     
-    const hasCompositePk = table.primaryKey && table.primaryKey.length > 1
+    const hasCompositePk = (table.primaryKey && table.primaryKey.length > 1) ?? false
     
     return hasOnlyFkColumns && hasCompositePk
   }

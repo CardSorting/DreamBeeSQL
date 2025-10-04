@@ -13,10 +13,11 @@ import { Kysely } from '../../kysely.js'
 import { freeze } from '../../util/object-utils.js'
 import { sql } from '../../raw-builder/sql.js'
 
-export class MysqlIntrospector implements DatabaseIntrospector {
+export class MysqlIntrospector extends DatabaseIntrospector {
   readonly #db: Kysely<any>
 
   constructor(db: Kysely<any>) {
+    super(db)
     this.#db = db
   }
 
@@ -82,24 +83,14 @@ export class MysqlIntrospector implements DatabaseIntrospector {
       if (!table) {
         table = freeze({
           name: it.TABLE_NAME,
-          isView: it.TABLE_TYPE === 'VIEW',
           schema: it.TABLE_SCHEMA,
-          columns: [],
         })
 
         tables.push(table)
       }
 
-      table.columns.push(
-        freeze({
-          name: it.COLUMN_NAME,
-          dataType: it.DATA_TYPE,
-          isNullable: it.IS_NULLABLE === 'YES',
-          isAutoIncrementing: it.EXTRA.toLowerCase().includes('auto_increment'),
-          hasDefaultValue: it.COLUMN_DEFAULT !== null,
-          comment: it.COLUMN_COMMENT === '' ? undefined : it.COLUMN_COMMENT,
-        }),
-      )
+      // Note: Column information should be retrieved separately using getTableMetadata
+      // This method only returns basic table metadata
 
       return tables
     }, [])

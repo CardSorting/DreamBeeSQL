@@ -20,7 +20,7 @@ export class ViewDiscovery {
   async discoverViews(introspector: DatabaseIntrospector): Promise<ViewMetadata[]> {
     try {
       // Get views using the introspector's getTables method with view filter
-      const tables = await introspector.getTables({ withInternalKyselyTables: false })
+      const tables = await introspector.getTables()
       const views: ViewMetadata[] = []
 
       // Filter for views (this depends on the specific introspector implementation)
@@ -30,7 +30,7 @@ export class ViewDiscovery {
           views.push({
             name: table.name,
             schema: table.schema,
-            definition: await this.getViewDefinition(introspector, table.name),
+            definition: (await this.getViewDefinition(introspector, table.name)) ?? undefined,
             columns: [] // Views don't have explicit columns in this context
           })
         }

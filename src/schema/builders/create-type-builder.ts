@@ -1,10 +1,10 @@
-import { OperationNodeSource } from '../operation-node/operation-node-source.js'
-import { CompiledQuery } from '../query-compiler/compiled-query.js'
-import { Compilable } from '../util/compilable.js'
-import { QueryExecutor } from '../query-executor/query-executor.js'
-import { QueryId } from '../util/query-id.js'
-import { freeze } from '../util/object-utils.js'
-import { CreateTypeNode } from '../operation-node/create-type-node.js'
+import { OperationNodeSource } from '../../operation-node/operation-node-source.js'
+import { CompiledQuery } from '../../query-compiler/compiled-query.js'
+import { Compilable } from '../../util/compilable.js'
+import { QueryExecutor } from '../../query-executor/query-executor.js'
+import { QueryId } from '../../util/query-id.js'
+import { freeze } from '../../util/object-utils.js'
+import { CreateTypeNode } from '../../operation-node/create-type-node.js'
 
 export class CreateTypeBuilder implements OperationNodeSource, Compilable {
   readonly #props: CreateTypeBuilderProps

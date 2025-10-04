@@ -20,14 +20,12 @@ export { PostgreSQLDiscoveryCoordinator } from './dialects/postgresql/postgresql
 export { PostgreSQLIndexDiscovery } from './dialects/postgresql/discovery/postgresql-index-discovery.js'
 export { PostgreSQLConstraintDiscovery } from './dialects/postgresql/discovery/postgresql-constraint-discovery.js'
 export { PostgreSQLSchemaIntrospector } from './dialects/postgresql/introspection/postgresql-schema-introspector.js'
-export { PostgreSQLTableBuilder } from './dialects/postgresql/builders/postgresql-table-builder.js'
 
 // SQLite Dialect
 export { SQLiteDiscoveryCoordinator } from './dialects/sqlite/sqlite-discovery.coordinator.js'
 export { SQLiteIndexDiscovery } from './dialects/sqlite/discovery/sqlite-index-discovery.js'
 export { SQLiteConstraintDiscovery } from './dialects/sqlite/discovery/sqlite-constraint-discovery.js'
 export { SQLiteSchemaIntrospector } from './dialects/sqlite/introspection/sqlite-schema-introspector.js'
-export { SQLiteTableBuilder } from './dialects/sqlite/builders/sqlite-table-builder.js'
 
 // Schema Builders
 export * from './builders/index.js'

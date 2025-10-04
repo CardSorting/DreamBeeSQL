@@ -1,29 +1,29 @@
 import {
   CreateIndexNode,
   IndexType,
-} from '../operation-node/create-index-node.js'
-import { OperationNodeSource } from '../operation-node/operation-node-source.js'
-import { RawNode } from '../operation-node/raw-node.js'
+} from '../../operation-node/create-index-node.js'
+import { OperationNodeSource } from '../../operation-node/operation-node-source.js'
+import { RawNode } from '../../operation-node/raw-node.js'
 import {
   ExtractColumnNameFromOrderedColumnName,
   OrderedColumnName,
   parseOrderedColumnName,
-} from '../parser/reference-parser.js'
-import { parseTable } from '../parser/table-parser.js'
-import { CompiledQuery } from '../query-compiler/compiled-query.js'
-import { Compilable } from '../util/compilable.js'
-import { QueryExecutor } from '../query-executor/query-executor.js'
-import { QueryId } from '../util/query-id.js'
-import { freeze } from '../util/object-utils.js'
-import { Expression } from '../expression/expression.js'
+} from '../../parser/reference-parser.js'
+import { parseTable } from '../../parser/table-parser.js'
+import { CompiledQuery } from '../../query-compiler/compiled-query.js'
+import { Compilable } from '../../util/compilable.js'
+import { QueryExecutor } from '../../query-executor/query-executor.js'
+import { QueryId } from '../../util/query-id.js'
+import { freeze } from '../../util/object-utils.js'
+import { Expression } from '../../expression/expression.js'
 import {
   ComparisonOperatorExpression,
   parseValueBinaryOperationOrExpression,
-} from '../parser/binary-operation-parser.js'
-import { QueryNode } from '../operation-node/query-node.js'
-import { ExpressionBuilder } from '../expression/expression-builder.js'
-import { ShallowRecord, SqlBool } from '../util/type-utils.js'
-import { ImmediateValueTransformer } from '../plugin/immediate-value/immediate-value-transformer.js'
+} from '../../parser/binary-operation-parser.js'
+import { QueryNode } from '../../operation-node/query-node.js'
+import { ExpressionBuilder } from '../../expression/expression-builder.js'
+import { ShallowRecord, SqlBool } from '../../util/type-utils.js'
+import { ImmediateValueTransformer } from '../../plugin/immediate-value/immediate-value-transformer.js'
 
 export class CreateIndexBuilder<C = never>
   implements OperationNodeSource, Compilable

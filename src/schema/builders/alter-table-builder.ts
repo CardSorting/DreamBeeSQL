@@ -1,36 +1,36 @@
-import { AddColumnNode } from '../operation-node/add-column-node.js'
-import { AlterTableNode } from '../operation-node/alter-table-node.js'
-import { ColumnDefinitionNode } from '../operation-node/column-definition-node.js'
-import { DropColumnNode } from '../operation-node/drop-column-node.js'
-import { IdentifierNode } from '../operation-node/identifier-node.js'
-import { OperationNodeSource } from '../operation-node/operation-node-source.js'
-import { RenameColumnNode } from '../operation-node/rename-column-node.js'
-import { CompiledQuery } from '../query-compiler/compiled-query.js'
-import { Compilable } from '../util/compilable.js'
-import { freeze, noop } from '../util/object-utils.js'
+import { AddColumnNode } from '../../operation-node/add-column-node.js'
+import { AlterTableNode } from '../../operation-node/alter-table-node.js'
+import { ColumnDefinitionNode } from '../../operation-node/column-definition-node.js'
+import { DropColumnNode } from '../../operation-node/drop-column-node.js'
+import { IdentifierNode } from '../../operation-node/identifier-node.js'
+import { OperationNodeSource } from '../../operation-node/operation-node-source.js'
+import { RenameColumnNode } from '../../operation-node/rename-column-node.js'
+import { CompiledQuery } from '../../query-compiler/compiled-query.js'
+import { Compilable } from '../../util/compilable.js'
+import { freeze, noop } from '../../util/object-utils.js'
 import {
   ColumnDefinitionBuilder,
   ColumnDefinitionBuilderCallback,
 } from './column-definition-builder.js'
-import { QueryId } from '../util/query-id.js'
-import { QueryExecutor } from '../query-executor/query-executor.js'
-import { ModifyColumnNode } from '../operation-node/modify-column-node.js'
+import { QueryId } from '../../util/query-id.js'
+import { QueryExecutor } from '../../query-executor/query-executor.js'
+import { ModifyColumnNode } from '../../operation-node/modify-column-node.js'
 import {
   DataTypeExpression,
   parseDataTypeExpression,
-} from '../parser/data-type-parser.js'
+} from '../../parser/data-type-parser.js'
 import {
   ForeignKeyConstraintBuilder,
   ForeignKeyConstraintBuilderCallback,
 } from './foreign-key-constraint-builder.js'
-import { AddConstraintNode } from '../operation-node/add-constraint-node.js'
-import { UniqueConstraintNode } from '../operation-node/unique-constraint-node.js'
-import { CheckConstraintNode } from '../operation-node/check-constraint-node.js'
-import { ForeignKeyConstraintNode } from '../operation-node/foreign-key-constraint-node.js'
-import { ColumnNode } from '../operation-node/column-node.js'
-import { parseTable } from '../parser/table-parser.js'
-import { DropConstraintNode } from '../operation-node/drop-constraint-node.js'
-import { Expression } from '../expression/expression.js'
+import { AddConstraintNode } from '../../operation-node/add-constraint-node.js'
+import { UniqueConstraintNode } from '../../operation-node/unique-constraint-node.js'
+import { CheckConstraintNode } from '../../operation-node/check-constraint-node.js'
+import { ForeignKeyConstraintNode } from '../../operation-node/foreign-key-constraint-node.js'
+import { ColumnNode } from '../../operation-node/column-node.js'
+import { parseTable } from '../../parser/table-parser.js'
+import { DropConstraintNode } from '../../operation-node/drop-constraint-node.js'
+import { Expression } from '../../expression/expression.js'
 import {
   AlterColumnBuilder,
   AlterColumnBuilderCallback,
@@ -38,9 +38,9 @@ import {
 import { AlterTableExecutor } from './alter-table-executor.js'
 import { AlterTableAddForeignKeyConstraintBuilder } from './alter-table-add-foreign-key-constraint-builder.js'
 import { AlterTableDropConstraintBuilder } from './alter-table-drop-constraint-builder.js'
-import { PrimaryKeyConstraintNode } from '../operation-node/primary-key-constraint-node.js'
-import { DropIndexNode } from '../operation-node/drop-index-node.js'
-import { AddIndexNode } from '../operation-node/add-index-node.js'
+import { PrimaryKeyConstraintNode } from '../../operation-node/primary-key-constraint-node.js'
+import { DropIndexNode } from '../../operation-node/drop-index-node.js'
+import { AddIndexNode } from '../../operation-node/add-index-node.js'
 import { AlterTableAddIndexBuilder } from './alter-table-add-index-builder.js'
 import {
   UniqueConstraintNodeBuilder,
@@ -54,7 +54,7 @@ import {
   CheckConstraintBuilder,
   CheckConstraintBuilderCallback,
 } from './check-constraint-builder.js'
-import { RenameConstraintNode } from '../operation-node/rename-constraint-node.js'
+import { RenameConstraintNode } from '../../operation-node/rename-constraint-node.js'
 
 /**
  * This builder can be used to create a `alter table` query.

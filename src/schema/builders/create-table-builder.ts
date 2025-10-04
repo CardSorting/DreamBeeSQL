@@ -1,17 +1,17 @@
-import { ColumnDefinitionNode } from '../operation-node/column-definition-node.js'
+import { ColumnDefinitionNode } from '../../operation-node/column-definition-node.js'
 import {
   CreateTableNode,
   OnCommitAction,
-} from '../operation-node/create-table-node.js'
-import { OperationNodeSource } from '../operation-node/operation-node-source.js'
-import { CompiledQuery } from '../query-compiler/compiled-query.js'
-import { Compilable } from '../util/compilable.js'
-import { QueryExecutor } from '../query-executor/query-executor.js'
+} from '../../operation-node/create-table-node.js'
+import { OperationNodeSource } from '../../operation-node/operation-node-source.js'
+import { CompiledQuery } from '../../query-compiler/compiled-query.js'
+import { Compilable } from '../../util/compilable.js'
+import { QueryExecutor } from '../../query-executor/query-executor.js'
 import { ColumnDefinitionBuilder } from './column-definition-builder.js'
-import { QueryId } from '../util/query-id.js'
-import { freeze, noop } from '../util/object-utils.js'
-import { ForeignKeyConstraintNode } from '../operation-node/foreign-key-constraint-node.js'
-import { ColumnNode } from '../operation-node/column-node.js'
+import { QueryId } from '../../util/query-id.js'
+import { freeze, noop } from '../../util/object-utils.js'
+import { ForeignKeyConstraintNode } from '../../operation-node/foreign-key-constraint-node.js'
+import { ColumnNode } from '../../operation-node/column-node.js'
 import {
   ForeignKeyConstraintBuilder,
   ForeignKeyConstraintBuilderCallback,
@@ -19,18 +19,18 @@ import {
 import {
   DataTypeExpression,
   parseDataTypeExpression,
-} from '../parser/data-type-parser.js'
-import { PrimaryKeyConstraintNode } from '../operation-node/primary-key-constraint-node.js'
-import { UniqueConstraintNode } from '../operation-node/unique-constraint-node.js'
-import { CheckConstraintNode } from '../operation-node/check-constraint-node.js'
-import { parseTable } from '../parser/table-parser.js'
-import { parseOnCommitAction } from '../parser/on-commit-action-parse.js'
-import { Expression } from '../expression/expression.js'
+} from '../../parser/data-type-parser.js'
+import { PrimaryKeyConstraintNode } from '../../operation-node/primary-key-constraint-node.js'
+import { UniqueConstraintNode } from '../../operation-node/unique-constraint-node.js'
+import { CheckConstraintNode } from '../../operation-node/check-constraint-node.js'
+import { parseTable } from '../../parser/table-parser.js'
+import { parseOnCommitAction } from '../../parser/on-commit-action-parse.js'
+import { Expression } from '../../expression/expression.js'
 import {
   UniqueConstraintNodeBuilder,
   UniqueConstraintNodeBuilderCallback,
 } from './unique-constraint-builder.js'
-import { parseExpression } from '../parser/expression-parser.js'
+import { parseExpression } from '../../parser/expression-parser.js'
 import {
   PrimaryKeyConstraintBuilder,
   PrimaryKeyConstraintBuilderCallback,

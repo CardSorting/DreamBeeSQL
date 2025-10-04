@@ -96,12 +96,6 @@ export * from './dialect/sqlite/sqlite-query-compiler.js'
 export * from './dialect/sqlite/sqlite-introspector.js'
 export * from './dialect/sqlite/sqlite-adapter.js'
 
-export * from './dialect/mssql/mssql-adapter.js'
-export * from './dialect/mssql/mssql-dialect-config.js'
-export * from './dialect/mssql/mssql-dialect.js'
-export * from './dialect/mssql/mssql-driver.js'
-export * from './dialect/mssql/mssql-introspector.js'
-export * from './dialect/mssql/mssql-query-compiler.js'
 
 export * from './query-compiler/default-query-compiler.js'
 export * from './query-compiler/query-compiler.js'

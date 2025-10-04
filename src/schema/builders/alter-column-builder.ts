@@ -1,13 +1,13 @@
-import { AlterColumnNode } from '../operation-node/alter-column-node.js'
-import { OperationNodeSource } from '../operation-node/operation-node-source.js'
+import { AlterColumnNode } from '../../operation-node/alter-column-node.js'
+import { OperationNodeSource } from '../../operation-node/operation-node-source.js'
 import {
   DataTypeExpression,
   parseDataTypeExpression,
-} from '../parser/data-type-parser.js'
+} from '../../parser/data-type-parser.js'
 import {
   DefaultValueExpression,
   parseDefaultValueExpression,
-} from '../parser/default-value-parser.js'
+} from '../../parser/default-value-parser.js'
 
 export class AlterColumnBuilder {
   readonly #column: string

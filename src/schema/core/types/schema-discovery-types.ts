@@ -6,10 +6,22 @@ export interface SchemaDiscoveryConfig {
   customTypeMappings?: Record<string, string>
 }
 
+export interface ColumnInfo {
+  name: string
+  type: string
+  nullable: boolean
+  defaultValue?: any
+  isPrimaryKey: boolean
+  isAutoIncrement: boolean
+  maxLength?: number
+  precision?: number
+  scale?: number
+}
+
 export interface TableMetadata {
   name: string
   schema?: string
-  columns: any[] // Changed from ColumnInfo[] to any[] to fix missing type error
+  columns: ColumnInfo[]
   primaryKey?: string[]
   indexes: IndexMetadata[]
   foreignKeys: ForeignKeyMetadata[];

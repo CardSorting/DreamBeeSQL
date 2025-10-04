@@ -40,13 +40,6 @@ export class TypeMapper {
     // SQLite specific types
     'blob': 'Buffer',
 
-    // MSSQL specific types
-    'nvarchar': 'string',
-    'nchar': 'string',
-    'ntext': 'string',
-    'bit': 'boolean',
-    'datetime2': 'Date',
-    'smalldatetime': 'Date'
   }
 
   /**
@@ -61,8 +54,8 @@ export class TypeMapper {
      type: string;
      nullable: boolean;
      defaultValue?: any;
-     isPrimaryKey?: boolean;
-     isAutoIncrement?: boolean;
+     isPrimaryKey: boolean;
+     isAutoIncrement: boolean;
      maxLength?: number;
      precision?: number;
      scale?: number;
@@ -72,8 +65,8 @@ export class TypeMapper {
        type: this.mapColumnType(dbColumn.type, customTypeMappings),
        nullable: dbColumn.nullable,
       defaultValue: dbColumn.defaultValue,
-      isPrimaryKey: dbColumn.isPrimaryKey,
-      isAutoIncrement: dbColumn.isAutoIncrement,
+      isPrimaryKey: dbColumn.isPrimaryKey ?? false,
+      isAutoIncrement: dbColumn.isAutoIncrement ?? false,
       maxLength: dbColumn.maxLength,
       precision: dbColumn.precision,
       scale: dbColumn.scale

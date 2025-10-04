@@ -111,21 +111,7 @@ export class DatabaseIntrospector {
       console.warn('SQLite table discovery failed:', error)
     }
 
-    try {
-      // MSSQL
-      const mssqlTables = await this.db
-        .selectFrom('information_schema.tables')
-        .select(['table_name as name', 'table_schema as schema'])
-        .where('table_type', '=', 'BASE TABLE')
-        .execute()
-
-      return mssqlTables.map(t => ({
-        name: t.name,
-        schema: t.schema
-      }))
-    } catch (error) {
-      throw new Error('Unable to introspect database tables. Unsupported database type.')
-    }
+    throw new Error('Unable to introspect database tables. Unsupported database type.')
   }
 
   /**
@@ -245,58 +231,11 @@ export class DatabaseIntrospector {
         isAutoIncrement: col.type.toLowerCase().includes('integer') && col.pk
       }))
     } catch (error) {
-      // Not SQLite, try MSSQL
+      // Not SQLite
       console.warn('SQLite column discovery failed:', error)
     }
 
-    try {
-      // MSSQL
-      const mssqlColumns = await this.db
-        .selectFrom('information_schema.columns')
-        .select([
-          'column_name as name',
-          'data_type as type',
-          'is_nullable as nullable',
-          'column_default as defaultValue',
-          'character_maximum_length as maxLength',
-          'numeric_precision as precision',
-          'numeric_scale as scale'
-        ])
-        .where('table_name', '=', tableName)
-        .execute()
-
-      if (mssqlColumns.length > 0) {
-        // Get primary key information
-        const pkColumns = await this.db
-          .selectFrom('information_schema.key_column_usage')
-          .select('column_name')
-          .where('table_name', '=', tableName)
-          .where('constraint_name', 'in',
-            this.db
-              .selectFrom('information_schema.table_constraints')
-              .select('constraint_name')
-              .where('table_name', '=', tableName)
-              .where('constraint_type', '=', 'PRIMARY KEY')
-          )
-          .execute()
-
-        const pkColumnNames = new Set(pkColumns.map(c => c.column_name))
-
-        return mssqlColumns.map(col => ({
-          name: col.name,
-          type: col.type,
-          nullable: col.nullable === 'YES',
-          defaultValue: col.defaultValue,
-          isPrimaryKey: pkColumnNames.has(col.name),
-          isAutoIncrement: col.defaultValue?.includes('IDENTITY') || false,
-          maxLength: col.maxLength,
-          precision: col.precision,
-          scale: col.scale
-        }))
-      }
-    } catch (error) {
-      throw new Error(`Unable to introspect columns for table '${tableName}'. Unsupported database type.`)
-    }
+    throw new Error(`Unable to introspect columns for table '${tableName}'. Unsupported database type.`)
 
     return []
   }
@@ -377,33 +316,11 @@ export class DatabaseIntrospector {
         referencedColumn: fk.to
       }))
     } catch (error) {
-      // Not SQLite, try MSSQL
+      // Not SQLite
       console.warn('SQLite foreign key discovery failed:', error)
     }
 
-    try {
-      // MSSQL
-      const mssqlFks = await this.db
-        .selectFrom('information_schema.key_column_usage')
-        .select([
-          'constraint_name as name',
-          'column_name as column',
-          'referenced_table_name as referencedTable',
-          'referenced_column_name as referencedColumn'
-        ])
-        .where('table_name', '=', tableName)
-        .where('referenced_table_name', 'is not', null)
-        .execute()
-
-      return mssqlFks.map(fk => ({
-        name: fk.name,
-        column: fk.column,
-        referencedTable: fk.referencedTable,
-        referencedColumn: fk.referencedColumn
-      }))
-    } catch (error) {
-      // Return empty array if foreign key discovery fails
-      return []
-    }
+    // Return empty array if foreign key discovery fails
+    return []
   }
 }

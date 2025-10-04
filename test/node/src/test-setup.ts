@@ -1,12 +1,6 @@
 import * as chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import * as Cursor from 'pg-cursor'
-import { Pool, PoolConfig } from 'pg'
-import { createPool } from 'mysql2'
 import * as Database from 'better-sqlite3'
-import * as Tarn from 'tarn'
-import * as Tedious from 'tedious'
-import { PoolOptions } from 'mysql2'
 
 chai.use(chaiAsPromised)
 
@@ -21,8 +15,6 @@ import {
   QueryResult,
   UnknownRow,
   OperationNodeTransformer,
-  PostgresDialect,
-  MysqlDialect,
   SchemaModule,
   InsertResult,
   SqliteDialect,
@@ -31,7 +23,6 @@ import {
   sql,
   ColumnType,
   InsertObject,
-  MssqlDialect,
   SelectQueryBuilder,
 } from '../../../'
 import {
@@ -89,11 +80,11 @@ export interface TestContext {
   db: Kysely<Database>
 }
 
-export type BuiltInDialect = 'postgres' | 'mysql' | 'mssql' | 'sqlite'
+export type BuiltInDialect = 'sqlite'
 export type PerDialect<T> = Record<BuiltInDialect, T>
 
 export const DIALECTS: BuiltInDialect[] = (
-  ['postgres', 'mysql', 'mssql', 'sqlite'] as const
+  ['sqlite'] as const
 ).filter(
   (d) =>
     !process.env.DIALECTS ||
@@ -119,94 +110,17 @@ if (process.env.TEST_TRANSFORMER) {
 
 export const POOL_SIZE = 20
 
-const POSTGRES_CONFIG: PoolConfig = {
-  database: 'kysely_test',
-  host: 'localhost',
-  user: 'kysely',
-  port: 5434,
-  max: POOL_SIZE,
-}
 
-const MYSQL_CONFIG: PoolOptions = {
-  database: 'kysely_test',
-  host: 'localhost',
-  user: 'kysely',
-  password: 'kysely',
-  port: 3308,
-  // Return big numbers as strings just like pg does.
-  supportBigNumbers: true,
-  bigNumberStrings: true,
-
-  connectionLimit: POOL_SIZE,
-}
-
-const MSSQL_CONFIG: ConnectionConfiguration = {
-  authentication: {
-    options: {
-      password: 'KyselyTest0',
-      userName: 'sa',
-    },
-    type: 'default',
-  },
-  options: {
-    connectTimeout: 3000,
-    database: 'kysely_test',
-    port: 21433,
-    trustServerCertificate: true,
-  },
-  server: 'localhost',
-}
 
 const SQLITE_CONFIG = {
   databasePath: ':memory:',
 }
 
 export const DIALECT_CONFIGS = {
-  postgres: POSTGRES_CONFIG,
-  mysql: MYSQL_CONFIG,
-  mssql: MSSQL_CONFIG,
   sqlite: SQLITE_CONFIG,
 }
 
 export const DB_CONFIGS: PerDialect<KyselyConfig> = {
-  postgres: {
-    dialect: new PostgresDialect({
-      pool: async () => new Pool(DIALECT_CONFIGS.postgres),
-      cursor: Cursor,
-    }),
-    plugins: PLUGINS,
-  },
-
-  mysql: {
-    dialect: new MysqlDialect({
-      pool: async () => createPool(DIALECT_CONFIGS.mysql),
-    }),
-    plugins: PLUGINS,
-  },
-
-  mssql: {
-    dialect: new MssqlDialect({
-      resetConnectionsOnRelease: false,
-      tarn: {
-        options: {
-          max: POOL_SIZE,
-          min: 0,
-          // @ts-expect-error making sure people see the deprecation warning
-          validateConnections: true,
-        },
-        ...Tarn,
-      },
-      tedious: {
-        ...Tedious,
-        connectionFactory: () => new Tedious.Connection(DIALECT_CONFIGS.mssql),
-        // @ts-expect-error making sure people see the deprecation warning
-        resetConnectionOnRelease: true,
-      },
-      validateConnections: false,
-    }),
-    plugins: PLUGINS,
-  },
-
   sqlite: {
     dialect: new SqliteDialect({
       database: async () => new Database(DIALECT_CONFIGS.sqlite.databasePath),
@@ -328,29 +242,7 @@ async function createDatabase(
     .addColumn('name', 'varchar(255)', (col) => col.notNull())
     .addColumn('pet_id', 'integer', (col) => col.references('pet.id').notNull())
 
-  if (dialect === 'postgres') {
-    await createToyTableBase
-      .addColumn('price', 'double precision', (col) => col.notNull())
-      .execute()
-    await sql`COMMENT ON COLUMN toy.price IS 'Price in USD';`.execute(db)
-  }
 
-  if (dialect === 'mssql') {
-    await createToyTableBase
-      .addColumn('price', 'double precision', (col) => col.notNull())
-      .execute()
-    await sql`EXECUTE sp_addextendedproperty N'MS_Description', N'Price in USD', N'SCHEMA', N'dbo', N'TABLE', 'toy', N'COLUMN', N'price'`.execute(
-      db,
-    )
-  }
-
-  if (dialect === 'mysql') {
-    await createToyTableBase
-      .addColumn('price', 'double precision', (col) =>
-        col.notNull().modifyEnd(sql`comment ${sql.lit('Price in USD')}`),
-      )
-      .execute()
-  }
 
   if (dialect === 'sqlite') {
     // there is no way to add a comment
@@ -374,15 +266,7 @@ export function createTableWithId(
 ) {
   const builder = schema.createTable(tableName)
 
-  if (dialect === 'postgres') {
-    return builder.addColumn('id', 'serial', (col) => col.primaryKey())
-  }
 
-  if (dialect === 'mssql') {
-    return builder.addColumn('id', 'integer', (col) =>
-      col.identity().notNull().primaryKey(),
-    )
-  }
 
   return builder.addColumn('id', 'integer', (col) => {
     if (implicitIncrement && dialect === 'sqlite') {
@@ -460,20 +344,12 @@ export async function insert<TB extends keyof Database>(
 ): Promise<number> {
   const { dialect } = ctx
 
-  if (dialect === 'postgres' || dialect === 'sqlite') {
+  if (dialect === 'sqlite') {
     const { id } = await qb.returning('id').executeTakeFirstOrThrow()
 
     return id
   }
 
-  if (dialect === 'mssql') {
-    const { id } = await qb
-      .output('inserted.id' as any)
-      .$castTo<{ id: number }>()
-      .executeTakeFirstOrThrow()
-
-    return id
-  }
 
   const { insertId } = await qb.executeTakeFirstOrThrow()
 
@@ -505,9 +381,6 @@ export function limit<QB extends SelectQueryBuilder<any, any, any>>(
   dialect: BuiltInDialect,
 ): (qb: QB) => QB {
   return (qb) => {
-    if (dialect === 'mssql') {
-      return qb.top(limit) as QB
-    }
 
     return qb.limit(limit) as QB
   }
@@ -521,14 +394,6 @@ export function orderBy<QB extends SelectQueryBuilder<any, any, any>>(
   dialect: BuiltInDialect,
 ): (qb: QB) => QB {
   return (qb) => {
-    if (dialect === 'mssql') {
-      return qb.orderBy(
-        orderBy,
-        sql`${sql.raw(direction ? `${direction} ` : '')}${sql.raw(
-          'offset 0 rows',
-        )}`,
-      ) as QB
-    }
 
     return qb.orderBy(orderBy, direction) as QB
   }

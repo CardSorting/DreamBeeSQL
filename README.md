@@ -191,10 +191,7 @@ Every repository automatically includes:
 
 ## Database Support
 
-- ✅ **PostgreSQL** - Full support with advanced features
-- ✅ **MySQL** - Complete compatibility
-- ✅ **SQLite** - Perfect for development and testing
-- ✅ **SQL Server** - Enterprise database support
+- ✅ **SQLite** - Perfect for development, testing, and production
 
 ## Documentation
 
@@ -368,13 +365,9 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
 ```typescript
 const db = new NOORMME({
-  dialect: 'postgresql', // or 'mysql', 'sqlite', 'mssql'
+  dialect: 'sqlite'
   connection: {
-    host: 'localhost',
-    port: 5432,
-    database: 'myapp',
-    username: 'user',
-    password: 'password'
+    database: './myapp.db'
   }
 })
 ```
@@ -383,18 +376,9 @@ const db = new NOORMME({
 
 ```typescript
 const db = new NOORMME({
-  dialect: 'postgresql',
+  dialect: 'sqlite',
   connection: {
-    host: 'localhost',
-    port: 5432,
-    database: 'myapp',
-    username: 'user',
-    password: 'password',
-    pool: {
-      min: 5,
-      max: 20,
-      idleTimeoutMillis: 30000
-    }
+    database: './myapp.db'
   },
   introspection: {
     includeViews: true,
@@ -425,10 +409,7 @@ const db = new NOORMME({
 
 | Database | Status | Features |
 |----------|--------|----------|
-| **PostgreSQL** | ✅ Full Support | All features |
-| **MySQL** | ✅ Full Support | All features |
 | **SQLite** | ✅ Full Support | All features |
-| **MSSQL** | 🚧 In Progress | Basic support |
 
 ## 🔄 Migration from Other ORMs
 

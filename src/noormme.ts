@@ -452,26 +452,15 @@ export class NOORMME {
 
       let dialect: NOORMConfig['dialect']
       switch (url.protocol) {
-        case 'postgresql:':
-        case 'postgres:':
-          dialect = 'postgresql'
-          break
-        case 'mysql:':
-          dialect = 'mysql'
-          break
         case 'sqlite:':
           dialect = 'sqlite'
-          break
-        case 'mssql:':
-        case 'sqlserver:':
-          dialect = 'mssql'
           break
         default:
           throw new NoormError(
             `Unsupported database protocol: ${url.protocol}`,
             {
               operation: 'connection_string_parsing',
-              suggestion: 'Supported protocols: postgresql, mysql, sqlite, mssql'
+              suggestion: 'Supported protocols: sqlite'
             }
           )
       }
@@ -516,11 +505,8 @@ export class NOORMME {
    */
   private getDefaultPort(dialect: NOORMConfig['dialect']): number {
     switch (dialect) {
-      case 'postgresql': return 5432
-      case 'mysql': return 3306
-      case 'mssql': return 1433
       case 'sqlite': return 0
-      default: return 5432
+      default: return 0
     }
   }
 
@@ -528,50 +514,10 @@ export class NOORMME {
     const { dialect, connection } = this.config
     
     switch (dialect) {
-      case 'postgresql':
-        const { Pool } = require('pg')
-        return new (require('./dialect/postgres/postgres-dialect').PostgresDialect)({
-          pool: new Pool({
-            host: connection.host,
-            port: connection.port,
-            database: connection.database,
-            user: connection.username,
-            password: connection.password,
-            ssl: connection.ssl,
-            ...connection.pool
-          })
-        })
-      
-      case 'mysql':
-        return new (require('./dialect/mysql/mysql-dialect').MysqlDialect)({
-          connection: {
-            host: connection.host,
-            port: connection.port,
-            database: connection.database,
-            user: connection.username,
-            password: connection.password,
-            ssl: connection.ssl,
-            ...connection.pool
-          }
-        })
-      
       case 'sqlite':
         const Database = require('better-sqlite3')
         return new (require('./dialect/sqlite/sqlite-dialect').SqliteDialect)({
           database: new Database(connection.database)
-        })
-      
-      case 'mssql':
-        return new (require('./dialect/mssql/mssql-dialect').MssqlDialect)({
-          connection: {
-            host: connection.host,
-            port: connection.port,
-            database: connection.database,
-            user: connection.username,
-            password: connection.password,
-            ssl: connection.ssl,
-            ...connection.pool
-          }
         })
       
       default:

@@ -17,7 +17,7 @@ for (const dialect of DIALECTS) {
     before(async function () {
       ctx = await initTest(this, dialect)
 
-      if (dialect === 'postgres' || dialect === 'mssql') {
+      if (dialect === 'postgres') {
         await dropSchema()
         await createSchema()
       }
@@ -54,22 +54,6 @@ for (const dialect of DIALECTS) {
             { name: 'pg_catalog' },
             { name: 'some_schema' },
             { name: 'dtype_schema' },
-          ])
-        } else if (dialect === 'mysql') {
-          expect(schemas).to.containSubset([
-            { name: 'mysql' },
-            { name: 'information_schema' },
-            { name: 'performance_schema' },
-            { name: 'sys' },
-            { name: 'kysely_test' },
-          ])
-        } else if (dialect === 'mssql') {
-          expect(schemas).to.containSubset([
-            { name: 'dbo' },
-            { name: 'sys' },
-            { name: 'guest' },
-            { name: 'INFORMATION_SCHEMA' },
-            { name: 'some_schema' },
           ])
         } else if (dialect === 'sqlite') {
           expect(schemas).to.eql([])

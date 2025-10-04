@@ -55,45 +55,6 @@ export class DatabaseIntrospector {
    * Get all tables in the database
    */
   async getTables(): Promise<TableMetadata[]> {
-    // Try to detect the database type and use appropriate query
-    try {
-      // PostgreSQL
-      const pgTables = await this.db
-        .selectFrom('information_schema.tables')
-        .select(['table_name as name', 'table_schema as schema'])
-        .where('table_type', '=', 'BASE TABLE')
-        .where('table_schema', 'not in', ['information_schema', 'pg_catalog'])
-        .execute()
-
-      if (pgTables.length > 0) {
-        return pgTables.map(t => ({
-          name: t.name,
-          schema: t.schema
-        }))
-      }
-    } catch (error) {
-      // Not PostgreSQL, try MySQL
-    }
-
-    try {
-      // MySQL
-      const mysqlTables = await this.db
-        .selectFrom('information_schema.tables')
-        .select(['table_name as name', 'table_schema as schema'])
-        .where('table_type', '=', 'BASE TABLE')
-        .where('table_schema', '=', 'public')
-        .execute()
-
-      if (mysqlTables.length > 0) {
-        return mysqlTables.map(t => ({
-          name: t.name,
-          schema: t.schema
-        }))
-      }
-    } catch (error) {
-      // Not MySQL, try SQLite
-    }
-
     try {
       // SQLite
       const sqliteTables = await this.db
@@ -107,116 +68,15 @@ export class DatabaseIntrospector {
         name: t.name
       }))
     } catch (error) {
-      // If sqlite_master fails, it's not SQLite
       console.warn('SQLite table discovery failed:', error)
+      throw new Error('Unable to introspect database tables. SQLite database required.')
     }
-
-    throw new Error('Unable to introspect database tables. Unsupported database type.')
   }
 
   /**
    * Get columns for a specific table
    */
   async getColumns(tableName: string): Promise<ColumnMetadata[]> {
-    try {
-      // PostgreSQL
-      const pgColumns = await this.db
-        .selectFrom('information_schema.columns')
-        .select([
-          'column_name as name',
-          'data_type as type',
-          'is_nullable as nullable',
-          'column_default as defaultValue',
-          'character_maximum_length as maxLength',
-          'numeric_precision as precision',
-          'numeric_scale as scale'
-        ])
-        .where('table_name', '=', tableName)
-        .execute()
-
-      if (pgColumns.length > 0) {
-        // Get primary key information
-        const pkColumns = await this.db
-          .selectFrom('information_schema.key_column_usage')
-          .select('column_name')
-          .where('table_name', '=', tableName)
-          .where('constraint_name', 'in', 
-            this.db
-              .selectFrom('information_schema.table_constraints')
-              .select('constraint_name')
-              .where('table_name', '=', tableName)
-              .where('constraint_type', '=', 'PRIMARY KEY')
-          )
-          .execute()
-
-        const pkColumnNames = new Set(pkColumns.map(c => c.column_name))
-
-        return pgColumns.map(col => ({
-          name: col.name,
-          type: col.type,
-          nullable: col.nullable === 'YES',
-          defaultValue: col.defaultValue,
-          isPrimaryKey: pkColumnNames.has(col.name),
-          isAutoIncrement: col.defaultValue?.includes('nextval') || false,
-          maxLength: col.maxLength,
-          precision: col.precision,
-          scale: col.scale
-        }))
-      }
-    } catch (error) {
-      // Not PostgreSQL, try MySQL
-    }
-
-    try {
-      // MySQL
-      const mysqlColumns = await this.db
-        .selectFrom('information_schema.columns')
-        .select([
-          'column_name as name',
-          'data_type as type',
-          'is_nullable as nullable',
-          'column_default as defaultValue',
-          'character_maximum_length as maxLength',
-          'numeric_precision as precision',
-          'numeric_scale as scale',
-          'extra'
-        ])
-        .where('table_name', '=', tableName)
-        .execute()
-
-      if (mysqlColumns.length > 0) {
-        // Get primary key information
-        const pkColumns = await this.db
-          .selectFrom('information_schema.key_column_usage')
-          .select('column_name')
-          .where('table_name', '=', tableName)
-          .where('constraint_name', 'in',
-            this.db
-              .selectFrom('information_schema.table_constraints')
-              .select('constraint_name')
-              .where('table_name', '=', tableName)
-              .where('constraint_type', '=', 'PRIMARY KEY')
-          )
-          .execute()
-
-        const pkColumnNames = new Set(pkColumns.map(c => c.column_name))
-
-        return mysqlColumns.map(col => ({
-          name: col.name,
-          type: col.type,
-          nullable: col.nullable === 'YES',
-          defaultValue: col.defaultValue,
-          isPrimaryKey: pkColumnNames.has(col.name),
-          isAutoIncrement: col.extra?.includes('auto_increment') || false,
-          maxLength: col.maxLength,
-          precision: col.precision,
-          scale: col.scale
-        }))
-      }
-    } catch (error) {
-      // Not MySQL, try SQLite
-    }
-
     try {
       // SQLite - use raw SQL for pragma_table_info
       const result = await sql`pragma_table_info(${sql.lit(tableName)})`.execute(this.db)
@@ -231,13 +91,9 @@ export class DatabaseIntrospector {
         isAutoIncrement: col.type.toLowerCase().includes('integer') && col.pk
       }))
     } catch (error) {
-      // Not SQLite
       console.warn('SQLite column discovery failed:', error)
+      throw new Error(`Unable to introspect columns for table '${tableName}'. SQLite database required.`)
     }
-
-    throw new Error(`Unable to introspect columns for table '${tableName}'. Unsupported database type.`)
-
-    return []
   }
 
   /**
@@ -253,58 +109,6 @@ export class DatabaseIntrospector {
    */
   async getForeignKeys(tableName: string): Promise<ForeignKeyMetadata[]> {
     try {
-      // PostgreSQL
-      const pgFks = await this.db
-        .selectFrom('information_schema.key_column_usage')
-        .select([
-          'constraint_name as name',
-          'column_name as column',
-          'referenced_table_name as referencedTable',
-          'referenced_column_name as referencedColumn'
-        ])
-        .where('table_name', '=', tableName)
-        .where('referenced_table_name', 'is not', null)
-        .execute()
-
-      if (pgFks.length > 0) {
-        return pgFks.map(fk => ({
-          name: fk.name,
-          column: fk.column,
-          referencedTable: fk.referencedTable,
-          referencedColumn: fk.referencedColumn
-        }))
-      }
-    } catch (error) {
-      // Not PostgreSQL, try MySQL
-    }
-
-    try {
-      // MySQL
-      const mysqlFks = await this.db
-        .selectFrom('information_schema.key_column_usage')
-        .select([
-          'constraint_name as name',
-          'column_name as column',
-          'referenced_table_name as referencedTable',
-          'referenced_column_name as referencedColumn'
-        ])
-        .where('table_name', '=', tableName)
-        .where('referenced_table_name', 'is not', null)
-        .execute()
-
-      if (mysqlFks.length > 0) {
-        return mysqlFks.map(fk => ({
-          name: fk.name,
-          column: fk.column,
-          referencedTable: fk.referencedTable,
-          referencedColumn: fk.referencedColumn
-        }))
-      }
-    } catch (error) {
-      // Not MySQL, try SQLite
-    }
-
-    try {
       // SQLite - use raw SQL for pragma_foreign_key_list
       const result = await sql`pragma_foreign_key_list(${sql.lit(tableName)})`.execute(this.db)
       const sqliteFks = result.rows as any[]
@@ -316,11 +120,9 @@ export class DatabaseIntrospector {
         referencedColumn: fk.to
       }))
     } catch (error) {
-      // Not SQLite
       console.warn('SQLite foreign key discovery failed:', error)
+      // Return empty array if foreign key discovery fails
+      return []
     }
-
-    // Return empty array if foreign key discovery fails
-    return []
   }
 }

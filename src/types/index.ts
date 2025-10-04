@@ -3,7 +3,7 @@
  */
 
 export interface NOORMConfig {
-  dialect: 'postgresql' | 'mysql' | 'sqlite' | 'mssql'
+  dialect: 'sqlite'
   connection: ConnectionConfig
   introspection?: IntrospectionConfig
   cache?: CacheConfig

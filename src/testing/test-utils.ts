@@ -6,7 +6,7 @@ import { NOORMConfig } from '../types/index.js'
  */
 
 export interface TestDatabaseConfig {
-  dialect?: 'sqlite' | 'postgresql' | 'mysql'
+  dialect?: 'sqlite'
   database?: string
   cleanup?: boolean
   seed?: boolean
@@ -42,37 +42,7 @@ export async function createTestDatabase(config: TestDatabaseConfig = {}): Promi
       }
       break
 
-    case 'postgresql':
-      dbConfig = {
-        dialect: 'postgresql',
-        connection: {
-          host: process.env.TEST_DB_HOST || 'localhost',
-          port: parseInt(process.env.TEST_DB_PORT || '5432'),
-          database: process.env.TEST_DB_NAME || 'noormme_test',
-          username: process.env.TEST_DB_USER || 'postgres',
-          password: process.env.TEST_DB_PASSWORD || ''
-        },
-        logging: {
-          enabled: false
-        }
-      }
-      break
 
-    case 'mysql':
-      dbConfig = {
-        dialect: 'mysql',
-        connection: {
-          host: process.env.TEST_DB_HOST || 'localhost',
-          port: parseInt(process.env.TEST_DB_PORT || '3306'),
-          database: process.env.TEST_DB_NAME || 'noormme_test',
-          username: process.env.TEST_DB_USER || 'root',
-          password: process.env.TEST_DB_PASSWORD || ''
-        },
-        logging: {
-          enabled: false
-        }
-      }
-      break
 
     default:
       throw new Error(`Unsupported test database dialect: ${dialect}`)

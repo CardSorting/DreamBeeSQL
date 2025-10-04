@@ -22,26 +22,5 @@
     "@types/supertest": "^2.0.0",
     "mock-fs": "^5.2.0",
     "@types/mock-fs": "^4.13.0"
-  },
-  "jest": {
-    "preset": "ts-jest/presets/default-esm",
-    "extensionsToTreatAsEsm": [".ts"],
-    "globals": {
-      "ts-jest": {
-        "useESM": true
-      }
-    },
-    "testEnvironment": "node",
-    "testMatch": [
-      "**/*.test.ts"
-    ],
-    "collectCoverageFrom": [
-      "src/cli/**/*.ts",
-      "!src/cli/**/*.d.ts"
-    ],
-    "coverageDirectory": "coverage/cli",
-    "coverageReporters": ["text", "lcov", "html"],
-    "setupFilesAfterEnv": ["<rootDir>/setup.ts"],
-    "testTimeout": 30000
   }
 }

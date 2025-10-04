@@ -26,6 +26,17 @@ afterAll(() => {
   process.exit = originalExit
 })
 
+// Extend Jest matchers for better TypeScript support
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toBeCalledWith(...args: any[]): R
+      toHaveBeenCalledWith(...args: any[]): R
+      toHaveBeenCalledTimes(times: number): R
+    }
+  }
+}
+
 // Global test utilities
 declare global {
   var createMockDatabase: () => string

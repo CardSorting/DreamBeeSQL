@@ -68,4 +68,11 @@ export class SchemaDiscoveryCoordinator {
   getDialectCapabilities(): ReturnType<DiscoveryFactory['getDialectCapabilities']> {
     return this.factory.getDialectCapabilities(this.currentDialect)
   }
+
+  /**
+   * Check if a dialect is supported
+   */
+  isDialectSupported(dialect: string): boolean {
+    return this.factory.isDialectSupported(dialect)
+  }
 }

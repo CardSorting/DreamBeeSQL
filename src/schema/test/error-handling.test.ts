@@ -48,8 +48,45 @@ describe('Error Handling', () => {
       selectFrom: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
-      execute: jest.fn()
-    }
+      execute: jest.fn(),
+      // Add other required Kysely properties as mocks
+      schema: jest.fn(),
+      dynamic: jest.fn(),
+      introspection: jest.fn(),
+      deleteFrom: jest.fn(),
+      insertInto: jest.fn(),
+      updateTable: jest.fn(),
+      with: jest.fn(),
+      withRecursive: jest.fn(),
+      case: jest.fn(),
+      fn: jest.fn(),
+      ref: jest.fn(),
+      raw: jest.fn(),
+      transaction: jest.fn(),
+      replaceInto: jest.fn(),
+      mergeInto: jest.fn(),
+      createSchema: jest.fn(),
+      dropSchema: jest.fn(),
+      createTable: jest.fn(),
+      dropTable: jest.fn(),
+      alterTable: jest.fn(),
+      createIndex: jest.fn(),
+      dropIndex: jest.fn(),
+      createType: jest.fn(),
+      dropType: jest.fn(),
+      createView: jest.fn(),
+      dropView: jest.fn(),
+      createMaterializedView: jest.fn(),
+      dropMaterializedView: jest.fn(),
+      refreshMaterializedView: jest.fn(),
+      executeQuery: jest.fn(),
+      compileQuery: jest.fn(),
+      getExecutor: jest.fn(),
+      getPlugin: jest.fn(),
+      withPlugin: jest.fn(),
+      withoutPlugins: jest.fn(),
+      freeze: jest.fn()
+    } as any
 
     it('should handle table discovery service errors', async () => {
       // Mock the service to throw an error
@@ -59,7 +96,7 @@ describe('Error Handling', () => {
         }))
 
       await expect(
-        sqliteCoordinator.discoverSchema(mockKysely, {})
+        sqliteCoordinator.discoverSchema(mockKysely as any, {})
       ).rejects.toThrow('Table discovery service failed')
     })
 
@@ -71,7 +108,7 @@ describe('Error Handling', () => {
         }))
 
       await expect(
-        sqliteCoordinator.discoverSchema(mockKysely, {})
+        sqliteCoordinator.discoverSchema(mockKysely as any, {})
       ).rejects.toThrow('Relationship discovery service failed')
     })
 
@@ -83,7 +120,7 @@ describe('Error Handling', () => {
         }))
 
       await expect(
-        sqliteCoordinator.discoverSchema(mockKysely, {})
+        sqliteCoordinator.discoverSchema(mockKysely as any, {})
       ).rejects.toThrow('Index discovery service failed')
     })
 
@@ -95,7 +132,7 @@ describe('Error Handling', () => {
         }))
 
       await expect(
-        sqliteCoordinator.discoverSchema(mockKysely, {})
+        sqliteCoordinator.discoverSchema(mockKysely as any, {})
       ).rejects.toThrow('Constraint discovery service failed')
     })
 
@@ -107,7 +144,7 @@ describe('Error Handling', () => {
         }))
 
       await expect(
-        sqliteCoordinator.discoverSchema(mockKysely, {})
+        sqliteCoordinator.discoverSchema(mockKysely as any, {})
       ).rejects.toThrow('View discovery service failed')
     })
 

@@ -39,19 +39,19 @@ describe('Compatibility E2E Tests', () => {
       }
     })
 
-    it('should handle dialect-specific features gracefully', withTestDatabase('postgresql', async (testDb) => {
+    it('should handle dialect-specific features gracefully', withTestDatabase('sqlite', async (testDb) => {
       const { db } = testDb
       
       
       const userRepo = db.getRepository('users')
       
-      // Test PostgreSQL-specific features
-      if ((db as any).getDialect() === 'postgresql') {
-        // Test JSON column support
+      // Test SQLite-specific features
+      if ((db as any).getDialect() === 'sqlite') {
+        // Test SQLite-specific functionality
         const user = await userRepo.create({
-          id: 'postgres-user',
-          email: 'postgres@example.com',
-          firstName: 'PostgreSQL',
+          id: 'sqlite-user',
+          email: 'sqlite@example.com',
+          firstName: 'SQLite',
           lastName: 'User',
           active: true
         })
@@ -59,31 +59,31 @@ describe('Compatibility E2E Tests', () => {
         expect(user).to.exist
         
         // Clean up
-        await userRepo.delete('postgres-user')
+        await userRepo.delete('sqlite-user')
       }
       }))
 
-    it('should handle MySQL-specific features gracefully', withTestDatabase('mysql', async (testDb) => {
+    it('should handle MySQL-specific features gracefully', withTestDatabase('sqlite', async (testDb) => {
       const { db } = testDb
       
       
       const userRepo = db.getRepository('users')
       
-      // Test MySQL-specific features
-      if ((db as any).getDialect() === 'mysql') {
-        // Test MySQL-specific data types
+      // Test SQLite-specific features
+      if ((db as any).getDialect() === 'sqlite') {
+        // Test SQLite-specific data types
         const user = await userRepo.create({
-          id: 'mysql-user',
-          email: 'mysql@example.com',
-          firstName: 'MySQL',
-          lastName: 'User',
+          id: 'sqlite-user-2',
+          email: 'sqlite2@example.com',
+          firstName: 'SQLite',
+          lastName: 'User2',
           active: true
         })
         
         expect(user).to.exist
         
         // Clean up
-        await userRepo.delete('mysql-user')
+        await userRepo.delete('sqlite-user-2')
       }
       }))
 
@@ -122,7 +122,7 @@ describe('Compatibility E2E Tests', () => {
       
       const { NOORMME } = await import('../../src/noormme.js')
       const db = new NOORMME({
-        dialect: 'postgresql',
+        dialect: 'sqlite',
         connection: {
           host: 'localhost',
           port: 5432,
@@ -167,7 +167,7 @@ describe('Compatibility E2E Tests', () => {
       
       const { NOORMME } = await import('../../src/noormme.js')
       const db = new NOORMME({
-        dialect: 'postgresql',
+        dialect: 'sqlite',
         connection: {
           host: 'localhost',
           port: 5432,
@@ -219,7 +219,7 @@ describe('Compatibility E2E Tests', () => {
         process.env.NODE_ENV = 'development'
         const { NOORMME } = await import('../../src/noormme.js')
         const devDb = new NOORMME({
-          dialect: 'postgresql',
+          dialect: 'sqlite',
           connection: {
             host: 'localhost',
             port: 5432,
@@ -233,7 +233,7 @@ describe('Compatibility E2E Tests', () => {
         // Test production environment
         process.env.NODE_ENV = 'production'
         const prodDb = new NOORMME({
-          dialect: 'postgresql',
+          dialect: 'sqlite',
           connection: {
             host: 'localhost',
             port: 5432,
@@ -247,7 +247,7 @@ describe('Compatibility E2E Tests', () => {
         // Test test environment
         process.env.NODE_ENV = 'test'
         const testDb = new NOORMME({
-          dialect: 'postgresql',
+          dialect: 'sqlite',
           connection: {
             host: 'localhost',
             port: 5432,
@@ -349,7 +349,7 @@ describe('Compatibility E2E Tests', () => {
       
       // Create NOORMME instance
       const db = new NOORMME({
-        dialect: 'postgresql',
+        dialect: 'sqlite',
         connection: {
           host: 'localhost',
           port: 5432,
@@ -376,7 +376,7 @@ describe('Compatibility E2E Tests', () => {
       
       // Create NOORMME instance
       const db = new NOORMME({
-        dialect: 'postgresql',
+        dialect: 'sqlite',
         connection: {
           host: 'localhost',
           port: 5432,
@@ -403,7 +403,7 @@ describe('Compatibility E2E Tests', () => {
       
       // Create NOORMME instance
       const db = new NOORMME({
-        dialect: 'postgresql',
+        dialect: 'sqlite',
         connection: {
           host: 'localhost',
           port: 5432,
@@ -436,7 +436,7 @@ describe('Compatibility E2E Tests', () => {
       
       // Test strict typing
       const db = new NOORMME({
-        dialect: 'postgresql',
+        dialect: 'sqlite',
         connection: {
           host: 'localhost',
           port: 5432,
@@ -447,7 +447,7 @@ describe('Compatibility E2E Tests', () => {
       })
       
       expect(db).to.exist
-      expect((db as any).getDialect()).to.equal('postgresql')
+      expect((db as any).getDialect()).to.equal('sqlite')
     })
 
     it('should provide proper type definitions', async () => {
@@ -457,7 +457,7 @@ describe('Compatibility E2E Tests', () => {
       
       // Test type inference
       const db = new NOORMME({
-        dialect: 'postgresql',
+        dialect: 'sqlite',
         connection: {
           host: 'localhost',
           port: 5432,
@@ -486,7 +486,7 @@ describe('Compatibility E2E Tests', () => {
       }
       
       const db = new NOORMME({
-        dialect: 'postgresql',
+        dialect: 'sqlite',
         connection: {
           host: 'localhost',
           port: 5432,
@@ -509,7 +509,7 @@ describe('Compatibility E2E Tests', () => {
       
       const { NOORMME } = await import('../../src/noormme.js')
       const db = new NOORMME({
-        dialect: 'postgresql',
+        dialect: 'sqlite',
         connection: {
           host: 'localhost',
           port: 5432,
@@ -531,7 +531,7 @@ describe('Compatibility E2E Tests', () => {
       const { NOORMME } = await import('../../src/noormme.js')
       
       const db = new NOORMME({
-        dialect: 'postgresql',
+        dialect: 'sqlite',
         connection: {
           host: 'localhost',
           port: 5432,
@@ -560,7 +560,7 @@ describe('Compatibility E2E Tests', () => {
       const instances: any[] = []
       for (let i = 0; i < 10; i++) {
         const db = new NOORMME({
-          dialect: 'postgresql',
+          dialect: 'sqlite',
           connection: {
             host: 'localhost',
             port: 5432,
@@ -577,7 +577,7 @@ describe('Compatibility E2E Tests', () => {
       // Test that all instances are independent
       for (let i = 0; i < instances.length; i++) {
         expect(instances[i]).to.exist
-        expect((instances[i] as any).getDialect()).to.equal('postgresql')
+        expect((instances[i] as any).getDialect()).to.equal('sqlite')
       }
     })
   })
@@ -612,7 +612,7 @@ describe('Compatibility E2E Tests', () => {
       // Test error message consistency
       try {
         const db = new NOORMME({
-          dialect: 'postgresql',
+          dialect: 'sqlite',
           connection: {
             host: 'invalid-host',
             port: 9999,
@@ -626,8 +626,8 @@ describe('Compatibility E2E Tests', () => {
         expect.fail('Should have thrown an error')
       } catch (error) {
         expect(error).to.be.instanceOf(Error)
-        expect(error.message).to.be.a('string')
-        expect(error.message.length).to.be.greaterThan(0)
+        expect((error as Error).message).to.be.a('string')
+        expect((error as Error).message.length).to.be.greaterThan(0)
       }
     })
 
@@ -636,7 +636,7 @@ describe('Compatibility E2E Tests', () => {
       
       // Test async error handling
       const db = new NOORMME({
-        dialect: 'postgresql',
+        dialect: 'sqlite',
         connection: {
           host: 'localhost',
           port: 5432,

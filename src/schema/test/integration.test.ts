@@ -141,7 +141,7 @@ describe('Schema Strategy Integration Tests', () => {
 
   describe('Coordinator Integration', () => {
     it('should coordinate schema discovery', async () => {
-      const schemaInfo = await coordinator.discoverSchema(mockKysely as any, 'sqlite', {})
+      const schemaInfo = await coordinator.discoverSchema(mockKysely as any, {}, 'sqlite' as any)
       
       expect(schemaInfo).toBeDefined()
       expect(typeof schemaInfo).toBe('object')
@@ -155,7 +155,7 @@ describe('Schema Strategy Integration Tests', () => {
       }
 
       await expect(
-        coordinator.discoverSchema(mockKyselyWithError as any, 'sqlite', {})
+        coordinator.discoverSchema(mockKyselyWithError as any, {}, 'sqlite' as any)
       ).rejects.toThrow('Database error')
     })
   })

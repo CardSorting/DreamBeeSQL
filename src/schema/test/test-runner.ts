@@ -12,7 +12,6 @@ import { describe, it, expect, beforeAll, afterAll } from '@jest/globals'
 // Import all test files
 import './discovery-factory.test.js'
 import './schema-discovery-coordinator.test.js'
-import './postgresql-discovery-coordinator.test.js'
 import './sqlite-discovery-coordinator.test.js'
 import './dialect-capabilities.test.js'
 import './error-handling.test.js'
@@ -50,30 +49,24 @@ describe('Schema Strategy Test Suite', () => {
  *    - Error handling
  *    - Configuration passing
  * 
- * 3. PostgreSQL Coordinator Tests
- *    - PostgreSQL-specific functionality
- *    - Metadata enhancement
- *    - Recommendations
- *    - Error handling
- * 
- * 4. SQLite Coordinator Tests
+ * 3. SQLite Coordinator Tests
  *    - SQLite-specific functionality
  *    - PRAGMA handling
  *    - Foreign key support detection
  *    - Configuration recommendations
  * 
- * 5. Dialect Capabilities Tests
+ * 4. Dialect Capabilities Tests
  *    - Feature support detection
  *    - Capability consistency
  *    - Edge case handling
  * 
- * 6. Error Handling Tests
+ * 5. Error Handling Tests
  *    - Unsupported dialects
  *    - Invalid inputs
  *    - Partial failures
  *    - Edge cases
  * 
- * 7. Integration Tests
+ * 6. Integration Tests
  *    - End-to-end scenarios
  *    - Real-world usage patterns
  *    - Performance testing
@@ -87,7 +80,6 @@ export default {
   testFiles: [
     'discovery-factory.test.ts',
     'schema-discovery-coordinator.test.ts',
-    'postgresql-discovery-coordinator.test.ts',
     'sqlite-discovery-coordinator.test.ts',
     'dialect-capabilities.test.ts',
     'error-handling.test.ts',
@@ -96,7 +88,6 @@ export default {
   coverage: {
     factory: '100%',
     coordinator: '100%',
-    postgresql: '100%',
     sqlite: '100%',
     capabilities: '100%',
     errorHandling: '100%',

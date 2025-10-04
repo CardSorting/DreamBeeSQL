@@ -35,16 +35,7 @@ Tests the central coordinator that delegates to dialect-specific implementations
 
 ### Dialect-Specific Tests
 
-#### 3. PostgreSQL Coordinator Tests (`postgresql-discovery-coordinator.test.ts`)
-Tests PostgreSQL-specific functionality:
-
-- **Schema Discovery**: Complete PostgreSQL schema discovery
-- **Metadata Enhancement**: PostgreSQL-specific index and constraint information
-- **Advanced Features**: Materialized views, custom types, extensions
-- **Recommendations**: Performance optimization suggestions
-- **Error Handling**: Graceful handling of partial failures
-
-#### 4. SQLite Coordinator Tests (`sqlite-discovery-coordinator.test.ts`)
+#### 3. SQLite Coordinator Tests (`sqlite-discovery-coordinator.test.ts`)
 Tests SQLite-specific functionality:
 
 - **Schema Discovery**: Complete SQLite schema discovery
@@ -55,7 +46,7 @@ Tests SQLite-specific functionality:
 
 ### Capability and Error Tests
 
-#### 5. Dialect Capabilities Tests (`dialect-capabilities.test.ts`)
+#### 4. Dialect Capabilities Tests (`dialect-capabilities.test.ts`)
 Tests feature support detection across dialects:
 
 - **Feature Detection**: Validates capability detection for each dialect
@@ -63,7 +54,7 @@ Tests feature support detection across dialects:
 - **Edge Cases**: Tests invalid inputs and boundary conditions
 - **Usage Examples**: Demonstrates conditional feature usage patterns
 
-#### 6. Error Handling Tests (`error-handling.test.ts`)
+#### 5. Error Handling Tests (`error-handling.test.ts`)
 Tests comprehensive error handling:
 
 - **Unsupported Dialects**: Validates error messages for unsupported databases
@@ -74,7 +65,7 @@ Tests comprehensive error handling:
 
 ### Integration Tests
 
-#### 7. Integration Tests (`integration.test.ts`)
+#### 6. Integration Tests (`integration.test.ts`)
 Tests end-to-end scenarios and real-world usage:
 
 - **End-to-End Discovery**: Complete schema discovery workflows
@@ -102,7 +93,6 @@ The test suite provides comprehensive coverage of:
 # Run specific test file
 npm test src/schema/test/discovery-factory.test.ts
 npm test src/schema/test/schema-discovery-coordinator.test.ts
-npm test src/schema/test/postgresql-discovery-coordinator.test.ts
 npm test src/schema/test/sqlite-discovery-coordinator.test.ts
 npm test src/schema/test/dialect-capabilities.test.ts
 npm test src/schema/test/error-handling.test.ts

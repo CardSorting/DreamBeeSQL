@@ -165,7 +165,7 @@ export class NOORMME {
         this.sqliteAutoIndexer = SQLiteAutoIndexer.getInstance(this.logger)
         
         // Apply automatic optimizations if enabled (default: true)
-        const enableAutoOptimization = (this.config.performance as any)?.enableAutoOptimization !== false
+        const enableAutoOptimization = this.config.automation?.enableAutoOptimization !== false
         if (enableAutoOptimization) {
           await this.applySQLiteAutoOptimizations()
         }
@@ -517,11 +517,11 @@ export class NOORMME {
   /**
    * Execute raw SQL
    */
-  async execute(sql: string, parameters?: any[]): Promise<any> {
-    return await this.db.executeQuery({
-      sql,
-      parameters: parameters || []
-    } as any)
+  async execute(sql: string, parameters?: unknown[]): Promise<unknown> {
+    const { sql: rawSql } = require('./raw-builder/sql.js')
+    return await this.db.executeQuery(
+      rawSql(sql, parameters || [])
+    )
   }
 
   private mergeConfig(config: NOORMConfig): NOORMConfig {
@@ -636,6 +636,7 @@ export class NOORMME {
     }
   }
 }
+
 
 // Export the main class as default
 export default NOORMME

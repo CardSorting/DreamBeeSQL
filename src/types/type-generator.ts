@@ -1,4 +1,4 @@
-import { SchemaInfo, GeneratedTypes, EntityType, IntrospectionConfig } from '../types'
+import { SchemaInfo, GeneratedTypes, EntityType, IntrospectionConfig, ColumnInfo, RelationshipInfo } from '../types'
 
 /**
  * Type generation system that creates TypeScript types from database schema
@@ -153,11 +153,11 @@ export class TypeGenerator {
   /**
    * Generate relationship types
    */
-  private generateRelationshipTypes(relationships: any[]): string {
+  private generateRelationshipTypes(relationships: RelationshipInfo[]): string {
     let relationshipTypes = '// Relationship types\n'
 
     // Group relationships by table
-    const relationshipsByTable = new Map<string, any[]>()
+    const relationshipsByTable = new Map<string, RelationshipInfo[]>()
     for (const rel of relationships) {
       if (!relationshipsByTable.has(rel.fromTable)) {
         relationshipsByTable.set(rel.fromTable, [])
@@ -196,7 +196,7 @@ export class TypeGenerator {
   /**
    * Map database column to TypeScript type
    */
-  private mapColumnToTypeScript(column: any): string {
+  private mapColumnToTypeScript(column: ColumnInfo): string {
     // Handle custom type mappings
     if (this.config.customTypeMappings?.[column.type]) {
       return this.config.customTypeMappings[column.type]
@@ -264,7 +264,7 @@ export class TypeGenerator {
   /**
    * Get relationships for a specific table
    */
-  private getRelationshipsForTable(tableName: string): any[] {
+  private getRelationshipsForTable(tableName: string): RelationshipInfo[] {
     // This would be passed from the schema discovery
     // For now, return empty array
     return []

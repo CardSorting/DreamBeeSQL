@@ -1,5 +1,19 @@
-// TODO: Remove this import if ColumnInfo is not used, or fix the import path if necessary.
-// import { ColumnInfo } from '../../types/index.js'
+import { ColumnInfo } from '../../../types/index.js'
+
+/**
+ * Raw database column information from introspection
+ */
+interface DatabaseColumn {
+  name: string
+  type: string
+  nullable: boolean
+  defaultValue?: unknown
+  isPrimaryKey?: boolean
+  isAutoIncrement?: boolean
+  maxLength?: number
+  precision?: number
+  scale?: number
+}
 
 /**
  * Maps database column types to TypeScript types
@@ -20,23 +34,12 @@ export class TypeMapper {
   }
 
   /**
-   /**
-    * Map database column info to our ColumnInfo interface
-    */
-   static mapColumnInfo(
-     dbColumn: any,
-     customTypeMappings?: Record<string, string>
-   ): {
-     name: string;
-     type: string;
-     nullable: boolean;
-     defaultValue?: any;
-     isPrimaryKey: boolean;
-     isAutoIncrement: boolean;
-     maxLength?: number;
-     precision?: number;
-     scale?: number;
-   } {
+   * Map database column info to our ColumnInfo interface
+   */
+  static mapColumnInfo(
+    dbColumn: DatabaseColumn,
+    customTypeMappings?: Record<string, string>
+  ): ColumnInfo {
      return {
        name: dbColumn.name,
        type: this.mapColumnType(dbColumn.type, customTypeMappings),
@@ -60,14 +63,14 @@ export class TypeMapper {
     }
 
     // Try exact match first
-    if ((this.typeMapping as any)[dbType.toLowerCase()]) {
-      return (this.typeMapping as any)[dbType.toLowerCase()]
+    if (this.typeMapping[dbType.toLowerCase() as keyof typeof this.typeMapping]) {
+      return this.typeMapping[dbType.toLowerCase() as keyof typeof this.typeMapping]
     }
 
     // Handle parameterized types (e.g., varchar(255), decimal(10,2))
     const baseType = dbType.toLowerCase().split('(')[0]
-    if ((this.typeMapping as any)[baseType]) {
-      return (this.typeMapping as any)[baseType]
+    if (this.typeMapping[baseType as keyof typeof this.typeMapping]) {
+      return this.typeMapping[baseType as keyof typeof this.typeMapping]
     }
 
     // Default to any for unknown types

@@ -9,14 +9,16 @@ export interface NOORMConfig {
   cache?: CacheConfig
   logging?: LoggingConfig
   performance?: PerformanceConfig
+  automation?: AutomationConfig
+  optimization?: OptimizationConfig
 }
 
 export interface ConnectionConfig {
-  host: string
-  port: number
+  host?: string
+  port?: number
   database: string
-  username: string
-  password: string
+  username?: string
+  password?: string
   ssl?: boolean | object
   pool?: PoolConfig
 }
@@ -49,6 +51,29 @@ export interface PerformanceConfig {
   enableQueryOptimization?: boolean
   enableBatchLoading?: boolean
   maxBatchSize?: number
+  enableCaching?: boolean
+  maxCacheSize?: number
+  enableBatchOperations?: boolean
+  slowQueryThreshold?: number
+}
+
+export interface AutomationConfig {
+  enableAutoOptimization?: boolean
+  enableIndexRecommendations?: boolean
+  enableQueryAnalysis?: boolean
+  enableMigrationGeneration?: boolean
+  enablePerformanceMonitoring?: boolean
+  enableSchemaWatcher?: boolean
+}
+
+export interface OptimizationConfig {
+  enableWALMode?: boolean
+  enableForeignKeys?: boolean
+  cacheSize?: number
+  synchronous?: 'OFF' | 'NORMAL' | 'FULL' | 'EXTRA'
+  tempStore?: 'DEFAULT' | 'FILE' | 'MEMORY'
+  autoVacuumMode?: 'NONE' | 'FULL' | 'INCREMENTAL'
+  journalMode?: 'DELETE' | 'TRUNCATE' | 'PERSIST' | 'MEMORY' | 'WAL' | 'OFF'
 }
 
 export interface SchemaInfo {
@@ -183,3 +208,4 @@ export interface RefreshResult {
   changes: SchemaChange[]
   typesRegenerated: boolean
 }
+

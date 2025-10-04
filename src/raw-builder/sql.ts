@@ -8,6 +8,7 @@ import { parseTable } from '../parser/table-parser.js'
 import { parseValueExpression } from '../parser/value-parser.js'
 import { createQueryId } from '../util/query-id.js'
 import { RawBuilder, createRawBuilder } from './raw-builder.js'
+import { validateColumnReference, validateTableReference, validateIdentifier } from '../util/security-validator.js'
 
 export interface Sql {
   /**
@@ -151,6 +152,9 @@ export interface Sql {
    *
    * WARNING! Using this with unchecked inputs WILL lead to SQL injection
    * vulnerabilities. The input is not checked or escaped by Kysely in any way.
+   *
+   * SECURITY: This method now includes built-in validation to prevent SQL injection.
+   * You should still validate that references come from trusted sources or a whitelist.
    *
    * ```ts
    * const columnRef = 'first_name'
@@ -404,6 +408,8 @@ export const sql: Sql = Object.assign(
   },
   {
     ref<R = unknown>(columnReference: string): RawBuilder<R> {
+      // Security validation to prevent SQL injection
+      validateColumnReference(columnReference)
       return createRawBuilder({
         queryId: createQueryId(),
         rawNode: RawNode.createWithChild(parseStringReference(columnReference)),
@@ -422,6 +428,8 @@ export const sql: Sql = Object.assign(
     },
 
     table<T = unknown>(tableReference: string): RawBuilder<T> {
+      // Security validation to prevent SQL injection
+      validateTableReference(tableReference)
       return createRawBuilder({
         queryId: createQueryId(),
         rawNode: RawNode.createWithChild(parseTable(tableReference)),
@@ -429,6 +437,11 @@ export const sql: Sql = Object.assign(
     },
 
     id<T = unknown>(...ids: readonly string[]): RawBuilder<T> {
+      // Security validation for each identifier
+      ids.forEach((id, index) => {
+        validateIdentifier(id, `identifier[${index}]`)
+      })
+
       const fragments = new Array<string>(ids.length + 1).fill('.')
 
       fragments[0] = ''

@@ -1,5 +1,6 @@
 import { DynamicReferenceBuilder } from './dynamic-reference-builder.js'
 import { DynamicTableBuilder } from './dynamic-table-builder.js'
+import { validateColumnReference, validateTableReference } from '../util/security-validator.js'
 
 export class DynamicModule<DB> {
   /**
@@ -18,6 +19,10 @@ export class DynamicModule<DB> {
    * create an SQL injection vulnerability. Always __always__ validate the user
    * input before passing it to this method.
    *
+   * SECURITY: This method now includes built-in validation to prevent SQL injection
+   * through malicious column references. However, you should still validate that
+   * the column reference is from a trusted source or whitelist of allowed columns.
+   *
    * There are couple of examples below for some use cases, but you can pass
    * `ref` to other methods as well. If the types allow you to pass a `ref`
    * value to some place, it should work.
@@ -29,6 +34,12 @@ export class DynamicModule<DB> {
    * ```ts
    * async function someQuery(filterColumn: string, filterValue: string) {
    *   const { ref } = db.dynamic
+   *
+   *   // Validate input against a whitelist of allowed columns
+   *   const allowedColumns = ['first_name', 'last_name', 'email']
+   *   if (!allowedColumns.includes(filterColumn)) {
+   *     throw new Error('Invalid column')
+   *   }
    *
    *   return await db
    *     .selectFrom('person')
@@ -46,6 +57,12 @@ export class DynamicModule<DB> {
    * ```ts
    * async function someQuery(orderBy: string) {
    *   const { ref } = db.dynamic
+   *
+   *   // Validate against allowed columns
+   *   const allowedColumns = ['first_name', 'last_name', 'created_at']
+   *   if (!allowedColumns.includes(orderBy)) {
+   *     throw new Error('Invalid order column')
+   *   }
    *
    *   return await db
    *     .selectFrom('person')
@@ -88,6 +105,8 @@ export class DynamicModule<DB> {
    * ```
    */
   ref<R extends string = never>(reference: string): DynamicReferenceBuilder<R> {
+    // Security validation to prevent SQL injection
+    validateColumnReference(reference)
     return new DynamicReferenceBuilder<R>(reference)
   }
 
@@ -95,6 +114,10 @@ export class DynamicModule<DB> {
    * Creates a table reference to a table that's not fully known at compile time.
    *
    * The type `T` is allowed to be a union of multiple tables.
+   *
+   * SECURITY: This method now includes built-in validation to prevent SQL injection
+   * through malicious table references. However, you should still validate that
+   * the table reference is from a trusted source or whitelist of allowed tables.
    *
    * <!-- siteExample("select", "Generic find query", 130) -->
    *
@@ -125,6 +148,8 @@ export class DynamicModule<DB> {
    * ```
    */
   table<T extends keyof DB & string>(table: T): DynamicTableBuilder<T> {
+    // Security validation to prevent SQL injection
+    validateTableReference(table as string)
     return new DynamicTableBuilder<T>(table)
   }
 }

@@ -24,10 +24,7 @@ export async function init(options: {
           name: 'dialect',
           message: 'Which database are you using?',
           choices: [
-            { name: 'PostgreSQL', value: 'postgresql' },
-            { name: 'MySQL', value: 'mysql' },
             { name: 'SQLite', value: 'sqlite' },
-            { name: 'Microsoft SQL Server', value: 'mssql' },
           ],
         },
       ])
@@ -96,14 +93,10 @@ export async function init(options: {
 
 function getDefaultConnectionString(dialect: string): string {
   switch (dialect) {
-    case 'postgresql':
-      return 'postgresql://username:password@localhost:5432/database_name'
-    case 'mysql':
-      return 'mysql://username:password@localhost:3306/database_name'
-    case 'mssql':
-      return 'mssql://username:password@localhost:1433/database_name'
+    case 'sqlite':
+      return 'sqlite:./database.sqlite'
     default:
-      return 'postgresql://username:password@localhost:5432/database_name'
+      return 'sqlite:./database.sqlite'
   }
 }
 
@@ -343,10 +336,7 @@ async function generatePackageScripts(): Promise<void> {
 
 function getDefaultPort(dialect: string): number {
   switch (dialect) {
-    case 'postgresql': return 5432
-    case 'mysql': return 3306
-    case 'mssql': return 1433
     case 'sqlite': return 0
-    default: return 5432
+    default: return 0
   }
 }

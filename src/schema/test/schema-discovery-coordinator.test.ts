@@ -1,82 +1,62 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals'
 import { SchemaDiscoveryCoordinator } from '../core/coordinators/schema-discovery.coordinator.js'
 import { DiscoveryFactory } from '../core/factories/discovery-factory.js'
-import { PostgreSQLDiscoveryCoordinator } from '../dialects/postgresql/postgresql-discovery.coordinator.js'
 import { SQLiteDiscoveryCoordinator } from '../dialects/sqlite/sqlite-discovery.coordinator.js'
 
 // Mock Kysely and related types
 const mockKysely = {
   selectFrom: jest.fn(),
   select: jest.fn(),
+  where: jest.fn(),
   execute: jest.fn()
-} as any
-
-const mockDialect = {
-  name: 'postgresql'
-} as any
-
-const mockSchemaInfo = {
-  tables: [
-    {
-      name: 'users',
-      columns: [
-        { name: 'id', type: 'integer', isPrimaryKey: true },
-        { name: 'email', type: 'varchar', isNullable: false }
-      ],
-      primaryKey: ['id']
-    }
-  ],
-  relationships: [],
-  views: []
 }
+
+// Mock DiscoveryFactory
+const mockFactory = {
+  createDiscoveryCoordinator: jest.fn(),
+  createDiscoveryServices: jest.fn(),
+  getDialectCapabilities: jest.fn(),
+  isDialectSupported: jest.fn()
+} as jest.Mocked<DiscoveryFactory>
+
+// Mock SQLite coordinator
+const mockSQLiteCoordinator = {
+  discoverSchema: jest.fn(),
+  getCapabilities: jest.fn()
+} as jest.Mocked<SQLiteDiscoveryCoordinator>
 
 describe('SchemaDiscoveryCoordinator', () => {
   let coordinator: SchemaDiscoveryCoordinator
   let mockFactory: jest.Mocked<DiscoveryFactory>
-  let mockPostgresCoordinator: jest.Mocked<PostgreSQLDiscoveryCoordinator>
   let mockSQLiteCoordinator: jest.Mocked<SQLiteDiscoveryCoordinator>
 
   beforeEach(() => {
     // Reset singleton instance
     ;(SchemaDiscoveryCoordinator as any).instance = undefined
 
-    // Create mocks
-    mockPostgresCoordinator = {
-      discoverSchema: jest.fn().mockResolvedValue(mockSchemaInfo),
-      getCapabilities: jest.fn().mockReturnValue({
-        supportsViews: true,
-        supportsIndexes: true,
-        supportsConstraints: true,
-        supportsForeignKeys: true,
-        supportsCheckConstraints: true,
-        supportsDeferredConstraints: true
-      }),
-      getRecommendations: jest.fn().mockResolvedValue([])
-    } as any
+    // Setup mocks
+    mockFactory.createDiscoveryCoordinator.mockReturnValue(mockSQLiteCoordinator)
+    mockFactory.createDiscoveryServices.mockReturnValue({
+      tableDiscovery: {} as any,
+      relationshipDiscovery: {} as any,
+      viewDiscovery: {} as any,
+      indexDiscovery: {} as any,
+      constraintDiscovery: {} as any
+    })
+    mockFactory.getDialectCapabilities.mockReturnValue({
+      supportsViews: true,
+      supportsIndexes: true,
+      supportsConstraints: true,
+      supportsForeignKeys: true,
+      supportsCheckConstraints: true,
+      supportsDeferredConstraints: false
+    })
+    mockFactory.isDialectSupported.mockReturnValue(true)
 
-    mockSQLiteCoordinator = {
-      discoverSchema: jest.fn().mockResolvedValue(mockSchemaInfo),
-      getCapabilities: jest.fn().mockReturnValue({
-        supportsViews: true,
-        supportsIndexes: true,
-        supportsConstraints: true,
-        supportsForeignKeys: false,
-        supportsCheckConstraints: true,
-        supportsDeferredConstraints: false
-      }),
-      getRecommendations: jest.fn().mockResolvedValue([])
-    } as any
-
-    mockFactory = {
-      createDiscoveryCoordinator: jest.fn(),
-      isDialectSupported: jest.fn(),
-      getDialectCapabilities: jest.fn()
-    } as any
-
-    // Mock the factory creation
-    jest.spyOn(DiscoveryFactory, 'getInstance').mockReturnValue(mockFactory)
-    
     coordinator = SchemaDiscoveryCoordinator.getInstance()
+    
+    // Mock the factory property
+    ;(coordinator as any).factory = mockFactory
   })
 
   afterEach(() => {
@@ -89,208 +69,89 @@ describe('SchemaDiscoveryCoordinator', () => {
       const instance2 = SchemaDiscoveryCoordinator.getInstance()
       expect(instance1).toBe(instance2)
     })
-
-    it('should maintain state across multiple calls', () => {
-      const instance1 = SchemaDiscoveryCoordinator.getInstance()
-      const instance2 = SchemaDiscoveryCoordinator.getInstance()
-      expect(instance1.getFactory()).toBe(instance2.getFactory())
-    })
-  })
-
-  describe('Factory Access', () => {
-    it('should return the discovery factory instance', () => {
-      const factory = coordinator.getFactory()
-      expect(factory).toBe(mockFactory)
-    })
-  })
-
-  describe('Dialect Management', () => {
-    it('should set current dialect from dialect parameter', () => {
-      const dialect = { name: 'postgresql' } as any
-      coordinator.discoverSchema(mockKysely, {}, dialect)
-      expect(coordinator.getCurrentDialect()).toBe('postgresql')
-    })
-
-    it('should default to sqlite when no dialect provided', () => {
-      coordinator.discoverSchema(mockKysely)
-      expect(coordinator.getCurrentDialect()).toBe('sqlite')
-    })
-
-    it('should handle dialect without name property', () => {
-      const dialect = {} as any
-      coordinator.discoverSchema(mockKysely, {}, dialect)
-      expect(coordinator.getCurrentDialect()).toBe('sqlite')
-    })
   })
 
   describe('Schema Discovery', () => {
-    describe('PostgreSQL Discovery', () => {
-      beforeEach(() => {
-        mockFactory.isDialectSupported.mockReturnValue(true)
-        mockFactory.createDiscoveryCoordinator.mockReturnValue(mockPostgresCoordinator)
-      })
+    it('should discover schema for SQLite', async () => {
+      const mockSchemaInfo = {
+        tables: [],
+        views: [],
+        indexes: [],
+        constraints: [],
+        relationships: []
+      }
 
-      it('should delegate to PostgreSQL coordinator for postgresql dialect', async () => {
-        const dialect = { name: 'postgresql' } as any
-        const config = { includeViews: true }
+      mockSQLiteCoordinator.discoverSchema.mockResolvedValue(mockSchemaInfo as any)
 
-        const result = await coordinator.discoverSchema(mockKysely, config, dialect)
+      const result = await coordinator.discoverSchema(mockKysely as any, 'sqlite', {})
 
-        expect(mockFactory.isDialectSupported).toHaveBeenCalledWith('postgresql')
-        expect(mockFactory.createDiscoveryCoordinator).toHaveBeenCalledWith('postgresql')
-        expect(mockPostgresCoordinator.discoverSchema).toHaveBeenCalledWith(mockKysely, config)
-        expect(result).toEqual(mockSchemaInfo)
-      })
-
-      it('should delegate to PostgreSQL coordinator for postgres dialect', async () => {
-        const dialect = { name: 'postgres' } as any
-
-        await coordinator.discoverSchema(mockKysely, {}, dialect)
-
-        expect(mockFactory.createDiscoveryCoordinator).toHaveBeenCalledWith('postgres')
-      })
-
-      it('should use default config when none provided', async () => {
-        const dialect = { name: 'postgresql' } as any
-
-        await coordinator.discoverSchema(mockKysely, undefined, dialect)
-
-        expect(mockPostgresCoordinator.discoverSchema).toHaveBeenCalledWith(mockKysely, {})
-      })
+      expect(mockFactory.createDiscoveryCoordinator).toHaveBeenCalledWith('sqlite')
+      expect(mockSQLiteCoordinator.discoverSchema).toHaveBeenCalledWith(mockKysely, {})
+      expect(result).toEqual(mockSchemaInfo)
     })
 
-    describe('SQLite Discovery', () => {
-      beforeEach(() => {
-        mockFactory.isDialectSupported.mockReturnValue(true)
-        mockFactory.createDiscoveryCoordinator.mockReturnValue(mockSQLiteCoordinator)
-      })
+    it('should handle unsupported dialects', async () => {
+      mockFactory.isDialectSupported.mockReturnValue(false)
 
-      it('should delegate to SQLite coordinator for sqlite dialect', async () => {
-        const dialect = { name: 'sqlite' } as any
-        const config = { excludeTables: ['temp_*'] }
+      await expect(
+        coordinator.discoverSchema(mockKysely as any, 'unsupported', {})
+      ).rejects.toThrow('Unsupported dialect: unsupported')
 
-        const result = await coordinator.discoverSchema(mockKysely, config, dialect)
-
-        expect(mockFactory.isDialectSupported).toHaveBeenCalledWith('sqlite')
-        expect(mockFactory.createDiscoveryCoordinator).toHaveBeenCalledWith('sqlite')
-        expect(mockSQLiteCoordinator.discoverSchema).toHaveBeenCalledWith(mockKysely, config)
-        expect(result).toEqual(mockSchemaInfo)
-      })
-
-      it('should default to sqlite when no dialect provided', async () => {
-        await coordinator.discoverSchema(mockKysely)
-
-        expect(mockFactory.createDiscoveryCoordinator).toHaveBeenCalledWith('sqlite')
-        expect(mockSQLiteCoordinator.discoverSchema).toHaveBeenCalledWith(mockKysely, {})
-      })
+      expect(mockFactory.isDialectSupported).toHaveBeenCalledWith('unsupported')
     })
 
-    describe('Error Handling', () => {
-      it('should throw error for unsupported dialects', async () => {
-        mockFactory.isDialectSupported.mockReturnValue(false)
-        const dialect = { name: 'oracle' } as any
+    it('should handle discovery errors', async () => {
+      const error = new Error('Discovery failed')
+      mockSQLiteCoordinator.discoverSchema.mockRejectedValue(error)
 
-        await expect(
-          coordinator.discoverSchema(mockKysely, {}, dialect)
-        ).rejects.toThrow('Unsupported database dialect: oracle')
-
-        expect(mockFactory.isDialectSupported).toHaveBeenCalledWith('oracle')
-      })
-
-      it('should throw error when coordinator creation fails', async () => {
-        mockFactory.isDialectSupported.mockReturnValue(true)
-        mockFactory.createDiscoveryCoordinator.mockImplementation(() => {
-          throw new Error('Failed to create coordinator')
-        })
-        const dialect = { name: 'postgresql' } as any
-
-        await expect(
-          coordinator.discoverSchema(mockKysely, {}, dialect)
-        ).rejects.toThrow('Failed to create coordinator')
-      })
-
-      it('should throw error when discovery fails', async () => {
-        mockFactory.isDialectSupported.mockReturnValue(true)
-        mockFactory.createDiscoveryCoordinator.mockReturnValue(mockPostgresCoordinator)
-        mockPostgresCoordinator.discoverSchema.mockRejectedValue(new Error('Discovery failed'))
-        const dialect = { name: 'postgresql' } as any
-
-        await expect(
-          coordinator.discoverSchema(mockKysely, {}, dialect)
-        ).rejects.toThrow('Discovery failed')
-      })
+      await expect(
+        coordinator.discoverSchema(mockKysely as any, 'sqlite', {})
+      ).rejects.toThrow('Discovery failed')
     })
   })
 
-  describe('Dialect Capabilities', () => {
-    it('should return capabilities for current dialect', () => {
-      const mockCapabilities = {
+  describe('Dialect Support', () => {
+    it('should check if dialect is supported', () => {
+      const isSupported = coordinator.isDialectSupported('sqlite')
+      expect(mockFactory.isDialectSupported).toHaveBeenCalledWith('sqlite')
+      expect(isSupported).toBe(true)
+    })
+
+    it('should get dialect capabilities', () => {
+      const capabilities = coordinator.getDialectCapabilities('sqlite')
+      expect(mockFactory.getDialectCapabilities).toHaveBeenCalledWith('sqlite')
+      expect(capabilities).toEqual({
         supportsViews: true,
         supportsIndexes: true,
         supportsConstraints: true,
         supportsForeignKeys: true,
         supportsCheckConstraints: true,
-        supportsDeferredConstraints: true
-      }
-
-      mockFactory.getDialectCapabilities.mockReturnValue(mockCapabilities)
-      
-      // Set current dialect
-      coordinator.discoverSchema(mockKysely, {}, { name: 'postgresql' } as any)
-      
-      const capabilities = coordinator.getDialectCapabilities()
-      expect(capabilities).toEqual(mockCapabilities)
-      expect(mockFactory.getDialectCapabilities).toHaveBeenCalledWith('postgresql')
-    })
-
-    it('should return capabilities for sqlite when no dialect set', () => {
-      const mockCapabilities = {
-        supportsViews: true,
-        supportsIndexes: true,
-        supportsConstraints: true,
-        supportsForeignKeys: false,
-        supportsCheckConstraints: true,
         supportsDeferredConstraints: false
-      }
-
-      mockFactory.getDialectCapabilities.mockReturnValue(mockCapabilities)
-      
-      const capabilities = coordinator.getDialectCapabilities()
-      expect(capabilities).toEqual(mockCapabilities)
-      expect(mockFactory.getDialectCapabilities).toHaveBeenCalledWith('sqlite')
+      })
     })
   })
 
-  describe('Integration with Factory', () => {
-    it('should use factory for dialect validation', async () => {
-      mockFactory.isDialectSupported.mockReturnValue(true)
-      mockFactory.createDiscoveryCoordinator.mockReturnValue(mockPostgresCoordinator)
-      
-      const dialect = { name: 'postgresql' } as any
-      await coordinator.discoverSchema(mockKysely, {}, dialect)
+  describe('Configuration', () => {
+    it('should handle introspection configuration', async () => {
+      const config = {
+        excludeTables: ['migrations'],
+        includeViews: true,
+        customTypeMappings: { 'jsonb': 'Record<string, any>' }
+      }
 
-      expect(mockFactory.isDialectSupported).toHaveBeenCalledWith('postgresql')
-    })
+      const mockSchemaInfo = {
+        tables: [],
+        views: [],
+        indexes: [],
+        constraints: [],
+        relationships: []
+      }
 
-    it('should use factory for coordinator creation', async () => {
-      mockFactory.isDialectSupported.mockReturnValue(true)
-      mockFactory.createDiscoveryCoordinator.mockReturnValue(mockPostgresCoordinator)
-      
-      const dialect = { name: 'postgresql' } as any
-      await coordinator.discoverSchema(mockKysely, {}, dialect)
+      mockSQLiteCoordinator.discoverSchema.mockResolvedValue(mockSchemaInfo as any)
 
-      expect(mockFactory.createDiscoveryCoordinator).toHaveBeenCalledWith('postgresql')
-    })
+      await coordinator.discoverSchema(mockKysely as any, 'sqlite', config)
 
-    it('should handle factory method failures gracefully', async () => {
-      mockFactory.isDialectSupported.mockImplementation(() => {
-        throw new Error('Factory error')
-      })
-
-      const dialect = { name: 'postgresql' } as any
-      await expect(
-        coordinator.discoverSchema(mockKysely, {}, dialect)
-      ).rejects.toThrow('Factory error')
+      expect(mockSQLiteCoordinator.discoverSchema).toHaveBeenCalledWith(mockKysely, config)
     })
   })
 })

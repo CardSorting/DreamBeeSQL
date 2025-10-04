@@ -111,17 +111,6 @@ async function runTests() {
     }
   });
 
-  // Test 3: PostgreSQL Coordinator Singleton
-  test.test('PostgreSQLDiscoveryCoordinator should be a singleton', () => {
-    try {
-      const { PostgreSQLDiscoveryCoordinator } = require('../dialects/postgresql/postgresql-discovery.coordinator.js');
-      const instance1 = PostgreSQLDiscoveryCoordinator.getInstance();
-      const instance2 = PostgreSQLDiscoveryCoordinator.getInstance();
-      test.expect(instance1).toBe(instance2);
-    } catch (error) {
-      console.log('⚠️  PostgreSQLDiscoveryCoordinator test skipped (module not available)');
-    }
-  });
 
   // Test 4: SQLite Coordinator Singleton
   test.test('SQLiteDiscoveryCoordinator should be a singleton', () => {

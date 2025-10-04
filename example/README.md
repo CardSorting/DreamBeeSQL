@@ -9,13 +9,9 @@ This directory contains practical examples showing how to use NOORM in real-worl
 import { NOORM } from 'noorm'
 
 const db = new NOORM({
-  dialect: 'postgresql',
+  dialect: 'sqlite',
   connection: {
-    host: 'localhost',
-    port: 5432,
-    database: 'myapp',
-    username: 'user',
-    password: 'password'
+    database: './myapp.sqlite'
   }
 })
 
@@ -184,13 +180,9 @@ const newUsers = await userRepo.createMany([
 ### Basic Configuration
 ```typescript
 const db = new NOORM({
-  dialect: 'postgresql',
+  dialect: 'sqlite',
   connection: {
-    host: 'localhost',
-    port: 5432,
-    database: 'myapp',
-    username: 'user',
-    password: 'password'
+    database: './myapp.sqlite'
   }
 })
 ```
@@ -198,7 +190,7 @@ const db = new NOORM({
 ### Advanced Configuration
 ```typescript
 const db = new NOORM({
-  dialect: 'postgresql',
+  dialect: 'sqlite',
   connection: {
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT || '5432'),
@@ -233,10 +225,6 @@ const db = new NOORM({
 
 2. **Install Database Driver**
    ```bash
-   npm install pg  # PostgreSQL
-   # or
-   npm install mysql2  # MySQL
-   # or
    npm install better-sqlite3  # SQLite
    ```
 

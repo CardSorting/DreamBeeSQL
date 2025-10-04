@@ -6,40 +6,17 @@
  */
 export class TypeMapper {
   private static typeMapping = {
-    // PostgreSQL types
-    'varchar': 'string',
+    // SQLite types
     'text': 'string',
+    'varchar': 'string',
     'char': 'string',
     'integer': 'number',
-    'bigint': 'number',
-    'smallint': 'number',
-    'decimal': 'number',
-    'numeric': 'number',
     'real': 'number',
-    'double precision': 'number',
+    'numeric': 'number',
     'boolean': 'boolean',
     'date': 'Date',
-    'timestamp': 'Date',
-    'timestamptz': 'Date',
-    'time': 'Date',
-    'json': 'any',
-    'jsonb': 'any',
-    'uuid': 'string',
-
-    // MySQL specific types
-    'longtext': 'string',
-    'mediumtext': 'string',
-    'tinytext': 'string',
-    'int': 'number',
-    'tinyint': 'number',
-    'float': 'number',
-    'double': 'number',
-    'bool': 'boolean',
     'datetime': 'Date',
-
-    // SQLite specific types
     'blob': 'Buffer',
-
   }
 
   /**

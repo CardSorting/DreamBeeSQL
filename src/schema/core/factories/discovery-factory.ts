@@ -3,11 +3,8 @@ import type { Dialect } from '../../../dialect/dialect.js'
 import { TableMetadataDiscovery } from '../discovery/table-metadata-discovery.js'
 import { RelationshipDiscovery } from '../discovery/relationship-discovery.js'
 import { ViewDiscovery } from '../discovery/view-discovery.js'
-import { PostgreSQLDiscoveryCoordinator } from '../../dialects/postgresql/postgresql-discovery.coordinator.js'
 import { SQLiteDiscoveryCoordinator } from '../../dialects/sqlite/sqlite-discovery.coordinator.js'
-import { PostgreSQLIndexDiscovery } from '../../dialects/postgresql/discovery/postgresql-index-discovery.js'
 import { SQLiteIndexDiscovery } from '../../dialects/sqlite/discovery/sqlite-index-discovery.js'
-import { PostgreSQLConstraintDiscovery } from '../../dialects/postgresql/discovery/postgresql-constraint-discovery.js'
 import { SQLiteConstraintDiscovery } from '../../dialects/sqlite/discovery/sqlite-constraint-discovery.js'
 
 /**
@@ -47,19 +44,10 @@ export class DiscoveryFactory {
   /**
    * Create index discovery service based on dialect
    */
-  createIndexDiscovery(dialect: string): PostgreSQLIndexDiscovery | SQLiteIndexDiscovery {
+  createIndexDiscovery(dialect: string): SQLiteIndexDiscovery {
     switch (dialect.toLowerCase()) {
-      case 'postgresql':
-      case 'postgres':
-        return PostgreSQLIndexDiscovery.getInstance()
       case 'sqlite':
         return SQLiteIndexDiscovery.getInstance()
-      case 'mysql':
-        // TODO: Implement MySQL index discovery
-        throw new Error('MySQL index discovery not yet implemented')
-      case 'mssql':
-        // TODO: Implement MSSQL index discovery
-        throw new Error('MSSQL index discovery not yet implemented')
       default:
         throw new Error(`Unsupported dialect for index discovery: ${dialect}`)
     }
@@ -68,19 +56,10 @@ export class DiscoveryFactory {
   /**
    * Create constraint discovery service based on dialect
    */
-  createConstraintDiscovery(dialect: string): PostgreSQLConstraintDiscovery | SQLiteConstraintDiscovery {
+  createConstraintDiscovery(dialect: string): SQLiteConstraintDiscovery {
     switch (dialect.toLowerCase()) {
-      case 'postgresql':
-      case 'postgres':
-        return PostgreSQLConstraintDiscovery.getInstance()
       case 'sqlite':
         return SQLiteConstraintDiscovery.getInstance()
-      case 'mysql':
-        // TODO: Implement MySQL constraint discovery
-        throw new Error('MySQL constraint discovery not yet implemented')
-      case 'mssql':
-        // TODO: Implement MSSQL constraint discovery
-        throw new Error('MSSQL constraint discovery not yet implemented')
       default:
         throw new Error(`Unsupported dialect for constraint discovery: ${dialect}`)
     }
@@ -89,19 +68,10 @@ export class DiscoveryFactory {
   /**
    * Create dialect-specific discovery coordinator
    */
-  createDiscoveryCoordinator(dialect: string): PostgreSQLDiscoveryCoordinator | SQLiteDiscoveryCoordinator {
+  createDiscoveryCoordinator(dialect: string): SQLiteDiscoveryCoordinator {
     switch (dialect.toLowerCase()) {
-      case 'postgresql':
-      case 'postgres':
-        return PostgreSQLDiscoveryCoordinator.getInstance()
       case 'sqlite':
         return SQLiteDiscoveryCoordinator.getInstance()
-      case 'mysql':
-        // TODO: Implement MySQL discovery coordinator
-        throw new Error('MySQL discovery coordinator not yet implemented')
-      case 'mssql':
-        // TODO: Implement MSSQL discovery coordinator
-        throw new Error('MSSQL discovery coordinator not yet implemented')
       default:
         throw new Error(`Unsupported dialect for discovery coordinator: ${dialect}`)
     }
@@ -114,8 +84,8 @@ export class DiscoveryFactory {
     tableDiscovery: TableMetadataDiscovery
     relationshipDiscovery: RelationshipDiscovery
     viewDiscovery: ViewDiscovery
-    indexDiscovery: PostgreSQLIndexDiscovery | SQLiteIndexDiscovery
-    constraintDiscovery: PostgreSQLConstraintDiscovery | SQLiteConstraintDiscovery
+    indexDiscovery: SQLiteIndexDiscovery
+    constraintDiscovery: SQLiteConstraintDiscovery
   } {
     return {
       tableDiscovery: this.createTableDiscovery(),
@@ -130,7 +100,7 @@ export class DiscoveryFactory {
    * Get supported dialects
    */
   getSupportedDialects(): string[] {
-    return ['postgresql', 'postgres', 'sqlite']
+    return ['sqlite']
   }
 
   /**
@@ -152,16 +122,6 @@ export class DiscoveryFactory {
     supportsDeferredConstraints: boolean
   } {
     switch (dialect.toLowerCase()) {
-      case 'postgresql':
-      case 'postgres':
-        return {
-          supportsViews: true,
-          supportsIndexes: true,
-          supportsConstraints: true,
-          supportsForeignKeys: true,
-          supportsCheckConstraints: true,
-          supportsDeferredConstraints: true
-        }
       case 'sqlite':
         return {
           supportsViews: true,
@@ -170,24 +130,6 @@ export class DiscoveryFactory {
           supportsForeignKeys: true,
           supportsCheckConstraints: true,
           supportsDeferredConstraints: false
-        }
-      case 'mysql':
-        return {
-          supportsViews: true,
-          supportsIndexes: true,
-          supportsConstraints: true,
-          supportsForeignKeys: true,
-          supportsCheckConstraints: true,
-          supportsDeferredConstraints: false
-        }
-      case 'mssql':
-        return {
-          supportsViews: true,
-          supportsIndexes: true,
-          supportsConstraints: true,
-          supportsForeignKeys: true,
-          supportsCheckConstraints: true,
-          supportsDeferredConstraints: true
         }
       default:
         return {

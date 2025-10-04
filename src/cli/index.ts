@@ -17,7 +17,7 @@ program
 program
   .command('init')
   .description('Initialize NOORMME in current directory')
-  .option('-d, --dialect <dialect>', 'Database dialect (postgresql, mysql, sqlite, mssql)')
+  .option('-d, --dialect <dialect>', 'Database dialect (sqlite)')
   .option('-c, --connection <connection>', 'Database connection string')
   .option('-o, --output <output>', 'Output directory for generated files', 'lib')
   .option('-f, --force', 'Overwrite existing files')
@@ -46,7 +46,7 @@ program.addHelpText('after', `
 
 Examples:
   $ noormme init                          # Interactive setup
-  $ noormme init -d postgresql            # Init with PostgreSQL
+  $ noormme init -d sqlite                # Init with SQLite
   $ noormme inspect users                 # Inspect users table
   $ noormme inspect --relationships       # Show all relationships
   $ noormme generate -o ./types/db.d.ts   # Generate types

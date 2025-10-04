@@ -22,7 +22,7 @@ npx noormme init
 
 #### Options
 
-- `-d, --dialect <dialect>` - Database dialect (postgresql, mysql, sqlite, mssql)
+- `-d, --dialect <dialect>` - Database dialect (sqlite)
 - `-c, --connection <connection>` - Database connection string
 - `-o, --output <output>` - Output directory for generated files (default: lib)
 - `-f, --force` - Overwrite existing files
@@ -33,8 +33,8 @@ npx noormme init
 # Interactive setup
 npx noormme init
 
-# PostgreSQL with specific connection
-npx noormme init -d postgresql -c "postgresql://user:pass@localhost:5432/mydb"
+# SQLite with specific connection
+npx noormme init -d sqlite -c "sqlite:./mydb.sqlite"
 
 # SQLite with custom output directory
 npx noormme init -d sqlite -c "./database.sqlite" -o src/db
@@ -78,7 +78,7 @@ npx noormme inspect users
 npx noormme inspect --relationships
 
 # Use custom connection string
-npx noormme inspect -c "postgresql://localhost/mydb"
+npx noormme inspect -c "sqlite:./mydb.sqlite"
 ```
 
 #### Output Format
@@ -117,7 +117,7 @@ npx noormme generate -o ./src/types/db.d.ts
 npx noormme generate -f json -o ./schema.json
 
 # Use custom connection
-npx noormme generate -c "mysql://localhost/mydb"
+npx noormme generate -c "sqlite:./mydb.sqlite"
 ```
 
 #### Generated Types
@@ -141,7 +141,7 @@ The CLI respects these environment variables:
 ### `.env` File
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/database"
+DATABASE_URL="sqlite:./database.sqlite"
 LOG_LEVEL=info
 CACHE_TTL=300000
 ```
@@ -177,7 +177,7 @@ Suggestion: Check your connection string and ensure the database is running
 
 ```bash
 # 1. Initialize NOORMME
-npx noormme init -d postgresql
+npx noormme init -d sqlite
 
 # 2. Inspect your schema
 npx noormme inspect

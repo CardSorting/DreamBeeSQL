@@ -21,13 +21,6 @@ describe('Schema Strategy - Basic Tests', () => {
     }).not.toThrow();
   });
 
-  test('should verify PostgreSQL coordinator exists', () => {
-    // Test that we can import the PostgreSQL coordinator
-    expect(() => {
-      const { PostgreSQLDiscoveryCoordinator } = require('../dialects/postgresql/postgresql-discovery.coordinator.js');
-      return PostgreSQLDiscoveryCoordinator;
-    }).not.toThrow();
-  });
 
   test('should verify SQLite coordinator exists', () => {
     // Test that we can import the SQLite coordinator

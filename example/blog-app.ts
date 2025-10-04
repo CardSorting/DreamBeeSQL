@@ -10,13 +10,9 @@ import { NOORM } from 'noorm'
 
 // Database configuration
 const db = new NOORM({
-  dialect: 'postgresql',
+  dialect: 'sqlite',
   connection: {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    database: process.env.DB_NAME || 'blog_app',
-    username: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'password'
+    database: process.env.DB_NAME || './blog_app.sqlite'
   },
   introspection: {
     includeViews: false,

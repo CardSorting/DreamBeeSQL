@@ -15,12 +15,6 @@ export { TypeMapper } from './core/utils/type-mapper.js'
 export { NameGenerator } from './core/utils/name-generator.js'
 export * from './core/types/schema-discovery-types.js'
 
-// PostgreSQL Dialect
-export { PostgreSQLDiscoveryCoordinator } from './dialects/postgresql/postgresql-discovery.coordinator.js'
-export { PostgreSQLIndexDiscovery } from './dialects/postgresql/discovery/postgresql-index-discovery.js'
-export { PostgreSQLConstraintDiscovery } from './dialects/postgresql/discovery/postgresql-constraint-discovery.js'
-export { PostgreSQLSchemaIntrospector } from './dialects/postgresql/introspection/postgresql-schema-introspector.js'
-
 // SQLite Dialect
 export { SQLiteDiscoveryCoordinator } from './dialects/sqlite/sqlite-discovery.coordinator.js'
 export { SQLiteIndexDiscovery } from './dialects/sqlite/discovery/sqlite-index-discovery.js'

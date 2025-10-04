@@ -3,6 +3,7 @@ import * as path from 'path'
 import chalk from 'chalk'
 import { NOORMME } from '../../noormme.js'
 import { TableInfo, ColumnInfo } from '../../types/index.js'
+import { sanitizeDatabasePath, validateOutputDirectory } from '../../util/security-validator.js'
 
 export async function generate(options: {
   database?: string
@@ -14,11 +15,13 @@ export async function generate(options: {
   console.log(chalk.blue.bold('\n🔧 NOORMME Code Generation - Automating TypeScript & Repositories\n'))
 
   try {
-    // Initialize NOORMME with database path
-    const databasePath = options.database || process.env.DATABASE_PATH || './database.sqlite'
+    // SECURITY: Validate and sanitize database path to prevent path traversal attacks
+    const databasePathInput = options.database || process.env.DATABASE_PATH || './database.sqlite'
+    const databasePath = sanitizeDatabasePath(databasePathInput)
+
     const db = new NOORMME({
       dialect: 'sqlite',
-      connection: { 
+      connection: {
         database: databasePath,
         host: 'localhost',
         port: 0,
@@ -29,7 +32,11 @@ export async function generate(options: {
     await db.initialize()
 
     const schemaInfo = await db.getSchemaInfo()
+
+    // SECURITY: Validate output directory to prevent path traversal attacks
     const outputDir = options.output || './generated'
+    validateOutputDirectory(outputDir)
+
     const format = options.format || 'dts'
 
     console.log(chalk.gray(`📁 Output directory: ${outputDir}`))

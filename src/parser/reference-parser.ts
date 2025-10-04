@@ -168,16 +168,19 @@ export function parseStringReference(ref: string): ReferenceNode {
   const COLUMN_SEPARATOR = '.'
 
   if (!ref.includes(COLUMN_SEPARATOR)) {
+    // SECURITY: ColumnNode.create will validate the column name
     return ReferenceNode.create(ColumnNode.create(ref))
   }
 
   const parts = ref.split(COLUMN_SEPARATOR).map(trim)
 
   if (parts.length === 3) {
+    // SECURITY: parseStringReferenceWithTableAndSchema uses ColumnNode and TableNode which validate
     return parseStringReferenceWithTableAndSchema(parts)
   }
 
   if (parts.length === 2) {
+    // SECURITY: parseStringReferenceWithTable uses ColumnNode and TableNode which validate
     return parseStringReferenceWithTable(parts)
   }
 
@@ -228,6 +231,7 @@ function parseStringReferenceWithTableAndSchema(
 ): ReferenceNode {
   const [schema, table, column] = parts
 
+  // SECURITY: Both ColumnNode.create and TableNode.createWithSchema validate their inputs
   return ReferenceNode.create(
     ColumnNode.create(column),
     TableNode.createWithSchema(schema, table),
@@ -237,6 +241,7 @@ function parseStringReferenceWithTableAndSchema(
 function parseStringReferenceWithTable(parts: string[]): ReferenceNode {
   const [table, column] = parts
 
+  // SECURITY: Both ColumnNode.create and TableNode.create validate their inputs
   return ReferenceNode.create(
     ColumnNode.create(column),
     TableNode.create(table),

@@ -3,6 +3,7 @@ import { promises as fs } from 'fs'
 import * as path from 'path'
 import chalk from 'chalk'
 import { NOORMConfig } from '../../types/index.js'
+import { sanitizeDatabasePath, validateOutputDirectory } from '../../util/security-validator.js'
 
 export async function init(options: {
   database?: string
@@ -15,8 +16,13 @@ export async function init(options: {
   console.log(chalk.gray('Setting up NOORMME with complete SQLite automation...\n'))
 
   try {
-    // Get database path
-    const databasePath = options.database || './database.sqlite'
+    // SECURITY: Validate and sanitize database path to prevent path traversal attacks
+    const databasePathInput = options.database || './database.sqlite'
+    const databasePath = sanitizeDatabasePath(databasePathInput)
+
+    // SECURITY: Validate output directory to prevent path traversal attacks
+    const outputDir = options.output || 'lib'
+    validateOutputDirectory(outputDir)
     
     console.log(chalk.blue('🔍 Detecting existing SQLite database...'))
     
@@ -70,7 +76,6 @@ export async function init(options: {
     }
 
     // Generate files with automation focus
-    const outputDir = options.output || 'lib'
     await generateDbFile(databasePath, outputDir, options.force, autoOptimize, autoIndex)
     await generateEnvExample(databasePath)
     await generateAutomationConfig(databasePath, autoOptimize, autoIndex)

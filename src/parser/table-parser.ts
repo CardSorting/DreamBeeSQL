@@ -137,8 +137,10 @@ export function parseTable(from: string): TableNode {
   if (from.includes(SCHEMA_SEPARATOR)) {
     const [schema, table] = from.split(SCHEMA_SEPARATOR).map(trim)
 
+    // SECURITY: TableNode.createWithSchema will validate both parts
     return TableNode.createWithSchema(schema, table)
   } else {
+    // SECURITY: TableNode.create will validate the table name
     return TableNode.create(from)
   }
 }

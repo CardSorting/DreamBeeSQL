@@ -1,6 +1,7 @@
 import { freeze } from '../util/object-utils.js'
 import { IdentifierNode } from './identifier-node.js'
 import { OperationNode } from './operation-node.js'
+import { validateIdentifier } from '../util/security-validator.js'
 
 export interface ColumnNode extends OperationNode {
   readonly kind: 'ColumnNode'
@@ -16,6 +17,10 @@ export const ColumnNode = freeze({
   },
 
   create(column: string): ColumnNode {
+    // SECURITY: Validate column name to prevent SQL injection
+    // Even though IdentifierNode will validate, we validate here too for defense in depth
+    validateIdentifier(column, 'column name')
+
     return freeze({
       kind: 'ColumnNode',
       column: IdentifierNode.create(column),

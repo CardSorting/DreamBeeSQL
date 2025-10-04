@@ -1,6 +1,7 @@
 import chalk from 'chalk'
 import { NOORMME } from '../../noormme.js'
 import { TableInfo, RelationshipInfo } from '../../types/index.js'
+import { sanitizeDatabasePath, validateIdentifier } from '../../util/security-validator.js'
 
 export async function inspect(tableName?: string, options: {
   database?: string
@@ -12,11 +13,13 @@ export async function inspect(tableName?: string, options: {
   console.log(chalk.blue.bold('\n🔍 NOORMME Schema Inspection - Intelligent Database Discovery\n'))
 
   try {
-    // Initialize NOORMME with database path
-    const databasePath = options.database || process.env.DATABASE_PATH || './database.sqlite'
+    // SECURITY: Validate and sanitize database path to prevent path traversal attacks
+    const databasePathInput = options.database || process.env.DATABASE_PATH || './database.sqlite'
+    const databasePath = sanitizeDatabasePath(databasePathInput)
+
     const db = new NOORMME({
       dialect: 'sqlite',
-      connection: { 
+      connection: {
         database: databasePath,
         host: 'localhost',
         port: 0,
@@ -31,6 +34,9 @@ export async function inspect(tableName?: string, options: {
     const schemaInfo = await db.getSchemaInfo()
 
     if (tableName) {
+      // SECURITY: Validate table name to prevent SQL injection
+      validateIdentifier(tableName, 'table name')
+
       // Show specific table with automation insights
       const table = schemaInfo.tables.find(t => t.name === tableName)
       if (!table) {

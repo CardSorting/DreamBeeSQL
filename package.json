@@ -1,27 +1,29 @@
 {
-  "name": "noorm",
+  "name": "noormme",
   "version": "1.0.0",
-  "description": "NOORM - No ORM, just magic! Zero-configuration pseudo-ORM built on Kysely with NOORMME",
+  "description": "NOORMME - The NO-ORM for Normies. SQLite automation so simple, even normies can use it.",
   "repository": {
     "type": "git",
-    "url": "git://github.com/your-org/noorm.git"
+    "url": "git://github.com/cardsorting/noormme.git"
   },
-  "homepage": "https://noorm.dev",
+  "homepage": "https://github.com/cardsorting/noormme",
   "keywords": [
-    "noorm",
     "noormme",
     "no-orm",
-    "pseudo-orm",
+    "sqlite",
+    "automation",
     "zero-config",
     "auto-discovery",
     "typescript",
     "kysely",
-    "sqlite",
     "type-safe",
     "auto-generated",
     "schema-discovery",
     "repository-pattern",
-    "relationship-loading"
+    "database-automation",
+    "sqlite-optimization",
+    "orm-alternative",
+    "normie-friendly"
   ],
   "engines": {
     "node": ">=20.0.0"
@@ -37,19 +39,28 @@
   },
   "files": [
     "dist",
-    "helpers",
+    "README.md",
+    "LICENSE",
     "outdated-typescript.d.ts"
   ],
   "exports": {
     ".": {
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js",
+      "types": "./dist/esm/index.d.ts",
       "default": "./dist/cjs/index.js"
     },
     "./helpers/sqlite": {
       "import": "./dist/esm/helpers/sqlite.js",
       "require": "./dist/cjs/helpers/sqlite.js",
+      "types": "./dist/esm/helpers/sqlite.d.ts",
       "default": "./dist/cjs/helpers/sqlite.js"
+    },
+    "./cli": {
+      "import": "./dist/esm/cli/index.js",
+      "require": "./dist/cjs/cli/index.js",
+      "types": "./dist/esm/cli/index.d.ts",
+      "default": "./dist/cjs/cli/index.js"
     }
   },
   "scripts": {
@@ -86,15 +97,15 @@
     "script:align-site-version": "node --experimental-strip-types scripts/align-site-version.mts",
     "script:generate-site-examples": "node scripts/generate-site-examples.js",
     "script:exclude-test-files-for-backwards-compat": "node --experimental-strip-types scripts/exclude-test-files-for-backwards-compat.mts",
-    "prepublishOnly": "pnpm build && pnpm test:exports",
-    "version": "pnpm script:align-site-version && git add ."
+    "prepublishOnly": "pnpm build",
+    "version": "pnpm script:align-site-version && git add .",
+    "prepack": "pnpm build",
+    "postpack": "echo 'Package ready for npm publish'",
+    "publish:dry-run": "pnpm build && npm pack --dry-run",
+    "publish:check": "pnpm build && npm publish --dry-run"
   },
-  "author": "Sami Koskimäki <sami@jakso.me>",
+  "author": "NOORMME Team",
   "license": "MIT",
-  "contributors": [
-    "Sami Koskimäki <sami@jakso.me>",
-    "Igal Klebanov <igalklebanov@gmail.com>"
-  ],
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
     "@ark/attest": "^0.49.0",
@@ -131,7 +142,9 @@
     "commander": "^11.0.0",
     "dotenv": "^16.4.5",
     "glob": "^11.0.3",
-    "inquirer": "^9.0.0"
+    "inquirer": "^9.0.0",
+    "better-sqlite3": "^12.4.1",
+    "kysely": "^0.27.4"
   },
   "bin": {
     "noormme": "./dist/cjs/cli/index.js"

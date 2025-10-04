@@ -1,5 +1,8 @@
 # NOORMME - The NO-ORM for Normies
 
+![npm](https://img.shields.io/npm/v/noormme)
+![downloads](https://img.shields.io/npm/dm/noormme)
+
 > **SQLite automation so simple, even normies can use it. Because who needs an ORM when you can have NO-ORM?**
 
 **NOORMME** (pronounced "normie") is the anti-ORM ORM - it's **NO**t an **ORM**, it's better. While traditional ORMs force you to learn complex abstractions and fight with your database, NOORMME gets out of your way and automates everything. Built on Kysely's type-safe foundation, NOORMME is database automation for the rest of us.
@@ -653,7 +656,7 @@ We welcome contributions to make SQLite automation even better!
 ### Development Setup
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/noormme.git
+git clone https://github.com/cardsorting/noormme.git
 cd noormme
 
 # Install dependencies

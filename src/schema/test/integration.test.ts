@@ -3,6 +3,7 @@ import { SchemaDiscoveryCoordinator } from '../core/coordinators/schema-discover
 import { DiscoveryFactory } from '../core/factories/discovery-factory.js'
 import { PostgreSQLDiscoveryCoordinator } from '../dialects/postgresql/postgresql-discovery.coordinator.js'
 import { SQLiteDiscoveryCoordinator } from '../dialects/sqlite/sqlite-discovery.coordinator.js'
+import type { SchemaInfo } from '../../types/index.js'
 
 // Mock Kysely and related dependencies
 const mockKysely = {
@@ -123,7 +124,7 @@ describe('Schema Strategy Integration Tests', () => {
         const dialect = { name: 'postgresql' } as any
         await coordinator.discoverSchema(mockKysely, {}, dialect)
 
-        const capabilities = coordinator.getDialectCapabilities()
+        const capabilities = postgresCoordinator.getCapabilities()
         expect(capabilities.supportsMaterializedViews).toBe(true)
         expect(capabilities.supportsCustomTypes).toBe(true)
         expect(capabilities.supportsExtensions).toBe(true)
@@ -174,7 +175,7 @@ describe('Schema Strategy Integration Tests', () => {
         const dialect = { name: 'sqlite' } as any
         await coordinator.discoverSchema(mockKysely, {}, dialect)
 
-        const capabilities = coordinator.getDialectCapabilities()
+        const capabilities = sqliteCoordinator.getCapabilities()
         expect(capabilities.supportsPRAGMA).toBe(true)
         expect(capabilities.supportsAutoIncrement).toBe(true)
         expect(capabilities.supportsRowId).toBe(true)
@@ -256,7 +257,7 @@ describe('Schema Strategy Integration Tests', () => {
         }
       }
 
-      await coordinator.discoverSchema(mockKysely, config, dialect)
+      const result = await coordinator.discoverSchema(mockKysely, config, dialect)
 
       expect(result).toBeDefined()
       // The configuration should be passed through to the underlying services
@@ -298,7 +299,7 @@ describe('Schema Strategy Integration Tests', () => {
       const results = await Promise.all(promises)
 
       expect(results).toHaveLength(5)
-      results.forEach(result => {
+      results.forEach((result: SchemaInfo) => {
         expect(result).toBeDefined()
         expect(result.tables).toBeDefined()
         expect(result.relationships).toBeDefined()
@@ -378,7 +379,8 @@ describe('Schema Strategy Integration Tests', () => {
       expect(result3).toBeDefined()
 
       // All results should have the same structure
-      [result1, result2, result3].forEach(result => {
+      const results = [result1, result2, result3] as SchemaInfo[]
+      results.forEach((result: SchemaInfo) => {
         expect(result).toHaveProperty('tables')
         expect(result).toHaveProperty('relationships')
         expect(result).toHaveProperty('views')

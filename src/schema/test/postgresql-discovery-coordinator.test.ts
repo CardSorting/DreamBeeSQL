@@ -243,18 +243,15 @@ describe('PostgreSQLDiscoveryCoordinator', () => {
       expect(result.tables[0]).toMatchObject({
         name: 'users',
         indexes: [], // Should be empty due to error
-        constraints: [],
         foreignKeys: []
       })
-    })
 
-    it('should handle constraint discovery errors gracefully', async () => {
       mockConstraintDiscovery.discoverTableConstraints.mockRejectedValue(new Error('Constraint discovery failed'))
 
-      const result = await coordinator.discoverSchema(mockKysely, {})
+      const result2 = await coordinator.discoverSchema(mockKysely, {})
 
-      expect(result.tables).toHaveLength(2)
-      expect(result.tables[0].constraints).toEqual([])
+      expect(result2.tables).toHaveLength(2)
+      expect(result2.tables[0].foreignKeys).toEqual([])
     })
   })
 
@@ -282,8 +279,8 @@ describe('PostgreSQLDiscoveryCoordinator', () => {
   describe('Recommendations', () => {
     it('should provide PostgreSQL-specific recommendations', async () => {
       const tables = [
-        { name: 'users', indexes: [], constraints: [] },
-        { name: 'posts', indexes: [], constraints: [] }
+        { name: 'users', indexes: [], foreignKeys: [] },
+        { name: 'posts', indexes: [], foreignKeys: [] }
       ]
 
       const recommendations = await coordinator.getRecommendations(mockKysely, tables)
@@ -304,7 +301,7 @@ describe('PostgreSQLDiscoveryCoordinator', () => {
 
     it('should handle recommendation errors gracefully', async () => {
       mockIndexDiscovery.discoverTableIndexes.mockRejectedValue(new Error('Index analysis failed'))
-      const tables = [{ name: 'users', indexes: [], constraints: [] }]
+      const tables = [{ name: 'users', indexes: [], foreignKeys: [] }]
 
       const recommendations = await coordinator.getRecommendations(mockKysely, tables)
 

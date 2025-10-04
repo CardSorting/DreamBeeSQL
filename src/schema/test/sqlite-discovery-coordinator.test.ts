@@ -251,7 +251,6 @@ describe('SQLiteDiscoveryCoordinator', () => {
       expect(result.tables[0]).toMatchObject({
         name: 'users',
         indexes: [],
-        constraints: [],
         foreignKeys: [],
         tableSize: undefined
       })
@@ -263,7 +262,7 @@ describe('SQLiteDiscoveryCoordinator', () => {
       const result = await coordinator.discoverSchema(mockKysely, {})
 
       expect(result.tables).toHaveLength(2)
-      expect(result.tables[0].constraints).toEqual([])
+      expect(result.tables[0].foreignKeys).toEqual([])
     })
   })
 
@@ -294,8 +293,8 @@ describe('SQLiteDiscoveryCoordinator', () => {
   describe('Recommendations', () => {
     it('should provide SQLite-specific recommendations', async () => {
       const tables = [
-        { name: 'users', primaryKey: ['id'], indexes: [], constraints: [] },
-        { name: 'posts', primaryKey: ['id'], indexes: [], constraints: [] }
+        { name: 'users', primaryKey: ['id'], indexes: [], foreignKeys: [] },
+        { name: 'posts', primaryKey: ['id'], indexes: [], foreignKeys: [] }
       ]
 
       const recommendations = await coordinator.getRecommendations(mockKysely, tables)
@@ -313,7 +312,7 @@ describe('SQLiteDiscoveryCoordinator', () => {
 
     it('should recommend enabling foreign keys when disabled', async () => {
       mockConstraintDiscovery.isForeignKeySupportEnabled.mockResolvedValue(false)
-      const tables = [{ name: 'users', primaryKey: ['id'], indexes: [], constraints: [] }]
+      const tables = [{ name: 'users', primaryKey: ['id'], indexes: [], foreignKeys: [] }]
 
       const recommendations = await coordinator.getRecommendations(mockKysely, tables)
 
@@ -322,8 +321,8 @@ describe('SQLiteDiscoveryCoordinator', () => {
 
     it('should recommend primary key for tables without one', async () => {
       const tables = [
-        { name: 'users', primaryKey: [], indexes: [], constraints: [] },
-        { name: 'posts', primaryKey: ['id'], indexes: [], constraints: [] }
+        { name: 'users', primaryKey: [], indexes: [], foreignKeys: [] },
+        { name: 'posts', primaryKey: ['id'], indexes: [], foreignKeys: [] }
       ]
 
       const recommendations = await coordinator.getRecommendations(mockKysely, tables)
@@ -333,7 +332,7 @@ describe('SQLiteDiscoveryCoordinator', () => {
 
     it('should handle recommendation errors gracefully', async () => {
       mockIndexDiscovery.discoverTableIndexes.mockRejectedValue(new Error('Index analysis failed'))
-      const tables = [{ name: 'users', primaryKey: ['id'], indexes: [], constraints: [] }]
+      const tables = [{ name: 'users', primaryKey: ['id'], indexes: [], foreignKeys: [] }]
 
       const recommendations = await coordinator.getRecommendations(mockKysely, tables)
 

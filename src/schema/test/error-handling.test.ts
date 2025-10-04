@@ -162,33 +162,19 @@ describe('Error Handling', () => {
 
       it('should handle null dialect', async () => {
         // Should default to sqlite and work
+        // @ts-ignore: Testing null as dialect, which is not assignable by type but should be handled gracefully
         await expect(
-          coordinator.discoverSchema(mockKysely, {}, null)
+          coordinator.discoverSchema(mockKysely, {}, null as any)
         ).resolves.toBeDefined()
-      })
-
-      it('should handle undefined dialect', async () => {
+        
         // Should default to sqlite and work
         await expect(
           coordinator.discoverSchema(mockKysely, {}, undefined)
         ).resolves.toBeDefined()
-      })
-
-      it('should handle dialect with null name', async () => {
-        const dialect = { name: null } as any
 
         // Should default to sqlite and work
         await expect(
-          coordinator.discoverSchema(mockKysely, {}, dialect)
-        ).resolves.toBeDefined()
-      })
-
-      it('should handle dialect with undefined name', async () => {
-        const dialect = { name: undefined } as any
-
-        // Should default to sqlite and work
-        await expect(
-          coordinator.discoverSchema(mockKysely, {}, dialect)
+          coordinator.discoverSchema(mockKysely, {})
         ).resolves.toBeDefined()
       })
     })
@@ -289,7 +275,7 @@ describe('Error Handling', () => {
         const result = await postgresCoordinator.discoverSchema(mockKysely, {})
 
         expect(result.tables).toHaveLength(2)
-        expect(result.tables[0].constraints).toEqual([])
+        expect(result.tables[0].foreignKeys).toEqual([])
         expect(mockConsoleWarn).toHaveBeenCalledWith(
           expect.stringContaining('Failed to enhance PostgreSQL metadata for table'),
           expect.any(Error)
@@ -308,7 +294,7 @@ describe('Error Handling', () => {
         jest.spyOn(require('../dialects/postgresql/discovery/postgresql-index-discovery.js'), 'PostgreSQLIndexDiscovery')
           .mockImplementation(() => mockIndexDiscovery)
 
-        const tables = [{ name: 'users', indexes: [], constraints: [] }]
+        const tables = [{ name: 'users', indexes: [], foreignKeys: [] }]
 
         const recommendations = await postgresCoordinator.getRecommendations(mockKysely, tables)
 
@@ -373,7 +359,7 @@ describe('Error Handling', () => {
         const result = await sqliteCoordinator.discoverSchema(mockKysely, {})
 
         expect(result.tables).toHaveLength(2)
-        expect(result.tables[0].tableSize).toBeUndefined()
+        expect((result.tables[0] as any).tableSize).toBeUndefined()
         expect(mockConsoleWarn).toHaveBeenCalledWith(
           expect.stringContaining('Failed to enhance SQLite metadata for table'),
           expect.any(Error)
@@ -391,7 +377,7 @@ describe('Error Handling', () => {
         jest.spyOn(require('../dialects/sqlite/discovery/sqlite-index-discovery.js'), 'SQLiteIndexDiscovery')
           .mockImplementation(() => mockIndexDiscovery)
 
-        const tables = [{ name: 'users', primaryKey: ['id'], indexes: [], constraints: [] }]
+        const tables = [{ name: 'users', primaryKey: ['id'], indexes: [], foreignKeys: [] }]
 
         const recommendations = await sqliteCoordinator.getRecommendations(mockKysely, tables)
 

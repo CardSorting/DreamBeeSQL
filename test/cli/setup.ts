@@ -96,10 +96,10 @@ global.createMockNOORMME = () => {
   const mockSchemaInfo = global.createMockSchemaInfo()
   
   return {
-    initialize: jest.fn().mockResolvedValue(undefined),
-    close: jest.fn().mockResolvedValue(undefined),
-    getSchemaInfo: jest.fn().mockResolvedValue(mockSchemaInfo),
-    getSQLiteOptimizations: jest.fn().mockResolvedValue({
+    initialize: jest.fn(() => Promise.resolve(undefined)),
+    close: jest.fn(() => Promise.resolve(undefined)),
+    getSchemaInfo: jest.fn(() => Promise.resolve(mockSchemaInfo)),
+    getSQLiteOptimizations: jest.fn(() => Promise.resolve({
       appliedOptimizations: [
         'Enabled WAL mode',
         'Set cache size to 64MB',
@@ -112,14 +112,14 @@ global.createMockNOORMME = () => {
       journalMode: 'WAL',
       synchronous: 'NORMAL',
       cacheSize: -64000
-    }),
-    getSQLiteIndexRecommendations: jest.fn().mockResolvedValue({
+    })),
+    getSQLiteIndexRecommendations: jest.fn(() => Promise.resolve({
       recommendations: [
         { table: 'users', column: 'created_at', reason: 'Frequently queried for sorting', impact: 'high' },
         { table: 'posts', column: 'created_at', reason: 'Used in date range queries', impact: 'medium' }
       ]
-    }),
-    getSQLitePerformanceMetrics: jest.fn().mockResolvedValue({
+    })),
+    getSQLitePerformanceMetrics: jest.fn(() => Promise.resolve({
       cacheHitRate: 0.85,
       averageQueryTime: 45.2,
       totalQueries: 1250,
@@ -132,19 +132,19 @@ global.createMockNOORMME = () => {
       autoVacuum: 'INCREMENTAL',
       journalMode: 'WAL',
       synchronous: 'NORMAL'
-    }),
-    applySQLiteOptimizations: jest.fn().mockResolvedValue({
+    })),
+    applySQLiteOptimizations: jest.fn(() => Promise.resolve({
       appliedOptimizations: ['Enabled WAL mode', 'Set optimal cache size'],
       warnings: []
-    }),
-    applySQLiteIndexRecommendations: jest.fn().mockResolvedValue([
+    })),
+    applySQLiteIndexRecommendations: jest.fn(() => Promise.resolve([
       { table: 'users', column: 'created_at' },
       { table: 'posts', column: 'created_at' }
-    ]),
-    runSQLiteAnalyze: jest.fn().mockResolvedValue(undefined),
-    enableSQLiteWALMode: jest.fn().mockResolvedValue(undefined),
-    getQueryAnalyzer: jest.fn().mockReturnValue({
-      getQueryPatterns: jest.fn().mockReturnValue({
+    ])),
+    runSQLiteAnalyze: jest.fn(() => Promise.resolve(undefined)),
+    enableSQLiteWALMode: jest.fn(() => Promise.resolve(undefined)),
+    getQueryAnalyzer: jest.fn(() => ({
+      getQueryPatterns: jest.fn(() => ({
         totalQueries: 100,
         uniquePatterns: 25,
         averageExecutionTime: 45.2,
@@ -158,34 +158,34 @@ global.createMockNOORMME = () => {
         nPlusOneQueries: [
           { description: 'User posts query without join', occurrences: 5 }
         ]
-      })
-    }),
-    getSlowQueries: jest.fn().mockResolvedValue([
+      }))
+    })),
+    getSlowQueries: jest.fn(() => Promise.resolve([
       {
         sql: 'SELECT * FROM users ORDER BY created_at DESC',
         executionTime: 1500,
         suggestions: ['Add index on created_at column', 'Consider pagination']
       }
-    ]),
-    getKysely: jest.fn().mockReturnValue({
+    ])),
+    getKysely: jest.fn(() => ({
       selectFrom: jest.fn().mockReturnThis(),
       selectAll: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
       limit: jest.fn().mockReturnThis(),
-      execute: jest.fn().mockResolvedValue([])
-    }),
-    getRepository: jest.fn().mockReturnValue({
-      findById: jest.fn().mockResolvedValue({ id: 1, name: 'Test User' }),
-      findAll: jest.fn().mockResolvedValue([{ id: 1, name: 'Test User' }]),
-      create: jest.fn().mockResolvedValue({ id: 1, name: 'Test User' }),
-      update: jest.fn().mockResolvedValue({ id: 1, name: 'Updated User' }),
-      delete: jest.fn().mockResolvedValue(true),
-      count: jest.fn().mockResolvedValue(1),
-      exists: jest.fn().mockResolvedValue(true)
-    }),
-    getMigrationManager: jest.fn().mockReturnValue({
-      getMigrationStatus: jest.fn().mockResolvedValue({
+      execute: jest.fn(() => Promise.resolve([]))
+    })),
+    getRepository: jest.fn(() => ({
+      findById: jest.fn(() => Promise.resolve({ id: 1, name: 'Test User' })),
+      findAll: jest.fn(() => Promise.resolve([{ id: 1, name: 'Test User' }])),
+      create: jest.fn(() => Promise.resolve({ id: 1, name: 'Test User' })),
+      update: jest.fn(() => Promise.resolve({ id: 1, name: 'Updated User' })),
+      delete: jest.fn(() => Promise.resolve(true)),
+      count: jest.fn(() => Promise.resolve(1)),
+      exists: jest.fn(() => Promise.resolve(true))
+    })),
+    getMigrationManager: jest.fn(() => ({
+      getMigrationStatus: jest.fn(() => Promise.resolve({
         currentVersion: '001',
         appliedMigrations: [
           { version: '001', name: 'initial_schema', appliedAt: '2024-01-01T00:00:00Z' }
@@ -194,28 +194,28 @@ global.createMockNOORMME = () => {
         availableMigrations: [
           { version: '001', name: 'initial_schema' }
         ]
-      }),
-      generateMigration: jest.fn().mockResolvedValue({
+      })),
+      generateMigration: jest.fn(() => Promise.resolve({
         fileName: '001_initial_schema.ts',
         filePath: '/tmp/migrations/001_initial_schema.ts',
         description: 'Initial database schema',
         content: 'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);'
-      }),
-      migrateToLatest: jest.fn().mockResolvedValue({
+      })),
+      migrateToLatest: jest.fn(() => Promise.resolve({
         migrationsApplied: [],
         migrationsRolledBack: [],
         currentVersion: '001'
-      }),
-      migrateToVersion: jest.fn().mockResolvedValue({
+      })),
+      migrateToVersion: jest.fn(() => Promise.resolve({
         migrationsApplied: [],
         migrationsRolledBack: [],
         currentVersion: '001'
-      }),
-      rollbackLastMigration: jest.fn().mockResolvedValue({
+      })),
+      rollbackLastMigration: jest.fn(() => Promise.resolve({
         success: false,
         migration: null,
         currentVersion: '001'
-      })
-    })
+      }))
+    }))
   }
 }

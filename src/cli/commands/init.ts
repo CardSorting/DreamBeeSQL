@@ -5,54 +5,53 @@ import chalk from 'chalk'
 import { NOORMConfig } from '../../types/index.js'
 
 export async function init(options: {
-  dialect?: string
-  connection?: string
+  database?: string
   output?: string
   force?: boolean
+  autoOptimize?: boolean
+  autoIndex?: boolean
 }) {
-  console.log(chalk.blue.bold('\n🎯 NOORMME Initialization\n'))
-  console.log(chalk.gray('Setting up NOORMME in your project...\n'))
+  console.log(chalk.blue.bold('\n🎯 NOORMME Zero-Configuration Setup\n'))
+  console.log(chalk.gray('Setting up NOORMME with complete SQLite automation...\n'))
 
   try {
-    let config: Partial<NOORMConfig> = {}
-
-    // Interactive prompts if not provided via options
-    if (!options.dialect) {
-      const answers = await inquirer.prompt([
-        {
-          type: 'list',
-          name: 'dialect',
-          message: 'Which database are you using?',
-          choices: [
-            { name: 'SQLite', value: 'sqlite' },
-          ],
-        },
-      ])
-      config.dialect = answers.dialect
+    // Get database path
+    const databasePath = options.database || './database.sqlite'
+    
+    console.log(chalk.blue('🔍 Detecting existing SQLite database...'))
+    
+    // Check if database exists
+    const dbExists = await checkDatabaseExists(databasePath)
+    
+    if (dbExists) {
+      console.log(chalk.green(`✅ Found existing database: ${databasePath}`))
+      console.log(chalk.gray('NOORMME will automatically discover your schema and optimize performance\n'))
     } else {
-      config.dialect = options.dialect as NOORMConfig['dialect']
+      console.log(chalk.yellow(`⚠️ Database not found: ${databasePath}`))
+      console.log(chalk.gray('NOORMME will create the database and set up automation when you first use it\n'))
     }
 
-    // Get connection string
-    let connectionString = options.connection
-    if (!connectionString) {
-      const answers = await inquirer.prompt([
+    // Interactive setup for automation options
+    let autoOptimize = options.autoOptimize !== false // Default to true
+    let autoIndex = options.autoIndex !== false // Default to true
+    
+    if (options.autoOptimize === undefined && options.autoIndex === undefined) {
+      const automationAnswers = await inquirer.prompt([
         {
-          type: 'input',
-          name: 'connection',
-          message: 'Database connection string:',
-          default: getDefaultConnectionString(config.dialect!),
-          when: config.dialect !== 'sqlite',
+          type: 'confirm',
+          name: 'autoOptimize',
+          message: 'Enable automatic SQLite performance optimization?',
+          default: true,
         },
         {
-          type: 'input',
-          name: 'connection',
-          message: 'SQLite database file path:',
-          default: './database.sqlite',
-          when: config.dialect === 'sqlite',
+          type: 'confirm',
+          name: 'autoIndex',
+          message: 'Enable intelligent index recommendations?',
+          default: true,
         },
       ])
-      connectionString = answers.connection || getDefaultConnectionString(config.dialect!)
+      autoOptimize = automationAnswers.autoOptimize
+      autoIndex = automationAnswers.autoIndex
     }
 
     // Confirm setup
@@ -60,7 +59,7 @@ export async function init(options: {
       {
         type: 'confirm',
         name: 'proceed',
-        message: `Ready to initialize NOORMME with ${config.dialect}?`,
+        message: `Ready to initialize NOORMME with complete automation?`,
         default: true,
       },
     ])
@@ -70,20 +69,33 @@ export async function init(options: {
       return
     }
 
-    // Generate files
+    // Generate files with automation focus
     const outputDir = options.output || 'lib'
-    await generateDbFile(config.dialect!, connectionString || '', outputDir, options.force)
-    await generateEnvExample(connectionString || '')
-    await generateReadme(config.dialect!)
+    await generateDbFile(databasePath, outputDir, options.force, autoOptimize, autoIndex)
+    await generateEnvExample(databasePath)
+    await generateAutomationConfig(databasePath, autoOptimize, autoIndex)
+    await generateReadme()
     await generatePackageScripts()
 
-    console.log(chalk.green.bold('\n✅ NOORMME initialized successfully!\n'))
-    console.log(chalk.blue('Next steps:'))
-    console.log(chalk.gray('1. Review the generated files'))
-    console.log(chalk.gray('2. Update your .env file with the correct DATABASE_URL'))
-    console.log(chalk.gray('3. Run: npm run dev (or your development command)\n'))
+    console.log(chalk.green.bold('\n✅ NOORMME initialized with complete automation!\n'))
+    console.log(chalk.blue('🚀 What NOORMME will do automatically:'))
+    console.log(chalk.gray('✅ Discover your existing database schema'))
+    console.log(chalk.gray('✅ Generate TypeScript types with full type safety'))
+    console.log(chalk.gray('✅ Create repository classes with intelligent CRUD methods'))
+    console.log(chalk.gray('✅ Optimize SQLite performance with PRAGMA settings'))
+    console.log(chalk.gray('✅ Recommend indexes based on your query patterns'))
+    console.log(chalk.gray('✅ Validate and fix foreign key constraints\n'))
 
-    console.log(chalk.yellow('Pro tip: Use "npx noormme inspect" to explore your database schema!'))
+    console.log(chalk.blue('📋 Next steps:'))
+    console.log(chalk.gray('1. Run: npx noormme inspect (to explore your database)'))
+    console.log(chalk.gray('2. Run: npx noormme generate (to create TypeScript types)'))
+    console.log(chalk.gray('3. Run: npx noormme optimize (to optimize performance)'))
+    console.log(chalk.gray('4. Start using auto-generated repositories in your code\n'))
+
+    console.log(chalk.yellow('💡 Pro tips:'))
+    console.log(chalk.gray('• Use "npx noormme watch" for continuous optimization'))
+    console.log(chalk.gray('• Run "npx noormme status" to monitor automation'))
+    console.log(chalk.gray('• Point NOORMME at your existing database - zero setup required!'))
 
   } catch (error) {
     console.error(chalk.red('❌ Initialization failed:'), error instanceof Error ? error.message : error)
@@ -91,20 +103,21 @@ export async function init(options: {
   }
 }
 
-function getDefaultConnectionString(dialect: string): string {
-  switch (dialect) {
-    case 'sqlite':
-      return 'sqlite:./database.sqlite'
-    default:
-      return 'sqlite:./database.sqlite'
+async function checkDatabaseExists(databasePath: string): Promise<boolean> {
+  try {
+    await fs.access(databasePath)
+    return true
+  } catch {
+    return false
   }
 }
 
 async function generateDbFile(
-  dialect: string,
-  connectionString: string,
+  databasePath: string,
   outputDir: string,
-  force?: boolean
+  force?: boolean,
+  autoOptimize?: boolean,
+  autoIndex?: boolean
 ): Promise<void> {
   const dbFilePath = path.join(outputDir, 'db.ts')
 
@@ -129,44 +142,74 @@ async function generateDbFile(
     // File doesn't exist, safe to create
   }
 
-  const dbFileContent = `import { NOORMME } from 'noorm'
+  const dbFileContent = `import { NOORMME } from 'noormme'
 
-// Initialize NOORMME with auto-loading from .env
-// Make sure to set DATABASE_URL in your .env file
-export const db = new NOORMME()
+// NOORMME with complete SQLite automation
+// Automatically discovers schema, generates types, and optimizes performance
+export const db = new NOORMME({
+  dialect: 'sqlite',
+  connection: { database: '${databasePath}' },
+  
+  // Complete automation enabled
+  performance: {
+    enableAutoOptimization: ${autoOptimize},
+    enableQueryOptimization: true,
+    enableAutoIndexing: ${autoIndex},
+    enableCaching: true,
+    enableBatchOperations: true,
+    maxCacheSize: 1000
+  },
 
-// Alternative: Pass connection string directly
-// export const db = new NOORMME('${connectionString}')
+  // SQLite-specific optimizations
+  sqlite: {
+    enableWALMode: true,
+    enableForeignKeys: true,
+    cacheSize: -64000, // 64MB
+    synchronous: 'NORMAL',
+    tempStore: 'MEMORY',
+    autoVacuumMode: 'INCREMENTAL'
+  },
 
-// Alternative: Use full config object
-// export const db = new NOORMME({
-//   dialect: '${dialect}',
-//   connection: {
-//     host: 'localhost',
-//     port: ${getDefaultPort(dialect)},
-//     database: 'your_database',
-//     username: 'your_username',
-//     password: 'your_password',
-//   },
-//   logging: {
-//     enabled: true,
-//     level: 'info'
-//   },
-//   cache: {
-//     ttl: 300000, // 5 minutes
-//     maxSize: 1000
-//   }
-// })
+  // Logging for development
+  logging: {
+    enabled: process.env.NODE_ENV !== 'production',
+    level: 'info',
+    includeQueryTime: true
+  }
+})
 
-// Initialize the database connection
+// Initialize with complete automation
 export async function initializeDatabase() {
   await db.initialize()
-  console.log('✅ Database initialized with NOORMME')
+  console.log('🎉 NOORMME initialized with complete SQLite automation!')
+  console.log('✅ Schema discovered automatically')
+  console.log('✅ Types generated automatically')
+  console.log('✅ Performance optimized automatically')
 }
 
-// Get a repository for any table
+// Get a repository for any table (auto-generated)
 export function getRepository<T>(tableName: string) {
   return db.getRepository<T>(tableName)
+}
+
+// Get Kysely instance for complex queries
+export function getKysely() {
+  return db.getKysely()
+}
+
+// Performance monitoring
+export async function getPerformanceMetrics() {
+  return await db.getSQLitePerformanceMetrics()
+}
+
+// Get optimization recommendations
+export async function getOptimizationRecommendations() {
+  return await db.getSQLiteIndexRecommendations()
+}
+
+// Apply optimizations
+export async function applyOptimizations() {
+  return await db.applySQLiteOptimizations()
 }
 
 // Close database connections
@@ -181,9 +224,9 @@ export async function closeDatabase() {
   console.log(chalk.green(`✓ Created: ${dbFilePath}`))
 }
 
-async function generateEnvExample(connectionString: string): Promise<void> {
-  const envContent = `# Database Configuration
-DATABASE_URL="${connectionString}"
+async function generateEnvExample(databasePath: string): Promise<void> {
+  const envContent = `# NOORMME SQLite Configuration
+DATABASE_PATH="${databasePath}"
 
 # Optional: Enable debug logging
 # LOG_LEVEL=debug
@@ -191,6 +234,10 @@ DATABASE_URL="${connectionString}"
 # Optional: Cache configuration
 # CACHE_TTL=300000
 # CACHE_MAX_SIZE=1000
+
+# Optional: Automation settings
+# AUTO_OPTIMIZE=true
+# AUTO_INDEX=true
 `
 
   await fs.writeFile('.env.example', envContent)
@@ -206,94 +253,211 @@ DATABASE_URL="${connectionString}"
   }
 }
 
-async function generateReadme(dialect: string): Promise<void> {
-  const readmeContent = `# NOORMME Setup
+async function generateAutomationConfig(databasePath: string, autoOptimize: boolean, autoIndex: boolean): Promise<void> {
+  const configContent = `// NOORMME Automation Configuration
+// This file contains the automation settings for your project
 
-This project uses NOORMME (No ORM, just magic!) for database access.
+export const noormmeConfig = {
+  database: '${databasePath}',
+  
+  // Complete automation settings
+  automation: {
+    autoOptimize: ${autoOptimize},
+    autoIndex: ${autoIndex},
+    enableQueryAnalysis: true,
+    enablePerformanceMonitoring: true,
+    enableSchemaWatcher: false // Set to true for development
+  },
+
+  // Performance settings
+  performance: {
+    enableCaching: true,
+    maxCacheSize: 1000,
+    slowQueryThreshold: 1000,
+    enableBatchOperations: true
+  },
+
+  // SQLite optimizations
+  sqlite: {
+    enableWALMode: true,
+    enableForeignKeys: true,
+    cacheSize: -64000, // 64MB
+    synchronous: 'NORMAL',
+    tempStore: 'MEMORY',
+    autoVacuumMode: 'INCREMENTAL'
+  }
+}
+
+// Usage example:
+// import { NOORMME } from 'noormme'
+// import { noormmeConfig } from './automation.config'
+// 
+// const db = new NOORMME({
+//   dialect: 'sqlite',
+//   connection: { database: noormmeConfig.database },
+//   ...noormmeConfig
+// })
+`
+
+  await fs.writeFile('automation.config.ts', configContent)
+  console.log(chalk.green('✓ Created: automation.config.ts'))
+}
+
+async function generateReadme(): Promise<void> {
+  const readmeContent = `# NOORMME - Complete SQLite Automation
+
+This project uses NOORMME (No ORM, just magic!) for complete SQLite automation.
+
+## 🚀 What NOORMME Does Automatically
+
+✅ **Schema Discovery**: Automatically introspects your existing SQLite database  
+✅ **Type Generation**: Creates TypeScript types with full type safety  
+✅ **Repository Creation**: Generates optimized CRUD repositories with intelligent methods  
+✅ **Performance Optimization**: Continuously optimizes SQLite with PRAGMA settings  
+✅ **Index Management**: Recommends and manages indexes based on query patterns  
+✅ **Migration Automation**: Handles schema changes with intelligent strategies  
 
 ## Quick Start
 
 \`\`\`typescript
 import { db, initializeDatabase } from './lib/db'
 
-// Initialize the database
+// Initialize with complete automation
 await initializeDatabase()
 
-// Get a repository for any table
+// Get auto-generated repository for any table
 const userRepo = db.getRepository('users')
 
-// Use the repository
+// Use intelligent CRUD methods
 const users = await userRepo.findAll()
 const user = await userRepo.findById(1)
+const activeUsers = await userRepo.findManyByStatus('active')
 
-// Create new records
+// Type-safe operations
 const newUser = await userRepo.create({
   name: 'John Doe',
   email: 'john@example.com'
 })
 
-// Pagination
-const result = await userRepo.paginate({
-  page: 1,
-  limit: 10,
-  where: { active: true },
-  orderBy: { column: 'created_at', direction: 'desc' }
-})
-
-// Count relationships
-const userWithCounts = await userRepo.withCount(1, ['posts', 'comments'])
-// Returns: { id: 1, name: '...', postsCount: 5, commentsCount: 12 }
+// Complex queries with Kysely
+const kysely = db.getKysely()
+const result = await kysely
+  .selectFrom('users')
+  .innerJoin('posts', 'posts.user_id', 'users.id')
+  .select(['users.name', 'posts.title'])
+  .where('users.status', '=', 'active')
+  .execute()
 \`\`\`
 
 ## CLI Commands
 
 \`\`\`bash
-# Inspect database schema
-npx noormme inspect
+# Zero-config setup
+npx noormme init
 
-# Inspect specific table
-npx noormme inspect users
+# Inspect database with automation insights
+npx noormme inspect --optimizations
 
-# Generate TypeScript types
-npx noormme generate --output ./types/database.d.ts
+# Generate TypeScript types and repositories
+npx noormme generate
+
+# Optimize SQLite performance automatically
+npx noormme optimize
+
+# Analyze query patterns and get recommendations
+npx noormme analyze --report
+
+# Manage migrations with automation
+npx noormme migrate --latest
+
+# Monitor schema changes and auto-optimize
+npx noormme watch --auto-optimize
+
+# Check automation status and metrics
+npx noormme status
 \`\`\`
 
 ## Configuration
 
-Update your \`.env\` file with the correct database connection:
+Your \`.env\` file is already configured:
 
 \`\`\`
-DATABASE_URL="${getDefaultConnectionString(dialect)}"
+DATABASE_PATH="./database.sqlite"
+AUTO_OPTIMIZE=true
+AUTO_INDEX=true
 \`\`\`
 
-## Available Methods
+## Available Repository Methods
 
 Every repository automatically includes:
 
+### Basic CRUD
 - \`findById(id)\` - Find by primary key
 - \`findAll()\` - Get all records
 - \`create(data)\` - Create new record
-- \`update(entity)\` - Update existing record
+- \`update(id, data)\` - Update existing record
 - \`delete(id)\` - Delete by primary key
+
+### Advanced Features
 - \`count()\` - Count total records
 - \`exists(id)\` - Check if record exists
-- \`paginate(options)\` - Paginated results
-- \`withCount(id, relations)\` - Count related records
-- Dynamic finders: \`findByColumnName(value)\`
-- Dynamic list finders: \`findManyByColumnName(value)\`
+- \`paginate(options)\` - Paginated results with sorting and filtering
+
+### Dynamic Finders
+- \`findByEmail(email)\` - Find by any column
+- \`findManyByStatus(status)\` - Find multiple by any column
+
+### Performance Monitoring
+- \`getPerformanceMetrics()\` - Get SQLite performance data
+- \`getOptimizationRecommendations()\` - Get index recommendations
+- \`applyOptimizations()\` - Apply performance optimizations
+
+## Automation Features
+
+### Performance Optimization
+- Automatic PRAGMA optimization
+- WAL mode for better concurrency
+- Intelligent cache sizing
+- Foreign key constraint validation
+
+### Index Management
+- Query pattern analysis
+- Automatic index recommendations
+- Performance impact assessment
+- Smart index creation
+
+### Schema Monitoring
+- Real-time schema change detection
+- Automatic optimization triggers
+- Migration recommendations
+- Performance degradation alerts
 
 ## Error Handling
 
-NOORMME provides enhanced error messages with context:
+NOORMME provides intelligent error messages with actionable suggestions:
 
 \`\`\`typescript
 try {
   await userRepo.findByInvalidColumn('test')
 } catch (error) {
-  // NoormError with helpful suggestions
+  // Enhanced error with suggestions
   console.log(error.getFormattedMessage())
+  // Output: Column 'invalid_column' not found. Did you mean 'email'?
 }
 \`\`\`
+
+## Pro Tips
+
+- Point NOORMME at your existing SQLite database - zero setup required!
+- Use \`npx noormme watch\` during development for continuous optimization
+- Check \`npx noormme status\` regularly to monitor automation effectiveness
+- Run \`npx noormme analyze --report\` for detailed performance insights
+
+## Learn More
+
+- [NOORMME Documentation](https://github.com/cardsorting/noormme)
+- [SQLite Optimization Guide](https://www.sqlite.org/optoverview.html)
+- [Kysely Query Builder](https://github.com/koskimas/kysely)
 `
 
   await fs.writeFile('NOORMME_README.md', readmeContent)
@@ -313,8 +477,14 @@ async function generatePackageScripts(): Promise<void> {
     }
 
     const noormmeScripts = {
+      'db:init': 'noormme init',
       'db:inspect': 'noormme inspect',
-      'db:generate-types': 'noormme generate',
+      'db:generate': 'noormme generate',
+      'db:optimize': 'noormme optimize',
+      'db:analyze': 'noormme analyze --report',
+      'db:migrate': 'noormme migrate --latest',
+      'db:watch': 'noormme watch --auto-optimize',
+      'db:status': 'noormme status'
     }
 
     let hasChanges = false
@@ -327,16 +497,9 @@ async function generatePackageScripts(): Promise<void> {
 
     if (hasChanges) {
       await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
-      console.log(chalk.green('✓ Updated: package.json (added NOORMME scripts)'))
+      console.log(chalk.green('✓ Updated: package.json (added NOORMME automation scripts)'))
     }
   } catch {
     console.log(chalk.yellow('Note: Could not update package.json scripts automatically'))
-  }
-}
-
-function getDefaultPort(dialect: string): number {
-  switch (dialect) {
-    case 'sqlite': return 0
-    default: return 0
   }
 }

@@ -4,47 +4,90 @@ import chalk from 'chalk'
 import { NOORMME } from '../../noormme.js'
 import { TableInfo, ColumnInfo } from '../../types/index.js'
 
-export async function generateTypes(options: {
-  connection?: string
+export async function generate(options: {
+  database?: string
   output?: string
+  typesOnly?: boolean
+  reposOnly?: boolean
   format?: string
 } = {}) {
-  console.log(chalk.blue.bold('\n🔧 TypeScript Type Generation\n'))
+  console.log(chalk.blue.bold('\n🔧 NOORMME Code Generation - Automating TypeScript & Repositories\n'))
 
   try {
-    // Initialize NOORMME
-    const db = options.connection ? new NOORMME(options.connection) : new NOORMME()
+    // Initialize NOORMME with database path
+    const databasePath = options.database || process.env.DATABASE_PATH || './database.sqlite'
+    const db = new NOORMME({
+      dialect: 'sqlite',
+      connection: { 
+        database: databasePath,
+        host: 'localhost',
+        port: 0,
+        username: '',
+        password: ''
+      }
+    })
     await db.initialize()
 
     const schemaInfo = await db.getSchemaInfo()
-    const outputPath = options.output || './types/database.d.ts'
-    const format = options.format || 'typescript'
+    const outputDir = options.output || './generated'
+    const format = options.format || 'dts'
 
-    let content: string
-    switch (format) {
-      case 'typescript':
-        content = generateTypeScriptTypes(schemaInfo.tables)
-        break
-      case 'json':
-        content = JSON.stringify(schemaInfo, null, 2)
-        break
-      default:
-        throw new Error(`Unsupported format: ${format}`)
+    console.log(chalk.gray(`📁 Output directory: ${outputDir}`))
+    console.log(chalk.gray(`📊 Discovered ${schemaInfo.tables.length} tables\n`))
+
+    // Ensure output directory exists
+    await fs.mkdir(outputDir, { recursive: true })
+
+    let generatedFiles: string[] = []
+
+    // Generate TypeScript types if not repos-only
+    if (!options.reposOnly) {
+      const typesContent = generateTypeScriptTypes(schemaInfo.tables)
+      const typesFile = format === 'dts' ? 'database.d.ts' : 'database.ts'
+      const typesPath = path.join(outputDir, typesFile)
+      
+      await fs.writeFile(typesPath, typesContent)
+      generatedFiles.push(typesPath)
+      console.log(chalk.green(`✅ Generated TypeScript types: ${typesFile}`))
     }
 
-    // Ensure directory exists
-    await fs.mkdir(path.dirname(outputPath), { recursive: true })
+    // Generate repository classes if not types-only
+    if (!options.typesOnly) {
+      const reposContent = generateRepositoryClasses(schemaInfo.tables)
+      const reposPath = path.join(outputDir, 'repositories.ts')
+      
+      await fs.writeFile(reposPath, reposContent)
+      generatedFiles.push(reposPath)
+      console.log(chalk.green(`✅ Generated repository classes: repositories.ts`))
+    }
 
-    // Write the file
-    await fs.writeFile(outputPath, content)
+    // Generate automation configuration
+    const configContent = generateAutomationConfig(schemaInfo.tables)
+    const configPath = path.join(outputDir, 'automation.config.ts')
+    
+    await fs.writeFile(configPath, configContent)
+    generatedFiles.push(configPath)
+    console.log(chalk.green(`✅ Generated automation config: automation.config.ts`))
 
-    console.log(chalk.green(`✅ Types generated: ${outputPath}`))
-    console.log(chalk.gray(`Generated types for ${schemaInfo.tables.length} tables`))
+    // Generate usage examples
+    const examplesContent = generateUsageExamples(schemaInfo.tables)
+    const examplesPath = path.join(outputDir, 'usage-examples.ts')
+    
+    await fs.writeFile(examplesPath, examplesContent)
+    generatedFiles.push(examplesPath)
+    console.log(chalk.green(`✅ Generated usage examples: usage-examples.ts`))
+
+    console.log(chalk.green.bold(`\n🎉 Generated ${generatedFiles.length} files successfully!`))
+    console.log(chalk.blue('\nNext steps:'))
+    console.log(chalk.gray('1. Import and use the generated types in your project'))
+    console.log(chalk.gray('2. Use the repository classes for type-safe database operations'))
+    console.log(chalk.gray('3. Configure automation settings in automation.config.ts'))
+    console.log(chalk.gray('4. Check usage-examples.ts for implementation patterns'))
 
     await db.close()
 
   } catch (error) {
-    console.error(chalk.red('❌ Type generation failed:'), error instanceof Error ? error.message : error)
+    console.error(chalk.red('❌ Code generation failed:'), error instanceof Error ? error.message : error)
     process.exit(1)
   }
 }
@@ -220,6 +263,307 @@ function getPrimaryKeyType(table: TableInfo): string {
   })
 
   return `[${types.join(', ')}]`
+}
+
+function generateRepositoryClasses(tables: TableInfo[]): string {
+  const imports = `import { NOORMME } from 'noormme'
+import type { 
+${tables.map(t => `  ${pascalCase(t.name)}Table,`).join('\n')}
+${tables.map(t => `  ${pascalCase(t.name)}Insert,`).join('\n')}
+${tables.map(t => `  ${pascalCase(t.name)}Update,`).join('\n')}
+} from './database'`
+
+  const repositoryClasses = tables.map(table => {
+    const tableName = table.name
+    const className = pascalCase(table.name) + 'Repository'
+    const primaryKeyType = getPrimaryKeyType(table)
+
+    return `export class ${className} {
+  constructor(private db: NOORMME) {}
+
+  async findById(id: ${primaryKeyType}): Promise<${pascalCase(tableName)}Table | null> {
+    const repo = this.db.getRepository('${tableName}')
+    return await repo.findById(id)
+  }
+
+  async findAll(): Promise<${pascalCase(tableName)}Table[]> {
+    const repo = this.db.getRepository('${tableName}')
+    return await repo.findAll()
+  }
+
+  async create(data: ${pascalCase(tableName)}Insert): Promise<${pascalCase(tableName)}Table> {
+    const repo = this.db.getRepository('${tableName}')
+    return await repo.create(data)
+  }
+
+  async update(id: ${primaryKeyType}, data: ${pascalCase(tableName)}Update): Promise<${pascalCase(tableName)}Table> {
+    const repo = this.db.getRepository('${tableName}')
+    return await repo.update({ ...data, [getPrimaryKeyColumn(table)]: id })
+  }
+
+  async delete(id: ${primaryKeyType}): Promise<boolean> {
+    const repo = this.db.getRepository('${tableName}')
+    return await repo.delete(id)
+  }
+
+  async count(): Promise<number> {
+    const repo = this.db.getRepository('${tableName}')
+    return await repo.count()
+  }
+
+  async exists(id: ${primaryKeyType}): Promise<boolean> {
+    const repo = this.db.getRepository('${tableName}')
+    return await repo.exists(id)
+  }
+
+  // Dynamic finders
+${table.columns.map(col => `  async findBy${pascalCase(col.name)}(value: ${mapColumnToTsType(col)}): Promise<${pascalCase(tableName)}Table | null> {
+    const repo = this.db.getRepository('${tableName}')
+    return await repo.findBy${pascalCase(col.name)}(value)
+  }`).join('\n')}
+
+${table.columns.map(col => `  async findManyBy${pascalCase(col.name)}(value: ${mapColumnToTsType(col)}): Promise<${pascalCase(tableName)}Table[]> {
+    const repo = this.db.getRepository('${tableName}')
+    return await repo.findManyBy${pascalCase(col.name)}(value)
+  }`).join('\n')}
+}`
+  }).join('\n\n')
+
+  const factoryClass = `export class RepositoryFactory {
+  constructor(private db: NOORMME) {}
+
+${tables.map(table => `  get ${table.name}(): ${pascalCase(table.name)}Repository {
+    return new ${pascalCase(table.name)}Repository(this.db)
+  }`).join('\n')}
+}`
+
+  return `${imports}
+
+${repositoryClasses}
+
+${factoryClass}
+
+// Convenience function to create repository factory
+export function createRepositoryFactory(db: NOORMME): RepositoryFactory {
+  return new RepositoryFactory(db)
+}
+`
+}
+
+function generateAutomationConfig(tables: TableInfo[]): string {
+  return `// NOORMME Automation Configuration
+// This file contains recommended automation settings for your database
+
+import type { NOORMConfig } from 'noormme'
+
+export const automationConfig: Partial<NOORMConfig> = {
+  dialect: 'sqlite',
+  
+  // Performance optimizations
+  performance: {
+    enableAutoOptimization: true,
+    enableQueryOptimization: true,
+    enableCaching: true,
+    enableBatchOperations: true,
+    maxCacheSize: 1000
+  },
+
+  // SQLite-specific optimizations
+  sqlite: {
+    enableWALMode: true,
+    enableForeignKeys: true,
+    cacheSize: -64000, // 64MB
+    synchronous: 'NORMAL',
+    tempStore: 'MEMORY',
+    autoVacuumMode: 'INCREMENTAL'
+  },
+
+  // Schema discovery settings
+  introspection: {
+    excludeTables: ['migrations', 'temp_*'],
+    includeViews: true,
+    customTypeMappings: {
+      // Add custom type mappings here
+    }
+  },
+
+  // Logging configuration
+  logging: {
+    enabled: true,
+    level: 'info',
+    includeQueryTime: true,
+    includeQueryResults: false
+  },
+
+  // Cache configuration
+  cache: {
+    ttl: 300000, // 5 minutes
+    maxSize: 1000,
+    enableCompression: true
+  }
+}
+
+// Table-specific automation settings
+export const tableAutomationSettings = {
+${tables.map(table => `  ${table.name}: {
+    // Auto-generated settings for ${table.name} table
+    enableAutoIndexing: true,
+    enablePerformanceMonitoring: true,
+    recommendedIndexes: [
+      ${table.columns.filter(col => col.name.includes('email') || col.name.includes('status') || col.name.includes('created')).map(col => `'${col.name}'`).join(',\n      ') || '// No recommended indexes'}
+    ]
+  },`).join('\n')}
+}
+
+// Usage example:
+// import { NOORMME } from 'noormme'
+// import { automationConfig } from './automation.config'
+// 
+// const db = new NOORMME(automationConfig)
+// await db.initialize()
+`
+}
+
+function generateUsageExamples(tables: TableInfo[]): string {
+  const firstTable = tables[0]
+  const tableName = firstTable?.name || 'users'
+  const className = pascalCase(tableName) + 'Repository'
+
+  return `// NOORMME Usage Examples
+// This file shows how to use the generated types and repositories
+
+import { NOORMME } from 'noormme'
+import { createRepositoryFactory } from './repositories'
+import { automationConfig } from './automation.config'
+
+// Initialize NOORMME with automation
+const db = new NOORMME(automationConfig)
+await db.initialize()
+
+// Create repository factory
+const repositories = createRepositoryFactory(db)
+
+// Example 1: Basic CRUD operations
+async function basicCrudExample() {
+  const ${tableName}Repo = repositories.${tableName}
+  
+  // Create a new record
+  const new${pascalCase(tableName)} = await ${tableName}Repo.create({
+    ${firstTable?.columns.filter(col => !col.isAutoIncrement && !col.isPrimaryKey).slice(0, 3).map(col => `${col.name}: 'example_value'`).join(',\n    ') || '// Add your data here'}
+  })
+  
+  // Find by ID
+  const ${tableName} = await ${tableName}Repo.findById(new${pascalCase(tableName)}.id)
+  
+  // Update record
+  const updated${pascalCase(tableName)} = await ${tableName}Repo.update(new${pascalCase(tableName)}.id, {
+    // Add fields to update
+  })
+  
+  // Delete record
+  await ${tableName}Repo.delete(new${pascalCase(tableName)}.id)
+}
+
+// Example 2: Using dynamic finders
+async function dynamicFinderExample() {
+  const ${tableName}Repo = repositories.${tableName}
+  
+  ${firstTable?.columns.filter(col => !col.isPrimaryKey).slice(0, 2).map(col => `
+  // Find by ${col.name}
+  const ${tableName}By${pascalCase(col.name)} = await ${tableName}Repo.findBy${pascalCase(col.name)}('value')
+  
+  // Find many by ${col.name}
+  const ${tableName}sBy${pascalCase(col.name)} = await ${tableName}Repo.findManyBy${pascalCase(col.name)}('value')`).join('') || '// Dynamic finders will be available based on your table columns'}
+}
+
+// Example 3: Direct repository access
+async function directRepositoryExample() {
+  // Get repository directly from NOORMME
+  const ${tableName}Repo = db.getRepository('${tableName}')
+  
+  // Use all repository methods
+  const all${pascalCase(tableName)}s = await ${tableName}Repo.findAll()
+  const count = await ${tableName}Repo.count()
+  const exists = await ${tableName}Repo.exists(1)
+}
+
+// Example 4: Complex queries with Kysely
+async function complexQueryExample() {
+  const kysely = db.getKysely()
+  
+  // Type-safe complex queries
+  const result = await kysely
+    .selectFrom('${tableName}')
+    .selectAll()
+    .where('status', '=', 'active')
+    .orderBy('created_at', 'desc')
+    .limit(10)
+    .execute()
+}
+
+// Example 5: Performance monitoring
+async function performanceExample() {
+  // Get performance metrics
+  const metrics = await db.getSQLitePerformanceMetrics()
+  console.log('Cache hit rate:', metrics.cacheHitRate)
+  console.log('Average query time:', metrics.averageQueryTime)
+  
+  // Get optimization recommendations
+  const recommendations = await db.getSQLiteIndexRecommendations()
+  console.log('Recommended indexes:', recommendations.recommendations)
+}
+
+// Example 6: Migration management
+async function migrationExample() {
+  const migrationManager = db.getMigrationManager()
+  
+  // Generate a new migration
+  await migrationManager.generateMigration('add_new_column')
+  
+  // Apply migrations
+  await migrationManager.migrateToLatest()
+  
+  // Check migration status
+  const status = await migrationManager.getMigrationStatus()
+  console.log('Migration status:', status)
+}
+
+// Run examples
+async function runExamples() {
+  try {
+    console.log('🚀 Running NOORMME examples...')
+    
+    await basicCrudExample()
+    console.log('✅ Basic CRUD example completed')
+    
+    await dynamicFinderExample()
+    console.log('✅ Dynamic finder example completed')
+    
+    await directRepositoryExample()
+    console.log('✅ Direct repository example completed')
+    
+    await complexQueryExample()
+    console.log('✅ Complex query example completed')
+    
+    await performanceExample()
+    console.log('✅ Performance example completed')
+    
+    console.log('🎉 All examples completed successfully!')
+    
+  } catch (error) {
+    console.error('❌ Example failed:', error)
+  } finally {
+    await db.close()
+  }
+}
+
+// Uncomment to run examples
+// runExamples()
+`
+}
+
+function getPrimaryKeyColumn(table: TableInfo): string {
+  return table.primaryKey?.[0] || 'id'
 }
 
 function pascalCase(str: string): string {

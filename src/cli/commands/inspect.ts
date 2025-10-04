@@ -3,21 +3,35 @@ import { NOORMME } from '../../noormme.js'
 import { TableInfo, RelationshipInfo } from '../../types/index.js'
 
 export async function inspect(tableName?: string, options: {
-  connection?: string
-  all?: boolean
+  database?: string
   relationships?: boolean
+  optimizations?: boolean
+  indexes?: boolean
+  performance?: boolean
 } = {}) {
-  console.log(chalk.blue.bold('\n🔍 Database Schema Inspection\n'))
+  console.log(chalk.blue.bold('\n🔍 NOORMME Schema Inspection - Intelligent Database Discovery\n'))
 
   try {
-    // Initialize NOORMME
-    const db = options.connection ? new NOORMME(options.connection) : new NOORMME()
+    // Initialize NOORMME with database path
+    const databasePath = options.database || process.env.DATABASE_PATH || './database.sqlite'
+    const db = new NOORMME({
+      dialect: 'sqlite',
+      connection: { 
+        database: databasePath,
+        host: 'localhost',
+        port: 0,
+        username: '',
+        password: ''
+      }
+    })
     await db.initialize()
+
+    console.log(chalk.gray(`📁 Database: ${databasePath}\n`))
 
     const schemaInfo = await db.getSchemaInfo()
 
     if (tableName) {
-      // Show specific table
+      // Show specific table with automation insights
       const table = schemaInfo.tables.find(t => t.name === tableName)
       if (!table) {
         console.error(chalk.red(`❌ Table '${tableName}' not found`))
@@ -26,17 +40,49 @@ export async function inspect(tableName?: string, options: {
         process.exit(1)
       }
 
-      showTableDetails(table, schemaInfo.relationships)
+      showTableDetails(table, schemaInfo.relationships, db)
+      
+      // Show automation insights for the table
+      if (options.optimizations) {
+        await showTableOptimizations(table, db)
+      }
+      
+      if (options.indexes) {
+        await showTableIndexAnalysis(table, db)
+      }
+      
+      if (options.performance) {
+        await showTablePerformanceMetrics(table, db)
+      }
     } else {
-      // Show all tables
-      console.log(chalk.green(`Found ${schemaInfo.tables.length} tables:\n`))
+      // Show all tables with automation overview
+      console.log(chalk.green(`📊 Discovered ${schemaInfo.tables.length} tables with complete automation:\n`))
 
       showTablesList(schemaInfo.tables)
 
       if (options.relationships) {
-        console.log('\n' + chalk.blue.bold('Relationships:\n'))
+        console.log('\n' + chalk.blue.bold('🔗 Relationships:\n'))
         showRelationships(schemaInfo.relationships)
       }
+      
+      if (options.optimizations) {
+        console.log('\n' + chalk.blue.bold('🔧 Optimization Overview:\n'))
+        await showOptimizationOverview(db)
+      }
+      
+      if (options.indexes) {
+        console.log('\n' + chalk.blue.bold('📊 Index Analysis:\n'))
+        await showIndexAnalysis(db)
+      }
+      
+      if (options.performance) {
+        console.log('\n' + chalk.blue.bold('⚡ Performance Metrics:\n'))
+        await showPerformanceOverview(db)
+      }
+
+      // Show automation recommendations
+      console.log('\n' + chalk.blue.bold('💡 Automation Recommendations:\n'))
+      await showAutomationRecommendations(schemaInfo, db)
     }
 
     await db.close()
@@ -75,7 +121,210 @@ function showTablesList(tables: TableInfo[]): void {
   console.log(chalk.gray('└─' + '─'.repeat(20) + '┴─' + '─'.repeat(8) + '┴─' + '─'.repeat(15) + '┴─' + '─'.repeat(5) + '┴─' + '─'.repeat(8) + '┘'))
 }
 
-function showTableDetails(table: TableInfo, relationships: RelationshipInfo[]): void {
+async function showTableOptimizations(table: TableInfo, db: NOORMME): Promise<void> {
+  try {
+    console.log(chalk.blue('\n🔧 Optimization Analysis for ' + table.name + ':'))
+    
+    // Check for missing indexes
+    const indexRecs = await db.getSQLiteIndexRecommendations()
+    const tableRecommendations = indexRecs.recommendations.filter((rec: any) => rec.table === table.name)
+    
+    if (tableRecommendations.length > 0) {
+      console.log(chalk.yellow(`💡 ${tableRecommendations.length} optimization recommendations:`))
+      tableRecommendations.forEach((rec: any, index: number) => {
+        console.log(chalk.gray(`  ${index + 1}. ${rec.column}: ${rec.reason} (${rec.impact} impact)`))
+      })
+    } else {
+      console.log(chalk.green('✅ No optimization recommendations for this table'))
+    }
+    
+    // Check for foreign key constraints
+    if (table.foreignKeys.length === 0 && table.columns.some(col => col.name.includes('_id'))) {
+      console.log(chalk.yellow('💡 Consider adding foreign key constraints for data integrity'))
+    }
+    
+  } catch (error) {
+    console.error(chalk.red('❌ Failed to get optimization analysis:'), error instanceof Error ? error.message : error)
+  }
+}
+
+async function showTableIndexAnalysis(table: TableInfo, db: NOORMME): Promise<void> {
+  try {
+    console.log(chalk.blue('\n📊 Index Analysis for ' + table.name + ':'))
+    
+    // Show current indexes
+    if (table.indexes.length > 0) {
+      console.log(chalk.green(`✅ ${table.indexes.length} indexes found:`))
+      table.indexes.forEach((index, i) => {
+        const type = index.unique ? 'UNIQUE' : 'INDEX'
+        console.log(chalk.gray(`  ${i + 1}. ${index.name} (${type}): ${index.columns.join(', ')}`))
+      })
+    } else {
+      console.log(chalk.yellow('⚠️ No indexes found - consider adding indexes for frequently queried columns'))
+    }
+    
+    // Show index recommendations
+    const indexRecs = await db.getSQLiteIndexRecommendations()
+    const tableRecommendations = indexRecs.recommendations.filter((rec: any) => rec.table === table.name)
+    
+    if (tableRecommendations.length > 0) {
+      console.log(chalk.blue(`\n💡 Index recommendations:`))
+      tableRecommendations.forEach((rec: any, index: number) => {
+        console.log(chalk.gray(`  ${index + 1}. CREATE INDEX idx_${rec.table}_${rec.column} ON ${rec.table}(${rec.column});`))
+        console.log(chalk.gray(`     Reason: ${rec.reason}`))
+      })
+    }
+    
+  } catch (error) {
+    console.error(chalk.red('❌ Failed to get index analysis:'), error instanceof Error ? error.message : error)
+  }
+}
+
+async function showTablePerformanceMetrics(table: TableInfo, db: NOORMME): Promise<void> {
+  try {
+    console.log(chalk.blue('\n⚡ Performance Metrics for ' + table.name + ':'))
+    
+    // Get performance metrics
+    const metrics = await db.getSQLitePerformanceMetrics()
+    
+    console.log(chalk.gray(`  Table size: ${table.columns.length} columns`))
+    console.log(chalk.gray(`  Indexes: ${table.indexes.length}`))
+    console.log(chalk.gray(`  Foreign keys: ${table.foreignKeys.length}`))
+    console.log(chalk.gray(`  Cache hit rate: ${(metrics.cacheHitRate * 100).toFixed(1)}%`))
+    
+    // Performance score for this table
+    let score = 0
+    if (table.indexes.length > 0) score += 25
+    if (table.foreignKeys.length > 0) score += 25
+    if (table.primaryKey && table.primaryKey.length > 0) score += 25
+    if (table.columns.length <= 20) score += 25 // Reasonable column count
+    
+    const scoreColor = score >= 80 ? 'green' : score >= 60 ? 'yellow' : 'red'
+    console.log(chalk[scoreColor](`  Performance score: ${score}/100`))
+    
+  } catch (error) {
+    console.error(chalk.red('❌ Failed to get performance metrics:'), error instanceof Error ? error.message : error)
+  }
+}
+
+async function showOptimizationOverview(db: NOORMME): Promise<void> {
+  try {
+    const optimizations = await db.getSQLiteOptimizations()
+    
+    console.log(chalk.green(`✅ Applied optimizations: ${optimizations.appliedOptimizations.length}`))
+    if (optimizations.appliedOptimizations.length > 0) {
+      optimizations.appliedOptimizations.forEach((opt: string, index: number) => {
+        console.log(chalk.gray(`  ${index + 1}. ${opt}`))
+      })
+    }
+    
+    if (optimizations.warnings.length > 0) {
+      console.log(chalk.yellow(`\n⚠️ Warnings: ${optimizations.warnings.length}`))
+      optimizations.warnings.forEach((warning: string, index: number) => {
+        console.log(chalk.gray(`  ${index + 1}. ${warning}`))
+      })
+    }
+    
+  } catch (error) {
+    console.error(chalk.red('❌ Failed to get optimization overview:'), error instanceof Error ? error.message : error)
+  }
+}
+
+async function showIndexAnalysis(db: NOORMME): Promise<void> {
+  try {
+    const indexRecs = await db.getSQLiteIndexRecommendations()
+    
+    if (indexRecs.recommendations.length > 0) {
+      console.log(chalk.yellow(`💡 ${indexRecs.recommendations.length} index recommendations available:`))
+      indexRecs.recommendations.slice(0, 10).forEach((rec: any, index: number) => {
+        console.log(chalk.gray(`  ${index + 1}. ${rec.table}.${rec.column} - ${rec.reason}`))
+      })
+      
+      if (indexRecs.recommendations.length > 10) {
+        console.log(chalk.gray(`  ... and ${indexRecs.recommendations.length - 10} more recommendations`))
+      }
+    } else {
+      console.log(chalk.green('✅ No index recommendations at this time'))
+    }
+    
+  } catch (error) {
+    console.error(chalk.red('❌ Failed to get index analysis:'), error instanceof Error ? error.message : error)
+  }
+}
+
+async function showPerformanceOverview(db: NOORMME): Promise<void> {
+  try {
+    const metrics = await db.getSQLitePerformanceMetrics()
+    
+    console.log(chalk.gray(`Cache hit rate: ${(metrics.cacheHitRate * 100).toFixed(1)}%`))
+    console.log(chalk.gray(`Average query time: ${metrics.averageQueryTime.toFixed(2)}ms`))
+    console.log(chalk.gray(`Database size: ${(metrics.databaseSize / 1024 / 1024).toFixed(2)}MB`))
+    console.log(chalk.gray(`Page count: ${metrics.pageCount.toLocaleString()}`))
+    console.log(chalk.gray(`WAL mode: ${metrics.walMode ? 'Enabled' : 'Disabled'}`))
+    console.log(chalk.gray(`Foreign keys: ${metrics.foreignKeys ? 'Enabled' : 'Disabled'}`))
+    
+  } catch (error) {
+    console.error(chalk.red('❌ Failed to get performance overview:'), error instanceof Error ? error.message : error)
+  }
+}
+
+async function showAutomationRecommendations(schemaInfo: any, db: NOORMME): Promise<void> {
+  try {
+    const recommendations: string[] = []
+    
+    // Check for tables without indexes
+    const tablesWithoutIndexes = schemaInfo.tables.filter((table: any) => 
+      table.indexes.length === 0 && table.columns.length > 1
+    )
+    if (tablesWithoutIndexes.length > 0) {
+      recommendations.push(`Consider adding indexes to tables: ${tablesWithoutIndexes.map((t: any) => t.name).join(', ')}`)
+    }
+    
+    // Check for missing foreign keys
+    const tablesWithIdColumns = schemaInfo.tables.filter((table: any) =>
+      table.columns.some((col: any) => col.name.includes('_id')) && table.foreignKeys.length === 0
+    )
+    if (tablesWithIdColumns.length > 0) {
+      recommendations.push(`Add foreign key constraints to tables: ${tablesWithIdColumns.map((t: any) => t.name).join(', ')}`)
+    }
+    
+    // Check performance metrics
+    const metrics = await db.getSQLitePerformanceMetrics()
+    if (metrics.cacheHitRate < 0.8) {
+      recommendations.push('Run optimization to improve cache hit rate')
+    }
+    if (metrics.averageQueryTime > 100) {
+      recommendations.push('Apply performance optimizations for faster queries')
+    }
+    if (!metrics.walMode) {
+      recommendations.push('Enable WAL mode for better concurrency')
+    }
+    
+    // Check for index recommendations
+    const indexRecs = await db.getSQLiteIndexRecommendations()
+    if (indexRecs.recommendations.length > 0) {
+      recommendations.push(`Apply ${indexRecs.recommendations.length} index recommendations`)
+    }
+    
+    if (recommendations.length > 0) {
+      recommendations.forEach((rec, index) => {
+        console.log(chalk.gray(`  ${index + 1}. ${rec}`))
+      })
+      
+      console.log(chalk.blue('\n💡 To apply recommendations:'))
+      console.log(chalk.gray('• Run: npx noormme optimize'))
+      console.log(chalk.gray('• Run: npx noormme analyze --report'))
+      console.log(chalk.gray('• Use: npx noormme watch --auto-optimize'))
+    } else {
+      console.log(chalk.green('✅ Your database is well-optimized!'))
+    }
+    
+  } catch (error) {
+    console.error(chalk.red('❌ Failed to get automation recommendations:'), error instanceof Error ? error.message : error)
+  }
+}
+
+function showTableDetails(table: TableInfo, relationships: RelationshipInfo[], db?: NOORMME): void {
   console.log(chalk.green.bold(`Table: ${table.name}`))
   if (table.schema) {
     console.log(chalk.gray(`Schema: ${table.schema}`))

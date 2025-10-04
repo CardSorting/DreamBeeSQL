@@ -1,5 +1,6 @@
 import type { Kysely } from '../../../../kysely.js'
 import { DatabaseIntrospector } from '../../../../dialect/database-introspector.js'
+import { sql } from '../../../../raw-builder/sql.js'
 
 /**
  * SQLite-specific schema introspector with enhanced metadata capabilities
@@ -31,12 +32,9 @@ export class SQLiteSchemaIntrospector extends DatabaseIntrospector {
       for (const table of tables) {
         try {
           // Get row count for each table
-          const rowCountResult = await this.db.executeQuery({
-            sql: `SELECT COUNT(*) as count FROM ${table.name}`,
-            parameters: []
-          })
+          const rowCountResult = await sql`SELECT COUNT(*) as count FROM ${sql.id(table.name)}`.execute(this.db)
 
-          const rowCount = rowCountResult.rows?.[0]?.count || 0
+          const rowCount = (rowCountResult.rows as any)?.[0]?.count || 0
 
           enhancedTables.push({
             ...table,
@@ -85,11 +83,8 @@ export class SQLiteSchemaIntrospector extends DatabaseIntrospector {
 
       for (const pragma of pragmas) {
         try {
-          const result = await this.db.executeQuery({
-            sql: `PRAGMA ${pragma}`,
-            parameters: []
-          })
-          stats[pragma] = result.rows?.[0]?.[pragma] || null
+          const result = await sql`PRAGMA ${sql.id(pragma)}`.execute(this.db)
+          stats[pragma] = (result.rows as any)?.[0]?.[pragma] || null
         } catch (error) {
           stats[pragma] = null
         }
@@ -127,25 +122,16 @@ export class SQLiteSchemaIntrospector extends DatabaseIntrospector {
       const info: any = {}
 
       // Get SQLite version
-      const versionResult = await this.db.executeQuery({
-        sql: 'SELECT sqlite_version() as version',
-        parameters: []
-      })
-      info.version = versionResult.rows?.[0]?.version
+      const versionResult = await sql`SELECT sqlite_version() as version`.execute(this.db)
+      info.version = (versionResult.rows as any)?.[0]?.version
 
       // Get compile options
-      const compileOptionsResult = await this.db.executeQuery({
-        sql: 'PRAGMA compile_options',
-        parameters: []
-      })
-      info.compileOptions = compileOptionsResult.rows?.map(row => (row as any).compile_options) || []
+      const compileOptionsResult = await sql`PRAGMA compile_options`.execute(this.db)
+      info.compileOptions = compileOptionsResult.rows?.map((row: any) => row.compile_options) || []
 
       // Get foreign key status
-      const fkResult = await this.db.executeQuery({
-        sql: 'PRAGMA foreign_keys',
-        parameters: []
-      })
-      info.foreignKeysEnabled = fkResult.rows?.[0]?.foreign_keys === 1
+      const fkResult = await sql`PRAGMA foreign_keys`.execute(this.db)
+      info.foreignKeysEnabled = (fkResult.rows as any)?.[0]?.foreign_keys === 1
 
       return info
     } catch (error) {
@@ -159,10 +145,7 @@ export class SQLiteSchemaIntrospector extends DatabaseIntrospector {
    */
   async checkIntegrity(): Promise<{ isValid: boolean; issues: string[] }> {
     try {
-      const result = await this.db.executeQuery({
-        sql: 'PRAGMA integrity_check',
-        parameters: []
-      })
+      const result = await sql`PRAGMA integrity_check`.execute(this.db)
 
       const issues: string[] = []
       let isValid = true
@@ -190,44 +173,32 @@ export class SQLiteSchemaIntrospector extends DatabaseIntrospector {
 
     try {
       // Check for unused pages
-      const freelistResult = await this.db.executeQuery({
-        sql: 'PRAGMA freelist_count',
-        parameters: []
-      })
-      const freelistCount = freelistResult.rows?.[0]?.freelist_count || 0
+      const freelistResult = await sql`PRAGMA freelist_count`.execute(this.db)
+      const freelistCount = (freelistResult.rows as any)?.[0]?.freelist_count || 0
 
       if (freelistCount > 0) {
         recommendations.push(`Consider running VACUUM to reclaim ${freelistCount} unused pages`)
       }
 
       // Check page size
-      const pageSizeResult = await this.db.executeQuery({
-        sql: 'PRAGMA page_size',
-        parameters: []
-      })
-      const pageSize = pageSizeResult.rows?.[0]?.page_size || 0
+      const pageSizeResult = await sql`PRAGMA page_size`.execute(this.db)
+      const pageSize = (pageSizeResult.rows as any)?.[0]?.page_size || 0
 
       if (pageSize < 4096) {
         recommendations.push('Consider using a larger page size (4096 or 8192) for better performance')
       }
 
       // Check journal mode
-      const journalModeResult = await this.db.executeQuery({
-        sql: 'PRAGMA journal_mode',
-        parameters: []
-      })
-      const journalMode = journalModeResult.rows?.[0]?.journal_mode
+      const journalModeResult = await sql`PRAGMA journal_mode`.execute(this.db)
+      const journalMode = (journalModeResult.rows as any)?.[0]?.journal_mode
 
       if (journalMode !== 'WAL') {
         recommendations.push('Consider using WAL mode for better concurrency: PRAGMA journal_mode = WAL')
       }
 
       // Check cache size
-      const cacheSizeResult = await this.db.executeQuery({
-        sql: 'PRAGMA cache_size',
-        parameters: []
-      })
-      const cacheSize = cacheSizeResult.rows?.[0]?.cache_size || 0
+      const cacheSizeResult = await sql`PRAGMA cache_size`.execute(this.db)
+      const cacheSize = (cacheSizeResult.rows as any)?.[0]?.cache_size || 0
 
       if (cacheSize < -1000) {
         recommendations.push('Consider increasing cache size for better performance')

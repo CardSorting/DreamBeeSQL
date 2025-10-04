@@ -1,5 +1,6 @@
-import type { Kysely } from '../../../kysely.js'
-import { DatabaseIntrospector } from '../../../dialect/database-introspector.js'
+import type { Kysely } from '../../../../kysely.js'
+import { DatabaseIntrospector } from '../../../../dialect/database-introspector.js'
+import { sql } from '../../../../raw-builder/sql.js'
 
 /**
  * PostgreSQL-specific index discovery
@@ -34,7 +35,7 @@ export class PostgreSQLIndexDiscovery {
           sql<string>`pg_get_indexdef(i.indexrelid)`.as('definition'),
           sql<string>`obj_description(i.indexrelid, 'pg_class')`.as('comment')
         ])
-        .innerJoin('pg_attribute as a', (join) => 
+        .innerJoin('pg_attribute as a', (join: any) => 
           join.onRef('a.attrelid', '=', 'c.oid')
               .on('a.attnum', '=', sql`ANY(i.indkey)`)
         )

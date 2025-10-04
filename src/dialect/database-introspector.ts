@@ -49,7 +49,7 @@ export interface DatabaseMetadata {
  * Database introspector that queries database metadata
  */
 export class DatabaseIntrospector {
-  constructor(private db: Kysely<any>) {}
+  constructor(protected db: Kysely<any>) {}
 
   /**
    * Get all tables in the database

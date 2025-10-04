@@ -1,5 +1,6 @@
 import type { Kysely } from '../../../../kysely.js'
 import { DatabaseIntrospector } from '../../../../dialect/database-introspector.js'
+import { sql } from '../../../../raw-builder/sql.js'
 
 /**
  * PostgreSQL-specific schema introspector with enhanced metadata capabilities

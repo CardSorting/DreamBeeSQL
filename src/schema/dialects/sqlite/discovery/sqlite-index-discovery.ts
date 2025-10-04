@@ -1,5 +1,6 @@
-import type { Kysely } from '../../../kysely.js'
-import { DatabaseIntrospector } from '../../../dialect/database-introspector.js'
+import type { Kysely } from '../../../../kysely.js'
+import { DatabaseIntrospector } from '../../../../dialect/database-introspector.js'
+import { sql } from '../../../../raw-builder/sql.js'
 
 /**
  * SQLite-specific index discovery
@@ -32,7 +33,7 @@ export class SQLiteIndexDiscovery {
         .execute()
 
       // Parse column information from SQL definition
-      const processedIndexes = indexes.map(index => ({
+      const processedIndexes = indexes.map((index: any) => ({
         ...index,
         columns: this.extractColumnsFromSQL(index.definition),
         isPrimary: index.name.includes('sqlite_autoindex'),
@@ -71,10 +72,7 @@ export class SQLiteIndexDiscovery {
   async getIndexInfo(db: Kysely<any>, tableName: string): Promise<any[]> {
     try {
       // SQLite pragma index_info
-      const result = await db.executeQuery({
-        sql: `PRAGMA index_list(${tableName})`,
-        parameters: []
-      })
+      const result = await sql`PRAGMA index_list(${sql.lit(tableName)})`.execute(db)
 
       return result.rows || []
     } catch (error) {
@@ -136,13 +134,10 @@ export class SQLiteIndexDiscovery {
    */
   async getTableSize(db: Kysely<any>, tableName: string): Promise<any> {
     try {
-      const result = await db.executeQuery({
-        sql: `SELECT COUNT(*) as rowCount FROM ${tableName}`,
-        parameters: []
-      })
+      const result = await sql`SELECT COUNT(*) as rowCount FROM ${sql.id(tableName)}`.execute(db)
 
       return {
-        rowCount: result.rows?.[0]?.rowCount || 0,
+        rowCount: (result.rows as any)?.[0]?.rowCount || 0,
         size: 0, // SQLite doesn't provide direct size info
         lastModified: new Date()
       }

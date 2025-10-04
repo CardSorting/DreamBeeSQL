@@ -1,4 +1,5 @@
-import type { Kysely } from '../../../kysely.js'
+import type { Kysely } from '../../../../kysely.js'
+import { sql } from '../../../../raw-builder/sql.js'
 
 /**
  * PostgreSQL-specific constraint discovery
@@ -31,7 +32,7 @@ export class PostgreSQLConstraintDiscovery {
           sql<boolean>`con.condeferred`.as('deferred'),
           sql<string>`obj_description(con.oid, 'pg_constraint')`.as('comment')
         ])
-        .innerJoin('pg_attribute as a', (join) =>
+        .innerJoin('pg_attribute as a', (join: any) =>
           join.onRef('a.attrelid', '=', 'c.oid')
               .on('a.attnum', '=', sql`ANY(con.conkey)`)
         )
@@ -79,11 +80,11 @@ export class PostgreSQLConstraintDiscovery {
           sql<boolean>`con.condeferrable`.as('deferrable'),
           sql<boolean>`con.condeferred`.as('deferred')
         ])
-        .innerJoin('pg_attribute as a', (join) =>
+        .innerJoin('pg_attribute as a', (join: any) =>
           join.onRef('a.attrelid', '=', 'c.oid')
               .on('a.attnum', '=', sql`con.conkey[1]`)
         )
-        .innerJoin('pg_attribute as fa', (join) =>
+        .innerJoin('pg_attribute as fa', (join: any) =>
           join.onRef('fa.attrelid', '=', 'f.oid')
               .on('fa.attnum', '=', sql`con.confkey[1]`)
         )

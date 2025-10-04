@@ -1,4 +1,5 @@
-import type { Kysely } from '../../../kysely.js'
+import type { Kysely } from '../../../../kysely.js'
+import { sql } from '../../../../raw-builder/sql.js'
 
 /**
  * SQLite-specific constraint discovery
@@ -126,12 +127,9 @@ export class SQLiteConstraintDiscovery {
    */
   async getForeignKeyInfo(db: Kysely<any>, tableName: string): Promise<any[]> {
     try {
-      const result = await db.executeQuery({
-        sql: `PRAGMA foreign_key_list(${tableName})`,
-        parameters: []
-      })
+      const result = await sql`PRAGMA foreign_key_list(${sql.lit(tableName)})`.execute(db)
 
-      return (result.rows || []).map(row => ({
+      return (result.rows || []).map((row: any) => ({
         name: `${tableName}_fk_${row.column}`,
         type: 'f',
         column: row.column,
@@ -151,12 +149,9 @@ export class SQLiteConstraintDiscovery {
    */
   async isForeignKeySupportEnabled(db: Kysely<any>): Promise<boolean> {
     try {
-      const result = await db.executeQuery({
-        sql: 'PRAGMA foreign_keys',
-        parameters: []
-      })
+      const result = await sql`PRAGMA foreign_keys`.execute(db)
 
-      return result.rows?.[0]?.foreign_keys === 1
+      return (result.rows as any)?.[0]?.foreign_keys === 1
     } catch (error) {
       console.warn('Failed to check foreign key support:', error)
       return false

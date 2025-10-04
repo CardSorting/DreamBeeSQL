@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-green)](https://nodejs.org/)
+[![Security](https://img.shields.io/badge/Security-Hardened-brightgreen.svg)](./SECURITY.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/cardsorting/noormme/pulls)
 
 > **SQLite automation so simple, even normies can use it. Because who needs an ORM when you can have NO-ORM?**
@@ -312,6 +313,42 @@ const result = await kysely
 const userRepo = db.getRepository('users')
 const users = await userRepo.findAll() // Auto-generated method
 ```
+
+## 🔒 Security-First Design (NEW in v1.1.0)
+
+NOORMME now includes **comprehensive security hardening** with automatic protection against common vulnerabilities:
+
+### Multi-Layer SQL Injection Prevention
+```typescript
+// ✅ Automatic validation prevents SQL injection
+import { sql } from 'kysely'
+
+const userColumn = req.query.sortBy
+sql.ref(userColumn)  // ✅ Automatically validated!
+// Throws error for: "id; DROP TABLE users--"
+
+// ✅ Safe helpers for common patterns
+import { safeOrderDirection, safeLimit } from 'noormme/util/security'
+
+sql`SELECT * FROM users ORDER BY name ${safeOrderDirection(req.query.dir)} LIMIT ${safeLimit(req.query.limit)}`
+```
+
+### Path Traversal Protection
+```typescript
+// ✅ All file operations automatically validated
+import { sanitizeDatabasePath } from 'noormme/util/security'
+
+const dbPath = sanitizeDatabasePath(userInput)  // ✅ Prevents ../../../etc/passwd
+```
+
+### Security Features
+- ✅ **Automatic validation** of all dynamic SQL identifiers
+- ✅ **Safe alternatives** to dangerous `sql.raw()` and `sql.lit()` methods
+- ✅ **Path sanitization** for file operations
+- ✅ **Rate limiting** for DoS protection
+- ✅ **Comprehensive security documentation**
+
+> **📖 See [SECURITY.md](./SECURITY.md) for complete security documentation and best practices**
 
 ## 🎯 Core Automation Features
 
@@ -856,8 +893,14 @@ A: For basic usage, yes! Just give it a database path. For advanced tuning, ther
 
 This README provides an overview of NOORMME's capabilities. For detailed implementation guides, production examples, and migration strategies, see the comprehensive documentation:
 
+### Core Documentation
 - **[📖 Complete Documentation](./docs/noormme-docs/README.md)** - Full documentation index
 - **[🚀 Migration Guides](./docs/noormme-docs/migration-guides/README.md)** - PostgreSQL to SQLite migration
 - **[🎯 API Reference](./docs/noormme-docs/07-api-reference.md)** - Complete API documentation
 
-*NOORMME - The NO-ORM for normies. Making SQLite automation normal.*
+### Security Documentation (NEW)
+- **[🔒 Security Policy](./SECURITY.md)** - Comprehensive security guide and best practices
+- **[📊 Security Audit Report](./SECURITY_AUDIT_REPORT.md)** - Detailed security audit findings
+- **[🛡️ Security Utilities](./src/util/SECURITY_UTILS_README.md)** - Security helper functions guide
+
+*NOORMME - The NO-ORM for normies. Making SQLite automation normal and secure.*

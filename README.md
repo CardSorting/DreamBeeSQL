@@ -1,7 +1,11 @@
 # NOORMME - The NO-ORM for Normies
 
-![npm](https://img.shields.io/npm/v/noormme)
-![downloads](https://img.shields.io/npm/dm/noormme)
+[![npm version](https://img.shields.io/npm/v/noormme)](https://www.npmjs.com/package/noormme)
+[![npm downloads](https://img.shields.io/npm/dm/noormme)](https://www.npmjs.com/package/noormme)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-green)](https://nodejs.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/cardsorting/noormme/pulls)
 
 > **SQLite automation so simple, even normies can use it. Because who needs an ORM when you can have NO-ORM?**
 

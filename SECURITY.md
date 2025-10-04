@@ -248,7 +248,7 @@ When using NOORMME in production:
 If you discover a security vulnerability in NOORMME:
 
 1. **DO NOT** open a public GitHub issue
-2. Email security concerns to: [security contact needed]
+2. Email security concerns to: https://x.com/bozoeggs
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce

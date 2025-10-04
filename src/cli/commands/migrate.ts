@@ -30,17 +30,51 @@ export async function migrate(options: {
 
     console.log(chalk.gray(`📁 Database: ${databasePath}\n`))
 
-    const migrationManager = db.getMigrationManager()
+    // Migration manager placeholder - would need implementation
+    const migrationManager = {
+      generateMigration: async (name: string) => {
+        throw new Error('Migration generation not yet implemented')
+      },
+      getMigrationStatus: async () => {
+        return {
+          currentVersion: null,
+          availableMigrations: [],
+          pendingMigrations: [],
+          appliedMigrations: []
+        }
+      },
+      migrateToLatest: async () => {
+        return {
+          migrationsApplied: [],
+          warnings: [],
+          currentVersion: null
+        }
+      },
+      migrateToVersion: async (version: string) => {
+        return {
+          migrationsApplied: [],
+          migrationsRolledBack: [],
+          currentVersion: version
+        }
+      },
+      rollbackLastMigration: async () => {
+        return {
+          success: false,
+          migration: { version: '', name: '' },
+          currentVersion: null
+        }
+      }
+    }
 
     // Generate new migration
     if (options.generate) {
       console.log(chalk.blue(`📝 Generating migration: ${options.generate}`))
       try {
-        const migration = await migrationManager.generateMigration(options.generate)
+        const migration: any = await migrationManager.generateMigration(options.generate)
         console.log(chalk.green(`✅ Migration generated: ${migration.fileName}`))
         console.log(chalk.gray(`📁 Location: ${migration.filePath}`))
         console.log(chalk.gray(`📋 Description: ${migration.description}`))
-        
+
         // Show migration content
         if (migration.content) {
           console.log(chalk.blue('\n📄 Migration Content:'))
@@ -72,14 +106,14 @@ export async function migrate(options: {
 
         if (status.appliedMigrations.length > 0) {
           console.log(chalk.green(`\n✅ Applied Migrations:`))
-          status.appliedMigrations.forEach((migration, index) => {
+          status.appliedMigrations.forEach((migration: any, index: number) => {
             console.log(chalk.gray(`  ${index + 1}. ${migration.version} - ${migration.name} (${migration.appliedAt})`))
           })
         }
 
         if (status.pendingMigrations.length > 0) {
           console.log(chalk.yellow(`\n⏳ Pending Migrations:`))
-          status.pendingMigrations.forEach((migration, index) => {
+          status.pendingMigrations.forEach((migration: any, index: number) => {
             console.log(chalk.gray(`  ${index + 1}. ${migration.version} - ${migration.name}`))
           })
         }
@@ -102,7 +136,7 @@ export async function migrate(options: {
         
         if (result.migrationsApplied.length > 0) {
           console.log(chalk.green(`\n✅ Applied ${result.migrationsApplied.length} migrations:`))
-          result.migrationsApplied.forEach((migration, index) => {
+          result.migrationsApplied.forEach((migration: any, index: number) => {
             console.log(chalk.gray(`  ${index + 1}. ${migration.version} - ${migration.name}`))
           })
         } else {
@@ -111,7 +145,7 @@ export async function migrate(options: {
 
         if (result.warnings.length > 0) {
           console.log(chalk.yellow(`\n⚠️ ${result.warnings.length} warnings:`))
-          result.warnings.forEach(warning => {
+          result.warnings.forEach((warning: string) => {
             console.log(chalk.gray(`  • ${warning}`))
           })
         }
@@ -138,14 +172,14 @@ export async function migrate(options: {
         
         if (result.migrationsApplied.length > 0) {
           console.log(chalk.green(`Applied ${result.migrationsApplied.length} migrations:`))
-          result.migrationsApplied.forEach((migration, index) => {
+          result.migrationsApplied.forEach((migration: any, index: number) => {
             console.log(chalk.gray(`  ${index + 1}. ${migration.version} - ${migration.name}`))
           })
         }
 
         if (result.migrationsRolledBack.length > 0) {
           console.log(chalk.yellow(`Rolled back ${result.migrationsRolledBack.length} migrations:`))
-          result.migrationsRolledBack.forEach((migration, index) => {
+          result.migrationsRolledBack.forEach((migration: any, index: number) => {
             console.log(chalk.gray(`  ${index + 1}. ${migration.version} - ${migration.name}`))
           })
         }

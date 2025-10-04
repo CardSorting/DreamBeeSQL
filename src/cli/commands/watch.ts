@@ -23,7 +23,6 @@ export async function watch(options: {
         password: ''
       },
       performance: {
-        enableAutoOptimization: true,
         enableQueryOptimization: true
       }
     })
@@ -73,8 +72,8 @@ export async function watch(options: {
             if (autoOptimize) {
               console.log(chalk.blue('🔧 Running auto-optimization...'))
               try {
-                const result = await db.applySQLiteOptimizations()
-                console.log(chalk.green(`✅ Applied ${result.appliedOptimizations.length} optimizations`))
+                const result = await db.getSQLiteOptimizations()
+                console.log(chalk.green(`✅ Generated ${result.appliedOptimizations.length} optimization recommendations`))
                 if (result.warnings.length > 0) {
                   console.log(chalk.yellow(`⚠️ ${result.warnings.length} warnings`))
                 }
@@ -90,10 +89,7 @@ export async function watch(options: {
                 const indexRecs = await db.getSQLiteIndexRecommendations()
                 if (indexRecs.recommendations.length > 0) {
                   console.log(chalk.yellow(`💡 ${indexRecs.recommendations.length} index recommendations found`))
-                  const appliedIndexes = await db.applySQLiteIndexRecommendations()
-                  if (appliedIndexes.length > 0) {
-                    console.log(chalk.green(`✅ Applied ${appliedIndexes.length} index recommendations`))
-                  }
+                  console.log(chalk.gray('Run optimize command to apply index recommendations'))
                 }
               } catch (error) {
                 console.error(chalk.red('❌ Auto-indexing failed:'), error instanceof Error ? error.message : error)
@@ -128,18 +124,15 @@ export async function watch(options: {
             if (indexRecs.recommendations.length > 0) {
               console.log(chalk.yellow(`💡 Found ${indexRecs.recommendations.length} new index recommendations`))
               if (autoIndex) {
-                const appliedIndexes = await db.applySQLiteIndexRecommendations()
-                if (appliedIndexes.length > 0) {
-                  console.log(chalk.green(`✅ Applied ${appliedIndexes.length} index recommendations`))
-                }
+                console.log(chalk.gray('Run optimize command to apply index recommendations'))
               }
             }
 
             // Check if optimization is needed
             if (metrics.cacheHitRate < 0.8 || metrics.averageQueryTime > 100) {
               console.log(chalk.yellow('⚠️ Performance degradation detected, running optimization...'))
-              const result = await db.applySQLiteOptimizations()
-              console.log(chalk.green(`✅ Applied ${result.appliedOptimizations.length} performance optimizations`))
+              const result = await db.getSQLiteOptimizations()
+              console.log(chalk.green(`✅ Generated ${result.appliedOptimizations.length} performance optimization recommendations`))
             } else {
               console.log(chalk.green('✅ Performance metrics look good'))
             }
@@ -176,8 +169,8 @@ export async function watch(options: {
         // Final optimization if auto-optimize is enabled
         if (autoOptimize) {
           console.log(chalk.blue('🔧 Running final optimization...'))
-          const result = await db.applySQLiteOptimizations()
-          console.log(chalk.green(`✅ Final optimization applied ${result.appliedOptimizations.length} changes`))
+          const result = await db.getSQLiteOptimizations()
+          console.log(chalk.green(`✅ Final optimization generated ${result.appliedOptimizations.length} recommendations`))
         }
 
         await db.close()

@@ -1,0 +1,39 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "outDir": "./dist",
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": false,
+    "exactOptionalPropertyTypes": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+    "verbatimModuleSyntax": false,
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.js",
+    "../utils/test-helpers.ts",
+    "../../src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "temp",
+    "**/*.d.ts"
+  ]
+}

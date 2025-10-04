@@ -9,10 +9,9 @@ import {
   ForeignKeyMetadata,
 } from '../database-introspector.js'
 import { Kysely } from '../../kysely.js'
-import {
-  DEFAULT_MIGRATION_LOCK_TABLE,
-  DEFAULT_MIGRATION_TABLE,
-} from '../../migration/migrator.js'
+// Migration constants - moved from old migration system
+const DEFAULT_MIGRATION_TABLE = 'kysely_migration'
+const DEFAULT_MIGRATION_LOCK_TABLE = 'kysely_migration_lock'
 import { sql } from '../../raw-builder/sql.js'
 import { QueryCreator } from '../../query-creator.js'
 

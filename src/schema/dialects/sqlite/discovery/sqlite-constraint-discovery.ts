@@ -353,18 +353,16 @@ export class SQLiteConstraintDiscovery {
     foreignKey: any
   ): Promise<number> {
     try {
-      const result = await db
-        .selectFrom(table)
-        .leftJoin(
-          foreignKey.referencedTable,
-          foreignKey.column,
-          `${foreignKey.referencedTable}.${foreignKey.referencedColumn}`
-        )
-        .where(`${foreignKey.referencedTable}.${foreignKey.referencedColumn}`, 'is', null)
-        .select(db.fn.count('*').as('count'))
-        .executeTakeFirst()
+      // Use a simpler approach to avoid type issues
+      const result = await sql`
+        SELECT COUNT(*) as count
+        FROM ${sql.id(table)} t
+        LEFT JOIN ${sql.id(foreignKey.referencedTable)} r
+          ON t.${sql.id(foreignKey.column)} = r.${sql.id(foreignKey.referencedColumn)}
+        WHERE r.${sql.id(foreignKey.referencedColumn)} IS NULL
+      `.execute(db)
 
-      return Number(result?.count || 0)
+      return Number((result.rows[0] as any)?.count || 0)
     } catch (error) {
       return 0
     }
@@ -432,8 +430,8 @@ export class SQLiteConstraintDiscovery {
 
       const columns = columnMatch[1]
         .split(',')
-        .map(col => col.trim())
-        .map(col => col.split(/\s+/)[0].replace(/["`]/g, ''))
+        .map((col: string) => col.trim())
+        .map((col: string) => col.split(/\s+/)[0].replace(/["`]/g, ''))
 
       return columns.includes(columnName)
     } catch (error) {

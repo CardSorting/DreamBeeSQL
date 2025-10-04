@@ -86,8 +86,8 @@ export * from './dialect/sqlite/sqlite-adapter.js'
 export * from './query-compiler/default-query-compiler.js'
 export * from './query-compiler/query-compiler.js'
 
-// Migration System - Clean, Composable, Singleton-based
-export * from './migration/index.js'
+// SQLite Migration System - Focused on SQLite automation and optimization
+export * from './sqlite-migration/index.js'
 
 export * from './plugin/kysely-plugin.js'
 export * from './plugin/camel-case/camel-case-plugin.js'

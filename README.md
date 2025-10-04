@@ -259,7 +259,7 @@ npm test
 
 ## 📄 License
 
-MIT License - use it however you want.
+Apache 2.0
 
 ## 🎉 Start Today
 

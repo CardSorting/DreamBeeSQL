@@ -10,42 +10,59 @@
 
 > **SQLite automation so simple, even normies can use it. Because who needs an ORM when you can have NO-ORM?**
 
-**NOORMME** (pronounced "normie") is the anti-ORM ORM - it's **NO**t an **ORM**, it's better. While traditional ORMs force you to learn complex abstractions and fight with your database, NOORMME gets out of your way and automates everything. Built on Kysely's type-safe foundation, NOORMME is a **runtime ORM** that provides database automation for the rest of us.
+**NOORMME** (pronounced "normie") is a **full-service SQLite ORM** that fixes everything wrong with traditional ORMs. Built on Kysely's type-safe foundation, NOORMME provides everything you need for SQLite development: repository pattern, query building, type safety, and production features - all while avoiding the complexity and headaches of traditional ORMs.
 
-**Why "normie"?** Because SQLite development should be normal, not needlessly complex. No PhD in database theory required. No 500-page documentation to read. Just point NOORMME at your database and watch it work. **NOORMME works at runtime** - no build-time code generation needed, just dynamic table discovery and intelligent automation.
+**Why "normie"?** Because SQLite development should be normal, not needlessly complex. No PhD in database theory required. No 500-page documentation to read. NOORMME gives you a complete ORM experience that actually works the way you expect, without the traditional ORM frustrations.
 
 ## 🎭 The NO-ORM Philosophy
 
 Traditional ORMs say: *"Learn our abstractions, fight our quirks, debug our magic."*
 
-NOORMME says: *"Your database already exists. Let's just use it."*
+NOORMME says: *"Here's an ORM that fixes everything wrong with traditional ORMs and actually works the way you expect."*
 
-- **NO** manual entity definitions
-- **NO** hand-written types
-- **NO** complex configuration
-- **NO** performance mysteries
-- **NO** learning curve
+### 🚫 What's Wrong with Traditional ORMs (That NOORMME Fixes)
 
-Just automation. Just simplicity. Just **NOORMME**.
+| Traditional ORM Problems | NOORMME's Solution |
+|--------------------------|-------------------|
+| **Complex Entity Definitions** | Runtime auto-discovery from existing database |
+| **Manual Type Generation** | Dynamic type-safe operations |
+| **Build-Time Code Generation** | Runtime ORM - no build step required |
+| **Steep Learning Curves** | Zero configuration, instant productivity |
+| **Performance Mysteries** | Transparent optimization and monitoring |
+| **Migration Complexity** | Intelligent migration strategies |
+| **Query Abstraction Overhead** | Direct SQL access when needed |
+| **Configuration Hell** | Sensible defaults with optional customization |
 
-## 🎯 Mission: Complete SQLite Automation
+### ✅ NOORMME's Problem-Solving Features
 
-NOORMME's mission is to make SQLite development as effortless as possible by automating:
+- **Complete ORM**: Repository pattern, query building, type safety, migrations
+- **Runtime Discovery**: Works with existing databases without configuration
+- **Transparent Performance**: Built-in monitoring and optimization
+- **Production Ready**: Health checks, caching, RBAC, real-world integrations
+- **Zero Configuration**: Works out of the box with your existing database
+- **Type Safe**: Full TypeScript support without manual definitions
 
-- **Runtime Schema Discovery**: Automatically introspect and understand your existing database at runtime
-- **Dynamic Repository Creation**: Generate optimized CRUD repositories with intelligent methods on-the-fly
+Just a great ORM. Just problem-solving. Just **NOORMME**.
+
+## 🎯 Mission: Fix Everything Wrong with Traditional ORMs
+
+NOORMME's mission is to provide a complete, production-ready SQLite ORM that fixes everything wrong with traditional ORMs:
+
+- **Complete ORM**: Repository pattern, query building, type safety, migrations
+- **Runtime Schema Discovery**: Automatically introspect and understand your existing database
+- **Dynamic Repository Creation**: Generate optimized CRUD repositories with intelligent methods
 - **Type-Safe Operations**: Provide full TypeScript support without manual type definitions
 - **Performance Optimization**: Continuously optimize your database based on usage patterns
 - **Index Management**: Recommend and manage indexes based on real query patterns
-- **Migration Automation**: Handle schema changes with intelligent migration strategies
-- **Production Features**: Health monitoring, caching, and real-world integrations
+- **Production Features**: Health monitoring, caching, RBAC, and real-world integrations
+- **Problem Solving**: Avoid traditional ORM complexity and frustrations
 
-## 🚀 Why NO-ORM?
+## 🚀 Why NOORMME?
 
-Because ORMs are over-engineered. SQLite is already perfect - it just needs a little automation.
+Because most ORMs are over-engineered and complex. NOORMME fixes everything wrong with traditional ORMs to give you a complete, production-ready SQLite ORM that actually works the way you expect.
 
-| Traditional ORMs | NOORMME (The NO-ORM) |
-|------------------|----------------------|
+| Traditional ORM Problems | NOORMME's Solutions |
+|--------------------------|-------------------|
 | Manual entity definitions | **Runtime auto-discovery from existing database** |
 | Hand-written TypeScript types | **Dynamic type-safe operations** |
 | Manual repository creation | **Auto-generated repositories with custom finders** |
@@ -54,15 +71,17 @@ Because ORMs are over-engineered. SQLite is already perfect - it just needs a li
 | Complex migration scripts | **Automated migration strategies** |
 | Build-time code generation | **Runtime ORM - no build step required** |
 | Steep learning curve | **Zero configuration, instant productivity** |
+| Configuration hell | **Sensible defaults with optional customization** |
+| Performance mysteries | **Transparent optimization and monitoring** |
 | Make you feel dumb | **Make you feel like a normie (in a good way)** |
 
-## 💬 The NO-ORM Normie Taglines
+## 💬 The NOORMME Normie Taglines
 
 > "Finally, an ORM that doesn't make me feel dumb." - Every Normie Ever
 
-> "It's not an ORM, it's better." - The Truth
+> "It's an ORM that fixes everything wrong with traditional ORMs." - The Truth
 
-> "Automation so good, it should be illegal." - Satisfied Developer
+> "Problem-solving so good, it should be illegal." - Satisfied Developer
 
 > "I pointed it at my database and it just... worked?" - Confused (Happy) Developer
 
@@ -108,17 +127,19 @@ const newUser = await userRepo.create({
 })
 ```
 
-**That's it!** NOORMME automatically:
-- ✅ Discovers all tables, columns, and relationships
-- ✅ Generates TypeScript interfaces for complete type safety
-- ✅ Creates repository classes with intelligent CRUD methods
-- ✅ Optimizes SQLite performance with pragma settings
-- ✅ Recommends indexes based on your query patterns
-- ✅ Validates and fixes foreign key constraints
+**That's it!** NOORMME fixes everything wrong with traditional ORMs by providing:
+- ✅ Complete ORM with repository pattern and query building
+- ✅ Runtime schema discovery for all tables, columns, and relationships
+- ✅ TypeScript interfaces for complete type safety
+- ✅ Auto-generated repository classes with intelligent CRUD methods
+- ✅ SQLite performance optimization with pragma settings
+- ✅ Intelligent index recommendations based on query patterns
+- ✅ Production features: health checks, caching, RBAC
+- ✅ Problem-solving: no complex configuration, no build steps, no learning curve
 
-## 🎮 CLI Commands - Automation at Your Fingertips
+## 🎮 CLI Commands - Database Management Made Easy
 
-NOORMME includes a powerful CLI for database automation. Because real normies use the command line.
+NOORMME includes a powerful CLI for database management and optimization. Because real normies use the command line.
 
 ### 🔍 `analyze` - Intelligent Performance Analysis
 
@@ -297,7 +318,7 @@ npx noormme migrate --rollback
 
 ## 🧠 Built on Kysely's Type-Safe Foundation
 
-NOORMME leverages Kysely's battle-tested query builder while adding intelligent automation:
+NOORMME is a complete ORM built on Kysely's battle-tested query builder, fixing everything wrong with traditional ORMs:
 
 ```typescript
 // Direct access to Kysely for complex queries
@@ -437,7 +458,7 @@ console.log('Database performance:', {
 
 ## 🚀 Runtime ORM Features
 
-NOORMME is a **runtime ORM** that provides dynamic database operations without requiring build-time code generation. This makes it perfect for production applications where you need flexibility and immediate productivity.
+NOORMME is a **complete runtime ORM** that fixes everything wrong with traditional ORMs by providing dynamic database operations without requiring build-time code generation. This makes it perfect for production applications where you need a full ORM with immediate productivity.
 
 ### 🔍 Dynamic Table Discovery
 NOORMME automatically discovers your database schema at runtime and provides dynamic access to tables and columns:
@@ -680,13 +701,14 @@ const userAgain = await userRepo.findById('123') // From cache
 await db.invalidateCache('users', '123')
 ```
 
-### 🚀 Runtime ORM Advantages
-- **No Build Step**: Works immediately with existing databases
-- **Dynamic Discovery**: Automatically finds tables, columns, and relationships
-- **Custom Finders**: Auto-generates `findManyByEmail()`, `findManyByName()` methods
-- **Type Safety**: Full TypeScript support without manual definitions
-- **Production Ready**: Health checks, monitoring, and optimization built-in
-- **Migration Support**: Complete PostgreSQL to SQLite migration tools
+### 🚀 Complete ORM with Problem-Solving Advantages
+- **Complete ORM**: Repository pattern, query building, type safety, migrations
+- **No Build Step**: Works immediately with existing databases (fixes build-time code generation problems)
+- **Dynamic Discovery**: Automatically finds tables, columns, and relationships (fixes manual entity definition problems)
+- **Custom Finders**: Auto-generates `findManyByEmail()`, `findManyByName()` methods (fixes manual repository creation problems)
+- **Type Safety**: Full TypeScript support without manual definitions (fixes manual type generation problems)
+- **Production Ready**: Health checks, monitoring, and optimization built-in (fixes performance mystery problems)
+- **Migration Support**: Complete PostgreSQL to SQLite migration tools (fixes migration complexity problems)
 
 ## 📚 Real-World Examples
 
@@ -1142,16 +1164,16 @@ npm install noormme
 A: Yes! It's **NO-ORM-ME** → **NOORMME** → **normie**. We're bringing database automation back to normal people.
 
 **Q: What does NO-ORM actually mean?**
-A: It means you don't need a traditional ORM with all its complexity. NOORMME gives you automation without the abstraction overload. It's not "just another ORM" - it's the anti-ORM.
+A: It means you get a complete ORM that fixes everything wrong with traditional ORMs. NOORMME gives you everything you need: repository pattern, query building, type safety, and smart automation features. It's a full-service SQLite ORM that avoids the complexity and frustrations of traditional ORMs.
 
 **Q: Is this just for normies?**
 A: Absolutely not! Power users love NOORMME too. But unlike other tools, you don't need to be a database wizard to use it. That's the point.
 
 **Q: Do I need to learn Kysely to use NOORMME?**
-A: Nope! NOORMME auto-generates repositories for 90% of your needs. Only drop down to Kysely for complex queries. And when you do, you'll have full type safety. See the [Repository Pattern guide](./docs/noormme-docs/02-repository-pattern.md) for examples.
+A: Nope! NOORMME is a complete ORM with auto-generated repositories for 90% of your needs. Only drop down to Kysely for complex queries. And when you do, you'll have full type safety. See the [Repository Pattern guide](./docs/noormme-docs/02-repository-pattern.md) for examples.
 
 **Q: Can I use this in production?**
-A: Yes! NOORMME is built on Kysely, which is battle-tested and production-ready. The automation layer just makes your life easier. See [Production Features](./docs/noormme-docs/04-production-features.md) for production implementation details.
+A: Yes! NOORMME is a complete ORM built on Kysely, which is battle-tested and production-ready. It fixes everything wrong with traditional ORMs while providing all the features you need: repository pattern, query building, type safety, and smart automation. See [Production Features](./docs/noormme-docs/04-production-features.md) for production implementation details.
 
 **Q: What if I already have a database?**
 A: Perfect! That's NOORMME's specialty. Point it at your existing SQLite database and it automatically discovers everything. No migration to a new ORM needed. For migrating from PostgreSQL, see our [Migration Guides](./docs/noormme-docs/migration-guides/).

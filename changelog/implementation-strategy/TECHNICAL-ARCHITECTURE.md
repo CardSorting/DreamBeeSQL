@@ -1,36 +1,13 @@
-# NOORMME Framework Architecture
+# NOORMME Technical Architecture
 
 ## Overview
 
-NOORMME is architected as a **batteries-included framework** built around code generation, templating, and configuration automation - not as a runtime ORM layer.
+This document outlines the technical architecture decisions for NOORMME, focusing on how we'll build the framework using modern Next.js patterns and proven tools.
 
-## The Architecture:
+## Core Architecture Principles
 
-```
-┌─────────────────────────────────────┐
-│         Next.js App Router          │
-│     (User's application code)       │
-└─────────────────────────────────────┘
-↓
-┌─────────────────────────────────────┐
-│         NOORMME Framework           │
-│                                     │
-│  ┌──────────┐  ┌──────────┐       │
-│  │   Auth   │  │  Admin   │       │
-│  │(NextAuth)│  │  Panel   │       │
-│  └──────────┘  └──────────┘       │
-│                                     │
-│  ┌──────────┐  ┌──────────┐       │
-│  │   RBAC   │  │    DB    │       │
-│  │  System  │  │ (SQLite) │       │
-│  └──────────┘  └──────────┘       │
-└─────────────────────────────────────┘
-```
-
-## Core Architectural Principles
-
-### 1. Generate, Don't Abstract
-- **Code Generation**: Generate working Next.js code instead of runtime wrappers
+### 1. Code Generation over Runtime
+- **Generate Code**: Create working Next.js code instead of runtime wrappers
 - **Templates**: Pre-built, customizable templates
 - **Configuration**: Auto-configure optimal settings
 - **Transparency**: Generated code is readable and modifiable
@@ -55,7 +32,7 @@ NOORMME is architected as a **batteries-included framework** built around code g
 ┌─────────────────────────────────────────────────────────┐
 │              NOORMME Framework Architecture              │
 ├─────────────────────────────────────────────────────────┤
-│                                                          │
+│                                                         │
 │  ┌─────────────────────────────────────────────────┐   │
 │  │          CLI Layer (create-noormme-app)         │   │
 │  │  • Project scaffolding                          │   │
@@ -63,8 +40,8 @@ NOORMME is architected as a **batteries-included framework** built around code g
 │  │  • Dependency installation                      │   │
 │  │  • Database initialization                      │   │
 │  └────────────────────┬────────────────────────────┘   │
-│                       │                                  │
-│                       ▼                                  │
+│                       │                                 │
+│                       ▼                                 │
 │  ┌─────────────────────────────────────────────────┐   │
 │  │          Code Generation Layer                  │   │
 │  │  • TypeScript types from schemas               │   │
@@ -72,8 +49,8 @@ NOORMME is architected as a **batteries-included framework** built around code g
 │  │  • RBAC middleware                              │   │
 │  │  • Migration files                              │   │
 │  └────────────────────┬────────────────────────────┘   │
-│                       │                                  │
-│                       ▼                                  │
+│                       │                                 │
+│                       ▼                                 │
 │  ┌─────────────────────────────────────────────────┐   │
 │  │          Generated Next.js App                  │   │
 │  │                                                  │   │
@@ -87,15 +64,15 @@ NOORMME is architected as a **batteries-included framework** built around code g
 │  │  │  (Roles, Permissions, Middleware)    │      │   │
 │  │  └──────────────────────────────────────┘      │   │
 │  └─────────────────────────────────────────────────┘   │
-│                                                          │
+│                                                         │
 └─────────────────────────────────────────────────────────┘
 
 Runtime: Minimal framework code, mostly standard Next.js/Kysely
 ```
 
-### Directory Structure
+## Directory Structure
 
-**Framework Repository**:
+### Framework Repository
 ```
 noormme/
 ├── packages/
@@ -144,7 +121,7 @@ noormme/
     └── basic-app/                  # Example generated app
 ```
 
-**Generated App Structure**:
+### Generated App Structure
 ```
 my-app/                             # Created by CLI
 ├── app/
@@ -186,9 +163,7 @@ my-app/                             # Created by CLI
 
 ### 1. CLI Scaffolding Tool
 
-**Purpose**: Generate complete Next.js project with zero configuration
-
-**Architecture**:
+#### Architecture
 ```typescript
 // packages/create-noormme-app/src/cli.ts
 export class ProjectScaffolder {
@@ -230,7 +205,7 @@ export class ProjectScaffolder {
 }
 ```
 
-**Design Decisions**:
+#### Design Decisions
 - ✅ Generate code, don't provide runtime wrappers
 - ✅ Create readable, modifiable files
 - ✅ Use standard Next.js structure
@@ -238,15 +213,13 @@ export class ProjectScaffolder {
 
 ### 2. Template System
 
-**Purpose**: Provide pre-built, customizable code templates
-
-**Template Types**:
+#### Template Types
 1. **Base Templates**: Core files (db.ts, auth.ts)
 2. **Admin Templates**: CRUD pages and components
 3. **RBAC Templates**: Middleware and helpers
 4. **Migration Templates**: Database schemas
 
-**Example Template**:
+#### Example Template
 ```typescript
 // packages/create-noormme-app/templates/lib/db.ts.template
 import { Kysely, SqliteDialect } from 'kysely';
@@ -269,7 +242,7 @@ db.executeSync("PRAGMA foreign_keys = ON");
 // Template variables replaced at generation time
 ```
 
-**Design Decisions**:
+#### Design Decisions
 - ✅ Simple variable substitution
 - ✅ No complex templating engine
 - ✅ Readable generated code
@@ -277,11 +250,7 @@ db.executeSync("PRAGMA foreign_keys = ON");
 
 ### 3. Code Generation Layer
 
-**Purpose**: Auto-generate types, pages, and migrations
-
-**Generators**:
-
-**A. Type Generator**:
+#### Type Generator
 ```typescript
 // packages/noormme-core/generators/type-generator.ts
 export class TypeGenerator {
@@ -316,7 +285,7 @@ export interface ${schema.name}Table {
 }
 ```
 
-**B. Admin Page Generator**:
+#### Admin Page Generator
 ```typescript
 // packages/noormme-admin/generators/page-generator.ts
 export class AdminPageGenerator {
@@ -346,17 +315,15 @@ export default async function ${model.name}ListPage() {
 }
 ```
 
-**Design Decisions**:
+#### Design Decisions
 - ✅ Generate at build time, not runtime
 - ✅ Readable, standard code
 - ✅ Fully typed output
 - ✅ No magic, just code generation
 
-### 4. Admin Panel Architecture (Next.js 15 Patterns)
+### 4. Admin Panel Architecture
 
-**Purpose**: Auto-generated CRUD interface using modern Next.js patterns
-
-**Modern Component Architecture**:
+#### Modern Component Architecture
 ```
 AdminLayout (Server Component)
 ├── Navigation (Server Component)
@@ -370,7 +337,7 @@ AdminLayout (Server Component)
     └── Settings (Server Component)
 ```
 
-**Server Components with Server Actions**:
+#### Server Components with Server Actions
 ```typescript
 // packages/noormme-admin/components/DataTable.tsx
 import { deleteRecord } from './actions';
@@ -424,25 +391,16 @@ async function deleteRecord(id: string) {
 }
 ```
 
-**Modern Page Generation**:
-- Server Components for data fetching
-- Client Components for interactivity
-- Server Actions for mutations
-- Progressive enhancement
-- Type-safe with generics
-
-**Design Decisions**:
+#### Design Decisions
 - ✅ Server Components by default (better performance)
 - ✅ Client Components only when needed
 - ✅ Server Actions for mutations
 - ✅ Modern CSS patterns (Tailwind)
 - ✅ Progressive enhancement
 
-### 5. RBAC System (Modern Next.js 15 Patterns)
+### 5. RBAC System
 
-**Purpose**: Role-based access control with modern middleware and Server Actions
-
-**Modern RBAC Architecture**:
+#### Modern RBAC Architecture
 ```typescript
 // lib/rbac.ts (generated)
 import { auth } from './auth';
@@ -495,7 +453,7 @@ export async function requirePermission(
 }
 ```
 
-**Modern Middleware (Edge Runtime)**:
+#### Modern Middleware (Edge Runtime)
 ```typescript
 // middleware.ts
 import { NextResponse } from 'next/server';
@@ -532,52 +490,16 @@ export const config = {
 };
 ```
 
-**Server Actions with RBAC**:
-```typescript
-// app/admin/users/actions.ts
-'use server';
-
-import { requireRole } from '@/lib/rbac';
-import { db } from '@/lib/db';
-import { revalidatePath } from 'next/cache';
-
-export async function deleteUser(id: string) {
-  await requireRole('admin');
-  
-  await db
-    .deleteFrom('users')
-    .where('id', '=', id)
-    .execute();
-    
-  revalidatePath('/admin/users');
-}
-
-export async function updateUserRole(userId: string, roleId: number) {
-  await requireRole('admin');
-  
-  await db
-    .insertInto('user_roles')
-    .values({ user_id: userId, role_id: roleId })
-    .onConflict(['user_id', 'role_id'])
-    .doUpdateSet({ role_id: roleId })
-    .execute();
-    
-  revalidatePath('/admin/users');
-}
-```
-
-**Design Decisions**:
+#### Design Decisions
 - ✅ Modern middleware with Edge Runtime
 - ✅ Server Actions for mutations
 - ✅ Redirect patterns (not exceptions)
 - ✅ Type-safe helpers
 - ✅ Progressive enhancement
 
-### 6. Database Layer (Modern Patterns)
+### 6. Database Layer
 
-**Purpose**: Optimized SQLite with Kysely and modern connection patterns
-
-**Modern Database Configuration**:
+#### Modern Database Configuration
 ```typescript
 // lib/db.ts (generated)
 import { Kysely, SqliteDialect } from 'kysely';
@@ -619,7 +541,7 @@ export async function withDatabase<T>(
 }
 ```
 
-**Modern Connection Patterns**:
+#### Modern Connection Patterns
 ```typescript
 // lib/db-utils.ts
 import { kysely } from './db';
@@ -649,7 +571,7 @@ export async function withTransaction<T>(
 }
 ```
 
-**Design Decisions**:
+#### Design Decisions
 - ✅ Connection singleton with lazy initialization
 - ✅ Proper error handling and logging
 - ✅ Cached queries with Next.js cache
@@ -660,7 +582,7 @@ export async function withTransaction<T>(
 
 ### 1. Code Generation over Runtime
 
-**Anti-pattern** (Runtime wrapper):
+#### Anti-pattern (Runtime wrapper)
 ```typescript
 // ❌ Don't do this
 class NOORMME {
@@ -673,7 +595,7 @@ const User = db.model('users');
 const users = await User.filter({ active: true });
 ```
 
-**Pattern** (Generated code):
+#### Pattern (Generated code)
 ```typescript
 // ✅ Do this
 // Generate standard Kysely code
@@ -686,7 +608,7 @@ const users = await db
 
 ### 2. Template-Based Scaffolding
 
-**Pattern**:
+#### Pattern
 1. Define templates with variables
 2. CLI copies and processes templates
 3. Generated code is standard Next.js
@@ -694,7 +616,7 @@ const users = await db
 
 ### 3. Composition over Complexity
 
-**Pattern**:
+#### Pattern
 - Use existing tools (Next.js, Kysely, NextAuth)
 - Don't reinvent (admin UI uses Shadcn, Tailwind)
 - Generate integration code
@@ -702,7 +624,7 @@ const users = await db
 
 ### 4. Progressive Enhancement
 
-**Pattern**:
+#### Pattern
 1. **Level 0**: Generated code works
 2. **Level 1**: Customize via config
 3. **Level 2**: Modify generated files
@@ -712,7 +634,7 @@ const users = await db
 
 ### Build-Time Performance
 
-**Strategies**:
+#### Strategies
 - Fast template copying
 - Efficient code generation
 - Parallel processing where possible
@@ -720,7 +642,7 @@ const users = await db
 
 ### Runtime Performance
 
-**Strategies**:
+#### Strategies
 - Minimal framework overhead
 - Direct Kysely usage (no wrapper)
 - SQLite optimization (WAL, pragmas)
@@ -728,7 +650,7 @@ const users = await db
 
 ### Database Optimization
 
-**Auto-configured**:
+#### Auto-configured
 - WAL mode enabled
 - Optimal pragma settings
 - Connection pooling (if needed)
@@ -738,7 +660,7 @@ const users = await db
 
 ### Framework Testing
 
-**Unit Tests**:
+#### Unit Tests
 ```typescript
 // Test code generators
 describe('TypeGenerator', () => {
@@ -750,7 +672,7 @@ describe('TypeGenerator', () => {
 });
 ```
 
-**Integration Tests**:
+#### Integration Tests
 ```typescript
 // Test full scaffolding
 describe('CLI', () => {
@@ -764,7 +686,7 @@ describe('CLI', () => {
 
 ### Generated App Testing
 
-**Tests Generated**:
+#### Tests Generated
 - Admin page tests
 - RBAC helper tests
 - API route tests
@@ -773,7 +695,7 @@ describe('CLI', () => {
 
 ### From Manual Setup
 
-**Before** (Manual):
+#### Before (Manual)
 ```typescript
 // Hours of setup
 // 1. Choose ORM
@@ -783,7 +705,7 @@ describe('CLI', () => {
 // 5. Implement RBAC
 ```
 
-**After** (NOORMME):
+#### After (NOORMME)
 ```bash
 # 2 minutes
 npx create-noormme-app my-app
@@ -791,7 +713,7 @@ npx create-noormme-app my-app
 
 ### From Other ORMs
 
-**Gradual Migration**:
+#### Gradual Migration
 1. Create NOORMME project
 2. Copy business logic
 3. Adapt to Kysely queries

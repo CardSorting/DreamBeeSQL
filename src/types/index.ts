@@ -164,6 +164,9 @@ export interface EntityType {
 }
 
 export interface Repository<T> {
+  // Django-style objects manager
+  objects: any // Will be DjangoManager<T>
+
   // CRUD operations
   findById(id: string | number): Promise<T | null>
   findAll(): Promise<T[]>

@@ -2,6 +2,7 @@ import type { Kysely } from '../kysely.js'
 import { TableInfo, RelationshipInfo, Repository, PerformanceConfig } from '../types'
 import { NoormError, RelationshipNotFoundError } from '../errors/NoormError.js'
 import { wrapKyselyError } from '../utils/errorHelpers.js'
+import { DjangoManager } from './django-style-query.js'
 
 /**
  * Repository factory that creates dynamic repository classes
@@ -16,7 +17,12 @@ export class RepositoryFactory {
    * Create a repository for the specified table
    */
   createRepository<T>(table: TableInfo, relationships: RelationshipInfo[]): Repository<T> {
+    // Create Django-style manager
+    const djangoManager = new DjangoManager(this.db, table, relationships, this.config.logger)
+    
     const repository: Repository<T> = {
+      // Django-style objects manager
+      objects: djangoManager,
       // Basic CRUD operations
       findById: async (id: any) => {
         try {

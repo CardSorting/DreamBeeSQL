@@ -65,71 +65,154 @@ npm run dev
 **Key files created:**
 ```
 my-app/
-├── lib/
-│   ├── db.ts          # Kysely instance, auto-configured
-│   ├── auth.ts        # NextAuth config, pre-integrated
-│   ├── rbac.ts        # Role/permission helpers
-│   ├── queue.ts       # Queuebase configuration
-│   ├── tasks.ts       # Task definitions
-│   └── task-handlers.ts # Task execution logic
-├── app/
-│   ├── admin/         # Auto-generated admin panel
-│   │   └── tasks/     # Task management dashboard
-│   ├── api/auth/      # NextAuth routes
-│   └── globals.css    # TailwindCSS imports & custom styles
-├── tailwind.config.js # Auto-configured TailwindCSS
-├── postcss.config.js  # PostCSS configuration
-└── noormme.config.ts  # Framework configuration
+├── src/
+│   ├── server/                    # Server-only code
+│   │   ├── actions/              # Server Actions
+│   │   │   ├── auth-actions.ts   # Authentication actions
+│   │   │   ├── user-actions.ts   # User management actions
+│   │   │   └── admin-actions.ts  # Admin panel actions
+│   │   ├── db/                   # Database layer
+│   │   │   ├── index.ts          # Kysely instance, auto-configured
+│   │   │   ├── queries/          # Server-only queries
+│   │   │   └── types.ts          # Database types
+│   │   ├── services/             # Business logic
+│   │   │   ├── auth-service.ts   # Authentication service
+│   │   │   ├── rbac-service.ts   # RBAC service
+│   │   │   └── queue-service.ts  # Background job service
+│   │   └── utils/                # Server utilities
+│   │       ├── auth.ts           # Auth helpers
+│   │       ├── rbac.ts           # RBAC helpers
+│   │       └── queue.ts          # Queue utilities
+│   ├── client/                   # Client-only code
+│   │   ├── components/           # Interactive components
+│   │   │   ├── ui/               # Base UI components
+│   │   │   ├── forms/            # Form components
+│   │   │   └── admin/            # Admin-specific components
+│   │   ├── hooks/                # Client-side hooks
+│   │   │   ├── use-auth.ts       # Authentication hook
+│   │   │   └── use-admin.ts      # Admin utilities hook
+│   │   └── utils/                # Client utilities
+│   │       └── client-utils.ts   # Browser-specific utils
+│   ├── shared/                   # Shared code
+│   │   ├── components/           # Server/Client compatible
+│   │   │   ├── layout/           # Layout components
+│   │   │   └── ui/               # Shared UI components
+│   │   ├── types/                # Shared TypeScript types
+│   │   │   ├── auth.ts           # Auth types
+│   │   │   ├── user.ts           # User types
+│   │   │   └── api.ts            # API types
+│   │   └── constants/            # Shared constants
+│   │       ├── routes.ts         # Route definitions
+│   │       └── permissions.ts    # Permission constants
+│   └── app/                      # Next.js App Router
+│       ├── admin/                # Auto-generated admin panel
+│       │   ├── layout.tsx        # Server Component layout
+│       │   ├── page.tsx          # Server Component dashboard
+│       │   └── [resource]/       # Dynamic admin routes
+│       ├── api/auth/             # NextAuth routes
+│       ├── globals.css           # TailwindCSS imports
+│       └── layout.tsx            # Root layout (Server Component)
+├── tailwind.config.js            # Auto-configured TailwindCSS
+├── postcss.config.js             # PostCSS configuration
+└── noormme.config.ts             # Framework configuration
 ```
 
-### Layer 2: Database (Kysely Direct)
+### Layer 2: Modern Database Architecture (Server-Only)
 **What it does:**
-- Provides configured Kysely instance
+- Provides configured Kysely instance (server-only)
 - Auto-generates TypeScript types
 - Connection pooling for serverless
 - WAL mode for performance
+- Strict server/client separation
 
 **NOT building:** ORM abstraction layer
-**Using:** Kysely's native API
+**Using:** Kysely's native API with modern architecture
 
 ```typescript
-// lib/db.ts (auto-generated)
+// src/server/db/index.ts (auto-generated, server-only)
+import 'server-only';
 import { Kysely } from 'kysely';
 import { SqliteDialect } from 'kysely';
 import Database from 'better-sqlite3';
+import type { Database as DB } from './types';
 
-export const db = new Kysely<DB>({
-  dialect: new SqliteDialect({
-    database: new Database('./database/app.db', {
-      verbose: console.log, // dev only
-    }),
-  }),
-});
+let db: Kysely<DB> | null = null;
 
-// Enable WAL mode for performance
-db.executeSync("PRAGMA journal_mode = WAL");
-db.executeSync("PRAGMA synchronous = NORMAL");
-db.executeSync("PRAGMA foreign_keys = ON");
+export function getDatabase(): Kysely<DB> {
+  if (!db) {
+    db = new Kysely<DB>({
+      dialect: new SqliteDialect({
+        database: new Database('./database/app.db', {
+          verbose: process.env.NODE_ENV === 'development' ? console.log : undefined,
+        }),
+      }),
+    });
+
+    // Enable WAL mode for performance
+    db.executeSync("PRAGMA journal_mode = WAL");
+    db.executeSync("PRAGMA synchronous = NORMAL");
+    db.executeSync("PRAGMA foreign_keys = ON");
+    db.executeSync("PRAGMA cache_size = -64000"); // 64MB cache
+    db.executeSync("PRAGMA temp_store = MEMORY");
+  }
+  
+  return db;
+}
+
+// Server-only database utilities
+export async function withDatabase<T>(
+  callback: (db: Kysely<DB>) => Promise<T>
+): Promise<T> {
+  const db = getDatabase();
+  return await callback(db);
+}
+
+// Auto-generated types from database schema
+// src/server/db/types.ts (auto-generated)
+export interface Database {
+  users: UserTable;
+  sessions: SessionTable;
+  accounts: AccountTable;
+  roles: RoleTable;
+  permissions: PermissionTable;
+  role_permissions: RolePermissionTable;
+  user_roles: UserRoleTable;
+}
+
+interface UserTable {
+  id: string;
+  email: string;
+  name: string | null;
+  emailVerified: Date | null;
+  image: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ... other table interfaces
 ```
 
-### Layer 3: Modern Authentication (Auth.js v5)
+### Layer 3: Modern Authentication (Auth.js v5 + Server Architecture)
 **What it does:**
-- Pre-configured Auth.js v5 setup
-- SQLite adapter (using Kysely)
+- Pre-configured Auth.js v5 setup with server/client separation
+- SQLite adapter (using Kysely, server-only)
 - User/Session/Account tables
 - OAuth providers ready
 - Modern middleware integration
+- Server Actions for authentication
 
-**Auto-generated (Modern Auth.js v5):**
+**Auto-generated (Modern Auth.js v5 with Server Architecture):**
 ```typescript
-// lib/auth.ts
+// src/server/services/auth-service.ts (server-only)
+import 'server-only';
 import NextAuth from 'next-auth';
 import GitHub from 'next-auth/providers/github';
 import { KyselyAdapter } from '@noormme/auth-adapter';
-import { db } from './db';
+import { getDatabase } from '../db';
+import type { Session, User } from '../../shared/types/auth';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: KyselyAdapter(db),
+  adapter: KyselyAdapter(getDatabase()),
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID,
@@ -141,7 +224,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: '/auth/error',
   },
   callbacks: {
-    async session({ session, user }) {
+    async session({ session, user }): Promise<Session> {
       if (session?.user && user?.id) {
         session.user.id = user.id;
       }
@@ -158,38 +241,109 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'database',
   },
 });
+
+// Server-only authentication utilities
+export async function getServerSession(): Promise<Session | null> {
+  return await auth();
+}
+
+export async function requireAuth(): Promise<Session> {
+  const session = await auth();
+  if (!session) {
+    throw new Error('Authentication required');
+  }
+  return session;
+}
+
+// src/server/actions/auth-actions.ts (Server Actions)
+'use server';
+
+import { signIn, signOut } from '../services/auth-service';
+import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
+
+export async function signInAction(provider: string) {
+  await signIn(provider, { redirectTo: '/admin' });
+}
+
+export async function signOutAction() {
+  await signOut();
+  revalidatePath('/');
+  redirect('/');
+}
+
+// src/shared/types/auth.ts (shared types)
+export interface Session {
+  user: {
+    id: string;
+    email: string;
+    name?: string;
+    image?: string;
+  };
+  expires: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  image?: string;
+  emailVerified?: Date;
+}
 ```
 
-### Layer 4: Modern Admin Panel (Server Components + Server Actions + TailwindCSS)
+### Layer 4: Modern Admin Panel (Server/Client Architecture + TailwindCSS)
 **What it does:**
-- Auto-generated CRUD UI using Server Components
+- Auto-generated CRUD UI with strict server/client separation
 - Authentication-protected with modern middleware
 - Responsive design with pre-configured TailwindCSS
 - Role-based access control with Server Actions
 - Zero-config styling with utility-first CSS
+- Progressive enhancement patterns
 
-**Modern File structure:**
+**Modern Architecture with Server/Client Separation:**
 ```
-app/admin/
-├── layout.tsx              # Admin layout (Server Component)
-├── page.tsx                # Dashboard (Server Component)
+src/app/admin/
+├── layout.tsx              # Server Component layout
+├── page.tsx                # Server Component dashboard
 ├── users/
-│   ├── page.tsx            # List users (Server Component)
+│   ├── page.tsx            # Server Component (data fetching)
 │   ├── [id]/
-│   │   ├── page.tsx        # View/edit user (Server Component)
+│   │   ├── page.tsx        # Server Component (view)
 │   │   └── edit/
-│   │       └── page.tsx    # Edit form (Client Component)
-│   └── actions.ts          # Server Actions for mutations
+│   │       └── page.tsx    # Server Component wrapper
+│   └── actions.ts          # Server Actions (mutations)
 ├── roles/
-│   ├── page.tsx            # List roles (Server Component)
-│   └── actions.ts          # Server Actions
-├── components/
-│   ├── DataTable.tsx       # Server Component with Client actions
-│   ├── Form.tsx            # Client Component with Server Actions
-│   ├── Navigation.tsx      # Server Component
-│   └── DeleteButton.tsx    # Client Component
-├── middleware.ts           # Route protection
+│   ├── page.tsx            # Server Component (data fetching)
+│   └── actions.ts          # Server Actions (mutations)
 └── globals.css             # TailwindCSS imports + custom admin styles
+
+src/server/
+├── actions/
+│   ├── user-actions.ts     # Server Actions for user operations
+│   └── admin-actions.ts    # Server Actions for admin operations
+└── services/
+    ├── admin-service.ts    # Server-only admin business logic
+    └── user-service.ts     # Server-only user business logic
+
+src/client/components/
+├── admin/
+│   ├── UserEditForm.tsx    # Client Component (interactive form)
+│   ├── DataTable.tsx       # Client Component (table interactions)
+│   ├── DeleteButton.tsx    # Client Component (confirmation dialog)
+│   └── SearchInput.tsx     # Client Component (search functionality)
+└── ui/
+    ├── Button.tsx          # Client Component (button interactions)
+    ├── Modal.tsx           # Client Component (modal behavior)
+    └── FormField.tsx       # Client Component (form field logic)
+
+src/shared/components/
+├── layout/
+│   ├── AdminLayout.tsx     # Server/Client compatible layout
+│   └── Navigation.tsx      # Server Component navigation
+└── ui/
+    ├── Badge.tsx           # Server/Client compatible badge
+    └── LoadingSpinner.tsx  # Server/Client compatible spinner
 ```
 
 **Auto-generated TailwindCSS Configuration:**
@@ -283,12 +437,614 @@ module.exports = {
 }
 ```
 
-### Layer 5: RBAC System
+**Modern Component Patterns with Server/Client Separation:**
+
+```typescript
+// src/app/admin/users/page.tsx (Server Component - Data Fetching)
+import { getServerSession } from '@/src/server/services/auth-service';
+import { withDatabase } from '@/src/server/db';
+import { UserDataTable } from '@/src/client/components/admin/UserDataTable';
+import { AdminLayout } from '@/src/shared/components/layout/AdminLayout';
+import type { User } from '@/src/shared/types/user';
+
+export default async function UsersPage() {
+  // Server-side authentication check
+  const session = await getServerSession();
+  if (!session) {
+    redirect('/login');
+  }
+
+  // Server-side data fetching
+  const users = await withDatabase(async (db) => {
+    return await db
+      .selectFrom('users')
+      .selectAll()
+      .orderBy('createdAt', 'desc')
+      .execute();
+  });
+
+  return (
+    <AdminLayout title="Users" session={session}>
+      <div className="admin-content">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+          <a 
+            href="/admin/users/new" 
+            className="btn-primary"
+          >
+            Add User
+          </a>
+        </div>
+        
+        {/* Client Component for interactivity */}
+        <UserDataTable users={users} />
+      </div>
+    </AdminLayout>
+  );
+}
+
+// src/client/components/admin/UserDataTable.tsx (Client Component - Interactivity)
+'use client';
+
+import { useState } from 'react';
+import { deleteUserAction } from '@/src/server/actions/user-actions';
+import type { User } from '@/src/shared/types/user';
+
+interface UserDataTableProps {
+  users: User[];
+}
+
+export function UserDataTable({ users }: UserDataTableProps) {
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+  const handleDelete = async (userId: string) => {
+    setIsDeleting(userId);
+    try {
+      await deleteUserAction(userId);
+      // The page will revalidate automatically via Server Actions
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  return (
+    <div className="data-table">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Name
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Email
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Created
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {users.map((user) => (
+            <tr key={user.id}>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {user.name || 'No name'}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {user.email}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {new Date(user.createdAt).toLocaleDateString()}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div className="flex space-x-2">
+                  <a
+                    href={`/admin/users/${user.id}/edit`}
+                    className="text-indigo-600 hover:text-indigo-900"
+                  >
+                    Edit
+                  </a>
+                  <button
+                    onClick={() => handleDelete(user.id)}
+                    disabled={isDeleting === user.id}
+                    className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                  >
+                    {isDeleting === user.id ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// src/server/actions/user-actions.ts (Server Actions)
+'use server';
+
+import { withDatabase } from '../db';
+import { requireAuth } from '../services/auth-service';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+export async function deleteUserAction(userId: string) {
+  // Server-side authentication and authorization
+  const session = await requireAuth();
+  
+  // Server-side business logic
+  await withDatabase(async (db) => {
+    await db
+      .deleteFrom('users')
+      .where('id', '=', userId)
+      .execute();
+  });
+  
+  // Revalidate the page to show updated data
+  revalidatePath('/admin/users');
+}
+
+export async function createUserAction(formData: FormData) {
+  const session = await requireAuth();
+  
+  const userData = {
+    email: formData.get('email') as string,
+    name: formData.get('name') as string,
+  };
+  
+  await withDatabase(async (db) => {
+    await db
+      .insertInto('users')
+      .values({
+        id: crypto.randomUUID(),
+        ...userData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .execute();
+  });
+  
+  revalidatePath('/admin/users');
+  redirect('/admin/users');
+}
+```
+
+### Layer 5: Modern RBAC System (Server Actions + Type Safety)
 **What it does:**
 - Role and Permission models (auto-created)
-- Middleware for route protection
-- Helpers for Server Actions
-- Admin UI for management
+- Modern middleware for route protection with Edge Runtime
+- Type-safe Server Actions for authorization
+- Admin UI for management with client/server separation
+- Progressive enhancement patterns
+
+**Modern RBAC Implementation:**
+```typescript
+// src/server/services/rbac-service.ts (Server-only)
+import 'server-only';
+import { withDatabase } from '../db';
+import { getServerSession } from './auth-service';
+import type { Session } from '../../shared/types/auth';
+
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
+  permissions: Permission[];
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  resource: string;
+  action: string;
+}
+
+export async function getUserRoles(userId: string): Promise<Role[]> {
+  return await withDatabase(async (db) => {
+    const roles = await db
+      .selectFrom('user_roles')
+      .innerJoin('roles', 'roles.id', 'user_roles.role_id')
+      .leftJoin('role_permissions', 'role_permissions.role_id', 'roles.id')
+      .leftJoin('permissions', 'permissions.id', 'role_permissions.permission_id')
+      .where('user_roles.user_id', '=', userId)
+      .selectAll(['roles', 'permissions'])
+      .execute();
+
+    // Group permissions by role
+    const roleMap = new Map<string, Role>();
+    
+    for (const row of roles) {
+      if (!roleMap.has(row.roles.id)) {
+        roleMap.set(row.roles.id, {
+          id: row.roles.id,
+          name: row.roles.name,
+          description: row.roles.description,
+          permissions: [],
+        });
+      }
+      
+      if (row.permissions) {
+        const role = roleMap.get(row.roles.id)!;
+        if (!role.permissions.find(p => p.id === row.permissions.id)) {
+          role.permissions.push({
+            id: row.permissions.id,
+            name: row.permissions.name,
+            resource: row.permissions.resource,
+            action: row.permissions.action,
+          });
+        }
+      }
+    }
+    
+    return Array.from(roleMap.values());
+  });
+}
+
+export async function requireRole(roleName: string): Promise<Session> {
+  const session = await getServerSession();
+  if (!session) {
+    throw new Error('Authentication required');
+  }
+
+  const userRoles = await getUserRoles(session.user.id);
+  const hasRole = userRoles.some(role => role.name === roleName);
+  
+  if (!hasRole) {
+    throw new Error(`Role '${roleName}' required`);
+  }
+  
+  return session;
+}
+
+export async function requirePermission(resource: string, action: string): Promise<Session> {
+  const session = await getServerSession();
+  if (!session) {
+    throw new Error('Authentication required');
+  }
+
+  const userRoles = await getUserRoles(session.user.id);
+  const hasPermission = userRoles.some(role =>
+    role.permissions.some(permission =>
+      permission.resource === resource && permission.action === action
+    )
+  );
+  
+  if (!hasPermission) {
+    throw new Error(`Permission '${action}' on '${resource}' required`);
+  }
+  
+  return session;
+}
+
+// src/server/actions/admin-actions.ts (Server Actions with RBAC)
+'use server';
+
+import { requireRole, requirePermission } from '../services/rbac-service';
+import { withDatabase } from '../db';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+export async function createRoleAction(formData: FormData) {
+  await requireRole('admin');
+  
+  const roleData = {
+    name: formData.get('name') as string,
+    description: formData.get('description') as string,
+  };
+  
+  await withDatabase(async (db) => {
+    await db
+      .insertInto('roles')
+      .values({
+        id: crypto.randomUUID(),
+        ...roleData,
+        createdAt: new Date(),
+      })
+      .execute();
+  });
+  
+  revalidatePath('/admin/roles');
+  redirect('/admin/roles');
+}
+
+export async function assignRoleToUserAction(userId: string, roleId: string) {
+  await requirePermission('users', 'manage');
+  
+  await withDatabase(async (db) => {
+    await db
+      .insertInto('user_roles')
+      .values({ user_id: userId, role_id: roleId })
+      .execute();
+  });
+  
+  revalidatePath('/admin/users');
+}
+
+// src/shared/types/rbac.ts (Shared types)
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: Date;
+  permissions?: Permission[];
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  resource: string;
+  action: string;
+  createdAt: Date;
+}
+
+export interface UserRole {
+  user_id: string;
+  role_id: string;
+}
+
+export interface RolePermission {
+  role_id: string;
+  permission_id: string;
+}
+
+// src/app/admin/roles/page.tsx (Server Component with RBAC)
+import { requireRole } from '@/src/server/services/rbac-service';
+import { withDatabase } from '@/src/server/db';
+import { RoleDataTable } from '@/src/client/components/admin/RoleDataTable';
+import { AdminLayout } from '@/src/shared/components/layout/AdminLayout';
+
+export default async function RolesPage() {
+  // Server-side RBAC check
+  const session = await requireRole('admin');
+  
+  // Server-side data fetching
+  const roles = await withDatabase(async (db) => {
+    return await db
+      .selectFrom('roles')
+      .selectAll()
+      .orderBy('createdAt', 'desc')
+      .execute();
+  });
+
+  return (
+    <AdminLayout title="Roles" session={session}>
+      <div className="admin-content">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Roles</h1>
+          <a href="/admin/roles/new" className="btn-primary">
+            Add Role
+          </a>
+        </div>
+        
+        <RoleDataTable roles={roles} />
+      </div>
+    </AdminLayout>
+  );
+}
+
+// src/client/hooks/use-auth.ts (Client-side auth hook)
+'use client';
+
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
+export function useAuth() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  return {
+    session,
+    isLoading: status === 'loading',
+    isAuthenticated: !!session,
+  };
+}
+
+export function useRequireAuth() {
+  const { session, isLoading, isAuthenticated } = useAuth();
+  
+  if (isLoading) {
+    return { session: null, isLoading: true, isAuthenticated: false };
+  }
+  
+  if (!isAuthenticated) {
+    return { session: null, isLoading: false, isAuthenticated: false };
+  }
+  
+  return { session, isLoading: false, isAuthenticated: true };
+}
+```
+
+**Modern Middleware with Edge Runtime:**
+```typescript
+// middleware.ts (Edge Runtime - Modern Next.js 15+)
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { auth } from '@/src/server/services/auth-service';
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
+  // Protect admin routes
+  if (pathname.startsWith('/admin')) {
+    try {
+      const session = await auth();
+      
+      if (!session?.user) {
+        return NextResponse.redirect(new URL('/login', request.url));
+      }
+      
+      // Add user info to headers for server components
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set('x-user-id', session.user.id);
+      requestHeaders.set('x-user-email', session.user.email);
+      
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    } catch (error) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+  
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    '/admin/:path*',
+    '/api/protected/:path*',
+  ],
+};
+
+// src/server/utils/auth.ts (Server-only auth utilities)
+import 'server-only';
+import { headers } from 'next/headers';
+import { getServerSession } from '../services/auth-service';
+
+export async function getCurrentUser() {
+  const session = await getServerSession();
+  return session?.user || null;
+}
+
+export async function getCurrentUserId(): Promise<string | null> {
+  const headersList = headers();
+  const userId = headersList.get('x-user-id');
+  return userId;
+}
+
+export async function requireCurrentUser() {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('Authentication required');
+  }
+  return user;
+}
+```
+
+**TypeScript Patterns for Server/Client Separation:**
+```typescript
+// src/shared/types/api.ts (Shared API types)
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+export interface PaginatedResponse<T> extends ApiResponse<T[]> {
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+// src/shared/types/user.ts (Shared user types)
+export interface User {
+  id: string;
+  email: string;
+  name: string | null;
+  emailVerified: Date | null;
+  image: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateUserData {
+  email: string;
+  name?: string;
+}
+
+export interface UpdateUserData {
+  email?: string;
+  name?: string;
+}
+
+// src/server/types/database.ts (Server-only database types)
+import 'server-only';
+import type { Database } from '../db/types';
+
+// Re-export with server-only marker
+export type { Database };
+
+// Server-only query result types
+export type UserWithRoles = Database['users'] & {
+  roles: Database['roles'][];
+};
+
+export type RoleWithPermissions = Database['roles'] & {
+  permissions: Database['permissions'][];
+};
+
+// src/client/types/hooks.ts (Client-only hook types)
+'use client';
+
+export interface UseAuthReturn {
+  session: any; // Will be properly typed with NextAuth
+  isLoading: boolean;
+  isAuthenticated: boolean;
+}
+
+export interface UseRequireAuthReturn extends UseAuthReturn {
+  // Additional client-specific properties
+}
+
+// src/shared/utils/validation.ts (Shared validation utilities)
+import { z } from 'zod';
+
+export const userSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(1).optional(),
+});
+
+export const roleSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+});
+
+export type UserInput = z.infer<typeof userSchema>;
+export type RoleInput = z.infer<typeof roleSchema>;
+
+// src/server/utils/validation.ts (Server-only validation)
+import 'server-only';
+import { userSchema, roleSchema } from '../../shared/utils/validation';
+
+export async function validateUserInput(data: unknown) {
+  return await userSchema.parseAsync(data);
+}
+
+export async function validateRoleInput(data: unknown) {
+  return await roleSchema.parseAsync(data);
+}
+
+// src/client/utils/client-validation.ts (Client-only validation)
+'use client';
+
+import { userSchema, roleSchema } from '../../shared/utils/validation';
+
+export function validateUserInputClient(data: unknown) {
+  return userSchema.safeParse(data);
+}
+
+export function validateRoleInputClient(data: unknown) {
+  return roleSchema.safeParse(data);
+}
+```
 
 **Auto-generated models:**
 ```typescript
@@ -733,19 +1489,30 @@ program
       'autoprefixer',
       '@tailwindcss/forms',
       '@tailwindcss/typography',
+      // Modern architecture dependencies
+      'server-only',
+      'client-only',
+      'zod',
+      '@types/better-sqlite3',
     ]);
 
-    // 3. Copy templates
+    // 3. Create modern folder structure
+    await scaffold.createModernStructure(projectName);
+
+    // 4. Copy templates with server/client separation
     await scaffold.copyTemplates(projectName);
 
-    // 4. Configure TailwindCSS
+    // 5. Configure TailwindCSS
     await scaffold.configureTailwindCSS(projectName);
 
-    // 5. Initialize database
+    // 6. Initialize database
     await scaffold.initializeDatabase(projectName);
 
-    // 6. Run initial migration
+    // 7. Run initial migration
     await scaffold.runMigration(projectName, '001_initial.sql');
+
+    // 8. Generate TypeScript configuration
+    await scaffold.generateTypeScriptConfig(projectName);
 
     console.log('✅ Done! Run: cd', projectName, '&& npm run dev');
   });
@@ -886,6 +1653,122 @@ module.exports = {
   await fs.writeFile(
     path.join(projectPath, 'app', 'globals.css'),
     globalsCSS
+  );
+}
+
+// Modern folder structure creation
+export async function createModernStructure(projectPath: string) {
+  const directories = [
+    'src/server/actions',
+    'src/server/db/queries',
+    'src/server/services',
+    'src/server/utils',
+    'src/client/components/ui',
+    'src/client/components/admin',
+    'src/client/hooks',
+    'src/client/utils',
+    'src/shared/components/layout',
+    'src/shared/components/ui',
+    'src/shared/types',
+    'src/shared/utils',
+    'src/shared/constants',
+    'src/app/admin',
+    'src/app/api/auth',
+    'database',
+  ];
+
+  for (const dir of directories) {
+    await fs.mkdir(path.join(projectPath, dir), { recursive: true });
+  }
+
+  // Create .gitkeep files for empty directories
+  const gitkeepFiles = [
+    'src/server/actions/.gitkeep',
+    'src/server/db/queries/.gitkeep',
+    'src/client/components/ui/.gitkeep',
+    'src/shared/components/ui/.gitkeep',
+  ];
+
+  for (const gitkeep of gitkeepFiles) {
+    await fs.writeFile(path.join(projectPath, gitkeep), '');
+  }
+}
+
+// TypeScript configuration generation
+export async function generateTypeScriptConfig(projectPath: string) {
+  // Create tsconfig.json with modern settings
+  const tsconfig = {
+    compilerOptions: {
+      target: 'ES2022',
+      lib: ['dom', 'dom.iterable', 'es6'],
+      allowJs: true,
+      skipLibCheck: true,
+      strict: true,
+      noEmit: true,
+      esModuleInterop: true,
+      module: 'esnext',
+      moduleResolution: 'bundler',
+      resolveJsonModule: true,
+      isolatedModules: true,
+      jsx: 'preserve',
+      incremental: true,
+      plugins: [
+        {
+          name: 'next',
+        },
+      ],
+      baseUrl: '.',
+      paths: {
+        '@/*': ['./src/*'],
+        '@/server/*': ['./src/server/*'],
+        '@/client/*': ['./src/client/*'],
+        '@/shared/*': ['./src/shared/*'],
+      },
+    },
+    include: [
+      'next-env.d.ts',
+      '**/*.ts',
+      '**/*.tsx',
+      '.next/types/**/*.ts',
+    ],
+    exclude: ['node_modules'],
+  };
+
+  await fs.writeFile(
+    path.join(projectPath, 'tsconfig.json'),
+    JSON.stringify(tsconfig, null, 2)
+  );
+
+  // Create path mapping file for better imports
+  const pathMapping = `// Auto-generated path mappings for NOORMME
+// This file helps with import resolution in the modern architecture
+
+export const paths = {
+  server: {
+    actions: '@/server/actions',
+    db: '@/server/db',
+    services: '@/server/services',
+    utils: '@/server/utils',
+  },
+  client: {
+    components: '@/client/components',
+    hooks: '@/client/hooks',
+    utils: '@/client/utils',
+  },
+  shared: {
+    components: '@/shared/components',
+    types: '@/shared/types',
+    utils: '@/shared/utils',
+    constants: '@/shared/constants',
+  },
+} as const;
+
+export type Paths = typeof paths;
+`;
+
+  await fs.writeFile(
+    path.join(projectPath, 'src', 'paths.ts'),
+    pathMapping
   );
 }
 ```

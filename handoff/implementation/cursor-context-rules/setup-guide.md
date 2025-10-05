@@ -81,7 +81,7 @@ See `rule-customization.md` for detailed customization instructions.
 - [ ] Cursor IDE recognizes the rules
 - [ ] AI generates code following NOORMME patterns
 - [ ] Code includes proper TypeScript types
-- [ ] Code follows Marie Kondo methodology
+- [ ] Code follows NORMIE DEV methodology
 
 ## Troubleshooting
 

@@ -1,8 +1,8 @@
-# Marie Kondo Methodology for Framework Development
+# NORMIE DEV Methodology for Framework Development
 
 ## The Philosophy
 
-We applied Marie Kondo's organizational principles to framework development, creating NOORMME as a "decluttered" development experience that sparks joy for developers.
+We applied organizational principles inspired by Marie Kondo to framework development, creating NOORMME as a "decluttered" development experience that sparks joy for developers.
 
 ## Core Principles
 
@@ -160,7 +160,7 @@ npm run dev
 # ... 5 minutes later
 ```
 
-## The Marie Kondo Developer Experience
+## The NORMIE DEV Developer Experience
 
 ### What Sparks Joy
 
@@ -214,7 +214,7 @@ npm run dev
 
 ### For Architecture Decisions
 
-**Ask: "What would Marie Kondo do?"**
+**Ask: "What would NORMIE DEV do?"**
 - Keep only what sparks joy
 - Thank complexity for its service
 - Let go of what doesn't serve
@@ -226,7 +226,7 @@ npm run dev
 
 **"Finally, an ORM that doesn't make me feel dumb."**
 
-This captures the Marie Kondo philosophy:
+This captures the NORMIE DEV philosophy:
 - **No complexity** that makes you feel overwhelmed
 - **No abstraction** that makes you feel lost
 - **No configuration** that makes you feel frustrated
@@ -244,7 +244,7 @@ Each step should spark joy, not frustration.
 
 ## Conclusion
 
-The Marie Kondo methodology for framework development means:
+The NORMIE DEV methodology for framework development means:
 
 1. **Identify what doesn't spark joy** (complexity, friction, abstraction)
 2. **Thank it for its service** (it taught us valuable lessons)
@@ -258,4 +258,4 @@ The Marie Kondo methodology for framework development means:
 
 ---
 
-*"The best framework is the one that makes you forget you're using a framework."* - Marie Kondo (probably)
+*"The best framework is the one that makes you forget you're using a framework."* - NORMIE DEV Philosophy

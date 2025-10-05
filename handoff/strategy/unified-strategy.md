@@ -61,7 +61,7 @@ Instead of creating new frameworks, NOORMME composes existing tools:
 
 ## Implementation Philosophy
 
-### Marie Kondo Methodology
+### NORMIE DEV Methodology
 **"Does this spark joy?"**
 - ❌ Complex database servers → ✅ Single SQLite file
 - ❌ Hours of boilerplate → ✅ Auto-generated methods

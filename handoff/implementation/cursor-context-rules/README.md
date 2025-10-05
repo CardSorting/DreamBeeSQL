@@ -33,7 +33,7 @@ ls .cursor/rules/
 - **`architecture.mdc`** - Architectural principles and patterns
 - **`coding-style.mdc`** - Coding style and conventions  
 - **`database.mdc`** - Database patterns and SQLite optimization
-- **`marie-kondo.mdc`** - Marie Kondo methodology for development
+- **`normie-dev.mdc`** - NORMIE DEV methodology for development
 - **`nextjs-patterns.mdc`** - Next.js organizational patterns
 
 ## Documentation

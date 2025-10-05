@@ -271,7 +271,7 @@ my-app/
 └── next.config.js    # Standard Next.js config
 ```
 
-## The Marie Kondo Connection
+## The NORMIE DEV Connection
 
 ### "Does this spark joy?"
 

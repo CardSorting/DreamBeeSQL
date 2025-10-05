@@ -400,7 +400,7 @@ This roadmap outlines the complete implementation strategy for NOORMME, broken d
 
 This roadmap provides a clear path to completing NOORMME as a unified SQLite automation and Next.js organizational toolkit. Each phase builds upon the previous one, ensuring a solid foundation while delivering incremental value.
 
-The implementation follows the Marie Kondo methodology - keeping only what sparks joy (simplicity, performance, organization) while eliminating complexity and friction.
+The implementation follows the NORMIE DEV methodology - keeping only what sparks joy (simplicity, performance, organization) while eliminating complexity and friction.
 
 **Timeline**: 6 weeks to complete implementation
 **Goal**: Make NOORMME the go-to solution for Next.js developers who want both powerful database automation and proven organizational patterns

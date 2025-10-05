@@ -94,7 +94,7 @@ NOORMME provides:
 
 ### Core Product Principles
 
-#### 1. Marie Kondo Methodology
+#### 1. NORMIE DEV Methodology
 **"Does this spark joy?"**
 - Eliminate complexity that doesn't add value
 - Keep only what makes developers happy
@@ -378,7 +378,7 @@ NOORMME's product strategy successfully positions it as a unique solution in the
 4. **Scalable Business Model**: Free tier with future pro tier
 5. **Strong Go-to-Market**: Content marketing, community building, developer relations
 
-The strategy leverages the Marie Kondo methodology - keeping only what sparks joy (simplicity, performance, organization) while eliminating complexity and friction.
+The strategy leverages the NORMIE DEV methodology - keeping only what sparks joy (simplicity, performance, organization) while eliminating complexity and friction.
 
 **Success Criteria**: NOORMME becomes the go-to solution for Next.js developers who want both powerful database automation and proven organizational patterns.
 

@@ -21,8 +21,25 @@ npx create-noormme-app my-app
 cd my-app
 npm run dev
 
-# You now have everything, working.
+# You get:
+# Working database ✅
+# Working auth ✅
+# Working admin panel ✅
+# Working permissions ✅
+# Ready to build features ✅
+
+# Batteries included. 🔋
 ```
+
+## The Stack:
+
+✅ **Database:** Zero-config SQLite (with auto-discovery)
+✅ **Auth:** NextAuth pre-configured (never rewrite again)
+✅ **Admin:** Auto-generated admin panel (Django admin vibes)
+✅ **RBAC:** Built-in role-based access control
+✅ **Framework:** Next.js App Router
+✅ **Language:** TypeScript
+✅ **Philosophy:** "Just works"
 
 ---
 
@@ -206,39 +223,52 @@ After `npx create-noormme-app`:
 
 ## 🚧 Development Roadmap
 
-### Phase 1: Zero-Config Setup ⚡
-Priority: **CRITICAL**
-- [ ] `create-noormme-app` CLI
-- [ ] Auto-configure SQLite
-- [ ] Pre-integrated NextAuth
-- [ ] Default auth schemas
+### Priority 1: Project Generator (Week 1) ⚡
+**Task:** CLI that scaffolds complete working app
+**Output:**
+```bash
+npx create-noormme-app my-app
+cd my-app
+npm run dev
 
-### Phase 2: Admin Panel ⚡
-Priority: **CRITICAL**
-- [ ] Auto-generated UI
-- [ ] CRUD operations
-- [ ] Auth-protected routes
-- [ ] Responsive dashboard
+# Opens to:
+# - Working login page
+# - Working admin panel  
+# - Working database
+# - Working RBAC
+# - Ready to build features
+```
+**Success:** User has working app in 2 minutes
 
-### Phase 3: RBAC System 📋
-Priority: **HIGH**
-- [ ] Role/Permission models
-- [ ] Access control middleware
-- [ ] Server Action helpers
-- [ ] Admin management UI
+### Priority 2: Admin Panel (Week 2-3) ⚡
+**Task:** Auto-generated admin interface
+**Features:**
+- Table list view (all tables from DB)
+- CRUD operations per table
+- Relationship handling
+- Search and filters
+- Bulk actions
+- Export to CSV
 
-### Phase 4: Schema Management 📋
-Priority: **HIGH**
-- [ ] Zero-boilerplate schemas
-- [ ] Auto-migration (dev)
-- [ ] Migration files (prod)
+**Inspiration:** Django admin, but React
 
-### Phase 5: CLI Tools 📋
-Priority: **MEDIUM**
-- [ ] `noormme dev`
-- [ ] `noormme db:migrate`
-- [ ] `noormme db:seed`
-- [ ] `noormme generate:model`
+### Priority 3: RBAC System (Week 4) 📋
+**Task:** Built-in permission system
+**Features:**
+- Role definitions
+- Permission checks
+- Middleware integration
+- API route protection
+- Component-level protection
+
+### Priority 4: Auth Integration (Week 5) 📋
+**Task:** NextAuth fully configured and working
+**Features:**
+- Pre-configured for SQLite
+- Email/password working
+- OAuth provider support
+- Session management
+- User registration flow
 
 ---
 
@@ -342,6 +372,17 @@ noormme generate:model Post title:string content:text
 **Goal:** Zero → Production in minutes, not hours
 
 **Inspiration:** Rails scaffolding + Django admin + Next.js patterns
+
+## Comparison:
+- Django: Batteries included, but Python
+- NOORMME: Batteries included, but Next.js 🔥
+
+## Non-Goals
+What We're NOT:
+- ❌ Multi-database (SQLite only, that's the point)
+- ❌ Headless CMS (we're a framework)
+- ❌ Low-code builder (we're for developers)
+- ❌ Everything to everyone (we're focused)
 
 ---
 

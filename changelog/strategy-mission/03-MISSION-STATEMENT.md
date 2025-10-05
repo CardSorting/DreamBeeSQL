@@ -4,11 +4,13 @@
 
 **"Django's Batteries-Included Philosophy for Next.js"**
 
-NOORMME is a zero-config framework for Next.js that provides instant setup for SQLite, authentication, admin panel, and RBAC - built on Kysely for type-safe database operations.
+NOORMME is a batteries-included framework for Next.js that eliminates setup hell by providing instant configuration for SQLite, authentication, admin panel, and RBAC - built on proven tools like Kysely and NextAuth.
 
 ## Vision
 
 To become the fastest way to start a production-ready Next.js application, eliminating hours of boilerplate setup and letting developers focus on building features instead of infrastructure.
+
+**From idea to deployed app in < 2 minutes.**
 
 ## Core Values
 
@@ -19,10 +21,13 @@ To become the fastest way to start a production-ready Next.js application, elimi
 - **Customizable**: Override defaults when needed
 
 ### 2. Batteries Included
-- **SQLite Auto-Configured**: WAL mode, optimal pragmas, ready to use
-- **NextAuth Pre-Integrated**: OAuth providers configured, auth tables created
-- **Admin Panel Generated**: Full CRUD UI at `/admin` instantly
-- **RBAC Built-In**: Roles and permissions working out-of-box
+- **Database**: Zero-config SQLite with auto-discovery
+- **Auth**: NextAuth pre-configured (never rewrite again)
+- **Admin**: Auto-generated admin panel (Django admin vibes)
+- **RBAC**: Built-in role-based access control
+- **Framework**: Next.js App Router
+- **Language**: TypeScript
+- **Philosophy**: "Just works"
 
 ### 3. Next.js Native
 - **App Router First**: Optimized for Next.js 13+ App Router
@@ -48,9 +53,25 @@ To become the fastest way to start a production-ready Next.js application, elimi
 - **CLI Scaffolding**: `create-noormme-app` for instant project setup
 - **Database Setup**: Auto-configured SQLite with optimal settings
 - **Authentication**: NextAuth pre-integrated with adapters
-- **Admin Panel**: Auto-generated CRUD interface
+- **Admin Panel**: Auto-generated CRUD interface (Django admin vibes)
 - **RBAC System**: Role-based access control ready to use
 - **Schema Management**: Zero-boilerplate schema definition
+
+### The Promise
+```bash
+npx create-noormme-app my-app
+cd my-app
+npm run dev
+
+# You get:
+# Working database ✅
+# Working auth ✅
+# Working admin panel ✅
+# Working permissions ✅
+# Ready to build features ✅
+
+# Batteries included. 🔋
+```
 
 ### Developer Tools
 - **CLI Commands**: `noormme dev`, `db:migrate`, `generate:model`
@@ -66,7 +87,7 @@ To become the fastest way to start a production-ready Next.js application, elimi
 
 ## What We Don't Build
 
-### Not a Query Builder
+### Not an ORM
 - **Use Kysely Directly**: No abstraction over Kysely's API
 - **No ORM Wrapper**: Kysely is already excellent
 - **No Custom DSL**: TypeScript + Kysely is enough
@@ -83,6 +104,11 @@ To become the fastest way to start a production-ready Next.js application, elimi
 - **Not Express/Fastify**: Different use cases
 - **App Router Focus**: Built for modern Next.js
 - **Opinionated**: Best practices baked in
+
+### Not a Headless CMS
+- **We're a Framework**: Not a content management system
+- **Not Low-Code**: We're for developers, not no-code users
+- **Not Everything to Everyone**: We're focused on Next.js + SQLite
 
 ## Target Audience
 
@@ -291,6 +317,8 @@ time npx create-noormme-app test-app
 # Target: < 120 seconds total
 ```
 
+**Success**: User has working app in 2 minutes
+
 ### Feature Completeness
 
 **Goal**: Everything needed for production
@@ -478,3 +506,16 @@ Our vision is to become the default starting point for Next.js applications, kno
 - **Simplicity**: No configuration needed
 
 We succeed when developers say: *"I went from idea to deployed app in a day."*
+
+**The Pitch:**
+- Django: Batteries included framework for Python
+- Laravel: Batteries included framework for PHP
+- Rails: Batteries included framework for Ruby
+- **NOORMME: Batteries included framework for Next.js**
+
+Stop building auth.
+Stop building admin panels.
+Stop building RBAC.
+Start building features. 🚀
+
+**No pain, everything to gain** 🔋

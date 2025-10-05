@@ -4,6 +4,29 @@
 
 NOORMME is architected as a **batteries-included framework** built around code generation, templating, and configuration automation - not as a runtime ORM layer.
 
+## The Architecture:
+
+```
+┌─────────────────────────────────────┐
+│         Next.js App Router          │
+│     (User's application code)       │
+└─────────────────────────────────────┘
+↓
+┌─────────────────────────────────────┐
+│         NOORMME Framework           │
+│                                     │
+│  ┌──────────┐  ┌──────────┐       │
+│  │   Auth   │  │  Admin   │       │
+│  │(NextAuth)│  │  Panel   │       │
+│  └──────────┘  └──────────┘       │
+│                                     │
+│  ┌──────────┐  ┌──────────┐       │
+│  │   RBAC   │  │    DB    │       │
+│  │  System  │  │ (SQLite) │       │
+│  └──────────┘  └──────────┘       │
+└─────────────────────────────────────┘
+```
+
 ## Core Architectural Principles
 
 ### 1. Generate, Don't Abstract

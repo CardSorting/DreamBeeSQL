@@ -17,6 +17,16 @@ npm run dev
 # ✅ RBAC (roles & permissions)
 ```
 
+## The Stack:
+
+✅ **Database:** Zero-config SQLite (with auto-discovery)
+✅ **Auth:** NextAuth pre-configured (never rewrite again)
+✅ **Admin:** Auto-generated admin panel (Django admin vibes)
+✅ **RBAC:** Built-in role-based access control
+✅ **Framework:** Next.js App Router
+✅ **Language:** TypeScript
+✅ **Philosophy:** "Just works"
+
 ---
 
 ## Technology Stack
@@ -186,7 +196,7 @@ CREATE TABLE user_roles (
 
 ## Implementation Roadmap
 
-### Phase 1: CLI & Zero-Config Setup ⚡
+### Phase 1: Project Generator (Week 1) ⚡
 
 **Goal:** One command creates working app
 
@@ -197,6 +207,44 @@ CREATE TABLE user_roles (
 4. Generate auth schemas
 5. Set up NextAuth with adapter
 6. Create initial migration
+
+**Success:** User has working app in 2 minutes
+
+### Phase 2: Admin Panel (Week 2-3) ⚡
+
+**Goal:** Auto-generated admin interface
+
+**Features:**
+- Table list view (all tables from DB)
+- CRUD operations per table
+- Relationship handling
+- Search and filters
+- Bulk actions
+- Export to CSV
+
+**Inspiration:** Django admin, but React
+
+### Phase 3: RBAC System (Week 4) 📋
+
+**Goal:** Built-in permission system
+
+**Features:**
+- Role definitions
+- Permission checks
+- Middleware integration
+- API route protection
+- Component-level protection
+
+### Phase 4: Auth Integration (Week 5) 📋
+
+**Goal:** NextAuth fully configured and working
+
+**Features:**
+- Pre-configured for SQLite
+- Email/password working
+- OAuth provider support
+- Session management
+- User registration flow
 
 **Files to create:**
 ```
@@ -286,16 +334,47 @@ export async function initializeDatabase(projectPath: string) {
 }
 ```
 
-### Phase 2: Admin Panel Generation ⚡
+## Configuration API
 
-**Goal:** Auto-generated admin UI for all models
+**noormme.config.ts**
+```typescript
+import { defineConfig } from 'noormme'
 
-**Tasks:**
-1. Create admin layout and navigation
-2. Build reusable DataTable component
-3. Generate CRUD pages for each model
-4. Implement Server Actions for mutations
-5. Add authentication protection
+export default defineConfig({
+  // Database (optional, defaults work)
+  database: {
+    path: './prisma/dev.db',
+    migrations: './migrations'
+  },
+  
+  // Auth (optional, add OAuth if wanted)
+  auth: {
+    providers: {
+      // google: { ... }
+      // github: { ... }
+    },
+    pages: {
+      signIn: '/login',  // Customize if wanted
+    }
+  },
+  
+  // Admin (optional, customize if wanted)
+  admin: {
+    path: '/admin',
+    title: 'My App Admin',
+    exclude: ['sessions', 'tokens']  // Hide tables
+  },
+  
+  // RBAC (optional, extend if wanted)
+  rbac: {
+    roles: {
+      // Custom roles
+    }
+  }
+})
+```
+
+**Philosophy:** Everything works with zero config, customize if you want.
 
 **File structure:**
 ```
@@ -795,23 +874,49 @@ describe('RBAC', () => {
 
 ---
 
-## Next Steps
+## Success Criteria
 
-### Immediate (Phase 1)
-1. Build `create-noormme-app` CLI
-2. Create project templates
-3. Implement database initialization
-4. Generate auth schemas
+**Technical:**
+- npx create-noormme-app generates working app
+- User can log in immediately
+- Admin panel shows all tables
+- CRUD operations work
+- RBAC protects routes
+- All batteries included
 
-### Short-term (Phases 2-3)
-1. Admin panel components
-2. Page generators
-3. RBAC implementation
+**Developer Experience:**
+- Working app in < 5 minutes
+- Never write auth setup again
+- Never build admin CRUD again
+- Never implement RBAC again
+- Just build features
 
-### Long-term (Phases 4-5)
-1. Schema DSL
-2. Migration system
-3. CLI tools
+## Comparison:
+- Django: Batteries included, but Python
+- NOORMME: Batteries included, but Next.js 🔥
+
+## Non-Goals
+What We're NOT:
+- ❌ Multi-database (SQLite only, that's the point)
+- ❌ Headless CMS (we're a framework)
+- ❌ Low-code builder (we're for developers)
+- ❌ Everything to everyone (we're focused)
+
+## Timeline
+**Month 1:**
+- Week 1: CLI/generator
+- Week 2-3: Admin panel
+- Week 4: RBAC system
+
+**Month 2:**
+- Week 1: Auth integration
+- Week 2-3: Documentation
+- Week 4: Example apps
+
+**Month 3:**
+- Polish
+- Testing
+- Launch
 
 ---
 

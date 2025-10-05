@@ -2,179 +2,189 @@
 
 ## Core Mission
 
-**"Django's ORM Without The Framework Prison"**
+**"Django-Inspired Type-Safe ORM Built on Kysely for Next.js"**
 
-NOORMME brings Django's powerful ORM patterns to Next.js applications while maintaining framework independence and avoiding vendor lock-in.
+NOORMME is a specialized ORM built on Kysely that brings Django's elegant API patterns to Next.js + SQLite applications, with seamless NextAuth integration and full TypeScript support.
 
 ## Vision
 
-To become the go-to ORM for Next.js developers who want Django-level power and simplicity without being constrained by framework limitations.
+To become the go-to ORM for Next.js developers who want Django's intuitive API patterns combined with Kysely's type-safety and performance, specialized for SQLite.
 
 ## Core Values
 
-### 1. Framework Independence
-- **No Lock-in**: Works with any existing database
-- **Portable**: Easy to migrate between projects
-- **Flexible**: Adapts to different development patterns
+### 1. Built on Kysely
+- **Type-Safe Foundation**: Leverages Kysely's excellent TypeScript inference
+- **Query Builder**: Kysely's powerful, composable query building
+- **SQLite Optimized**: Built specifically for SQLite with Kysely
+- **Performance**: Kysely's lightweight, fast query execution
 
-### 2. Django-Inspired Patterns
-- **Auto-Discovery**: Automatic schema detection and type generation
-- **Repository Pattern**: Clean, consistent data access
-- **Relationship Loading**: Powerful relationship management
-- **Migration System**: Django-style database migrations
+### 2. Django-Inspired API
+- **Familiar Patterns**: Django-style `.objects.filter()` and query methods
+- **Intuitive API**: Easy-to-learn query interface for Django developers
+- **Relationship Loading**: Simplified eager/lazy loading patterns
+- **Clean Syntax**: Readable, expressive query construction
 
-### 3. Next.js Optimization
-- **App Router First**: Optimized for Next.js App Router patterns
+### 3. Next.js Specialization
+- **App Router First**: Optimized for Next.js 13+ App Router patterns
 - **Server Components**: Seamless data fetching integration
 - **Server Actions**: Form handling and mutations
 - **Edge Runtime**: Full compatibility with Edge Runtime
 
-### 4. Production Readiness
-- **Performance**: Optimized for speed and efficiency
-- **Reliability**: Comprehensive error handling and recovery
-- **Scalability**: Connection pooling and query optimization
-- **Monitoring**: Built-in performance metrics and analysis
+### 4. SQLite Focus
+- **Single Database**: Specialized for SQLite, not generic multi-database
+- **WAL Mode**: Optimized for SQLite's Write-Ahead Logging
+- **Auto-Discovery**: Automatic schema detection from existing SQLite databases
+- **Type Generation**: TypeScript types generated from SQLite schema
 
-### 5. Developer Experience
-- **Type Safety**: Full TypeScript support with generated types
-- **Error Handling**: Descriptive errors with actionable suggestions
-- **Documentation**: Django-level quality documentation
-- **Simplicity**: Easy to learn and use
+### 5. NextAuth Integration
+- **Built-in Adapter**: Native NextAuth database adapter
+- **Session Management**: Optimized session storage and retrieval
+- **User Authentication**: Seamless integration with NextAuth patterns
+- **Type Safety**: Fully typed authentication models
 
 ## What We Build
 
-### Core Features
-- **Auto-Discovery**: Automatically detect and work with existing databases
-- **Type Generation**: Generate TypeScript types from database schema
-- **Repository Pattern**: Consistent, type-safe data access
-- **Relationship Loading**: Load related data efficiently
-- **Migration System**: Manage database schema changes
-- **Performance Optimization**: Query caching, connection pooling, and optimization
+### Core Features (Built on Kysely)
+- **Django-Style Query API**: `.objects.filter()`, `.exclude()`, `.get()` wrapping Kysely queries
+- **Type Generation**: Generate TypeScript types from SQLite schema
+- **Auto-Discovery**: Automatically introspect existing SQLite databases
+- **Relationship Helpers**: Simplified eager/lazy loading on top of Kysely joins
+- **NextAuth Adapter**: Native integration for authentication and sessions
 
 ### Next.js Integration
-- **Server Components**: Optimized data fetching patterns
+- **Server Components**: Optimized data fetching patterns for RSC
 - **Server Actions**: Form handling and mutations
-- **API Routes**: RESTful endpoint patterns
-- **Middleware**: Authentication and rate limiting
-- **Edge Runtime**: Full compatibility and optimization
+- **Edge Runtime**: Full compatibility with Vercel Edge Runtime
+- **App Router Patterns**: Best practices for Next.js 13+ App Router
 
-### Production Features
-- **Performance Monitoring**: Query analysis and optimization suggestions
-- **Error Handling**: Comprehensive error recovery and reporting
-- **Security**: SQL injection prevention and input validation
-- **Testing**: Comprehensive test suite and benchmarking
+### Developer Experience
+- **Kysely + Django API**: Best of both worlds - type safety and intuitive syntax
+- **TypeScript First**: Full type inference and autocomplete
+- **Error Handling**: Clear, actionable error messages
+- **Documentation**: Comprehensive guides for Next.js + SQLite + Kysely patterns
 
 ## What We Don't Build
 
-### Framework Lock-in
-- **No Framework Dependencies**: Works independently of any framework
-- **No Vendor Lock-in**: Easy to migrate and adapt
-- **No Forced Patterns**: Adapts to existing codebases
+### Not a Django ORM Port
+- **Not Replicating Django**: Django-inspired API, not full Django ORM features
+- **Built on Kysely**: Leverages Kysely, doesn't reinvent query building
+- **SQLite Only**: Specialized for SQLite, not multi-database like Django
+- **Next.js Focused**: Not a generic framework-agnostic ORM
 
-### Over-Engineering
-- **No Complex Abstractions**: Simple, direct patterns
-- **No Unnecessary Features**: Focus on core functionality
-- **No Legacy Support**: Modern, clean codebase
+### Not Generic Multi-Database
+- **SQLite Specialization**: Not PostgreSQL, MySQL, or other databases
+- **Kysely Handles Queries**: We build patterns on top, not replace Kysely
+- **No Complex Migrations**: Simple migration helpers, not full migration framework
+- **No ORM Magic**: Transparent, predictable behavior built on Kysely
 
-### Generic Solutions
-- **No Multi-Database Support**: SQLite specialization
-- **No Generic Patterns**: Next.js-optimized patterns
-- **No One-Size-Fits-All**: Focused, specialized solution
+### Not Framework Agnostic
+- **Next.js First**: Optimized specifically for Next.js patterns
+- **Not Express/Fastify/etc**: Focused on Next.js use cases
+- **Not Generic Node**: Server Components and Server Actions focused
+- **NextAuth Coupled**: Authentication integrated with NextAuth specifically
 
 ## Target Audience
 
 ### Primary Users
-- **Next.js Developers**: Building modern web applications with Server Components
-- **Django Developers**: Transitioning to JavaScript ecosystem with familiar patterns
-- **Full-Stack Developers**: Working with SQLite and Next.js for complete solutions
-- **Startup Teams**: Need rapid development with production quality and scalability
+- **Next.js Developers**: Building modern web applications with Server Components and SQLite
+- **Django Developers**: Transitioning to Next.js who want familiar query patterns
+- **Kysely Users**: Looking for a higher-level, Django-inspired API on top of Kysely
+- **Full-Stack Next.js Teams**: Building complete solutions with NextAuth authentication
+- **Startup Teams**: Need rapid Next.js + SQLite development with type safety
 
 ### Use Cases
 
-#### 1. Rapid Prototyping
-**Scenario**: Build an MVP in days, not weeks
+#### 1. Rapid Next.js Prototyping
+**Scenario**: Build a Next.js MVP with SQLite in days
 
 ```typescript
-// Auto-discovery: No schema definitions needed!
+// Django-inspired API built on Kysely
 import { NOORMME } from 'noormme';
 
 const db = new NOORMME({ database: './app.db' });
 
-// Automatically discovers schema and generates types
+// Auto-discovers SQLite schema and generates TypeScript types
 const User = db.model('users');
-const users = await User.objects.all(); // Fully typed!
+const users = await User.objects.all(); // Kysely-powered, Django-style API, fully typed!
 ```
 
-**Benefits**: 5-minute setup, instant productivity, zero configuration
+**Benefits**: Kysely's type safety + Django's intuitive API for Next.js
 
-#### 2. Production Applications
-**Scenario**: Enterprise-grade applications with high performance requirements
+#### 2. Next.js Production Apps with NextAuth
+**Scenario**: Full-featured Next.js app with authentication
 
 ```typescript
-// Connection pooling and caching built-in
+// Built-in NextAuth adapter for SQLite
 const db = new NOORMME({
   database: './prod.db',
-  enableWAL: true,
-  poolSize: 10,
-  enableCache: true,
-  cacheConfig: { ttl: 300000 }
+  enableWAL: true, // SQLite WAL mode for concurrency
 });
 
-// Relationship loading with performance optimization
-const posts = await Post.objects
-  .select('id', 'title', 'created_at')
-  .prefetch('author', 'comments')
-  .filter({ published: true })
-  .all(); // Optimized query with eager loading
+// NextAuth integration
+import { NOORMMEAdapter } from 'noormme/nextauth';
+export const authOptions = {
+  adapter: NOORMMEAdapter(db),
+  // ...
+};
+
+// Django-style API in Next.js Server Components
+export default async function PostsPage() {
+  const posts = await Post.objects
+    .filter({ published: true })
+    .prefetch('author') // Kysely joins under the hood
+    .all();
+  return <PostList posts={posts} />;
+}
 ```
 
-**Benefits**: <10ms queries, intelligent caching, production monitoring
+**Benefits**: NextAuth + Django API + Kysely type safety for Next.js
 
-#### 3. Migration Projects
-**Scenario**: Moving from Django/Prisma/TypeORM to NOORMME
+#### 3. Migration from Prisma/TypeORM to Kysely+NOORMME
+**Scenario**: Moving to Kysely with a familiar API layer
 
 ```typescript
-// Works with existing databases - no migration needed!
+// Works with existing SQLite databases
 const db = new NOORMME({ database: './existing.db' });
 
-// Django-style queries feel familiar
+// Django-style queries on top of Kysely
 const activeUsers = await User.objects
   .filter({ is_active: true })
   .exclude({ email__endswith: '@example.com' })
   .orderBy('-created_at')
   .all();
 
-// Repository pattern for clean architecture
-class UserRepository extends Repository<User> {
-  async findActiveUsers() {
-    return this.filter({ is_active: true }).all();
-  }
-}
+// Drop down to Kysely when needed
+const complexQuery = await db.kysely
+  .selectFrom('users')
+  .where(/* complex Kysely query */)
+  .execute();
 ```
 
-**Benefits**: Minimal learning curve, incremental migration, no breaking changes
+**Benefits**: Familiar API + direct Kysely access when needed
 
-#### 4. Learning Projects
-**Scenario**: Understanding ORM patterns and best practices
+#### 4. Learning Next.js + SQLite + Kysely
+**Scenario**: Learning modern Next.js development patterns
 
 ```typescript
-// Clear, self-documenting API
+// Clear, Django-inspired API built on Kysely
 const blog = await Blog.objects.get({ id: 1 });
 
-// Relationship traversal like Django
+// Django-style relationship loading (Kysely joins underneath)
 const posts = await blog.posts.all();
 const author = await posts[0].author.get();
 
-// Aggregations and grouping
-const stats = await Post.objects
-  .aggregate({
-    total: Count('id'),
-    avgViews: Avg('view_count')
-  })
-  .groupBy('category');
+// When you need raw Kysely power:
+const stats = await db.kysely
+  .selectFrom('posts')
+  .select(({ fn }) => [
+    fn.count('id').as('total'),
+    fn.avg('view_count').as('avgViews')
+  ])
+  .groupBy('category')
+  .execute();
 ```
 
-**Benefits**: Django-quality documentation, comprehensive examples, clear patterns
+**Benefits**: Learn Next.js patterns + Kysely power + Django API design
 
 ## Success Criteria
 

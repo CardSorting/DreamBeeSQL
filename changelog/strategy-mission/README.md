@@ -14,17 +14,18 @@ This directory contains comprehensive documentation of NOORMME's strategic evolu
 
 ## 🎯 Executive Summary
 
-NOORMME has successfully completed a strategic pivot from a generic multi-framework ORM to a specialized, production-ready Next.js + SQLite ORM that brings Django's powerful patterns to the JavaScript ecosystem.
+NOORMME has successfully completed a strategic pivot from a generic multi-framework ORM to a specialized Kysely-based ORM with a Django-inspired API for Next.js + SQLite applications.
 
 ### Core Transformation
-- **From**: Generic ORM supporting multiple frameworks and databases
-- **To**: Next.js-optimized ORM with SQLite specialization and Django-inspired patterns
+- **From**: Generic ORM attempting to replicate Django ORM
+- **To**: Kysely-based wrapper with Django-inspired API patterns, specialized for Next.js + SQLite + NextAuth
 
 ### Key Differentiators
-1. **Django's ORM Without Framework Lock-in** - Powerful patterns with portability
-2. **Next.js App Router Optimization** - Built for Server Components and Server Actions
-3. **SQLite WAL Mode Excellence** - Leveraging SQLite's strengths for maximum performance
-4. **Auto-Discovery & Type Generation** - Minimal setup, maximum productivity
+1. **Built on Kysely** - Type-safe foundation, not proprietary query builder
+2. **Django-Inspired API** - Familiar `.objects.filter()` patterns wrapping Kysely
+3. **Next.js + NextAuth Specialized** - Deep integration for modern Next.js apps
+4. **SQLite Focus** - Auto-discovery and WAL mode optimization
+5. **Escape Hatch** - Drop to raw Kysely for complex queries
 
 ## 📚 Document Guide
 
@@ -32,11 +33,11 @@ NOORMME has successfully completed a strategic pivot from a generic multi-framew
 **Purpose**: Understand the complete strategic transformation
 
 **Key Topics**:
-- Strategic vision and mission statement
-- Framework focus shift (generic → Next.js-first)
-- Database strategy evolution (multi-DB → SQLite specialization)
-- Development methodology changes (feature-driven → phase-based)
-- Competitive positioning and market differentiation
+- Strategic vision: Kysely-based with Django-inspired API
+- Technology stack clarity (Next.js + SQLite + Kysely + NextAuth)
+- Why built on Kysely, not from scratch
+- Django-inspired vs. Django-replicated
+- Competitive positioning vs. Kysely, Prisma, Drizzle
 - Success metrics and future roadmap
 
 **Read This When**:
@@ -49,12 +50,12 @@ NOORMME has successfully completed a strategic pivot from a generic multi-framew
 **Purpose**: Define core values, principles, and long-term vision
 
 **Key Topics**:
-- Core mission: "Django's ORM Without The Framework Prison"
-- Framework independence and portability
-- Django-inspired patterns and Next.js optimization
-- Production readiness and developer experience
-- Target audience and use cases
-- Success criteria and principles in action
+- Core mission: "Django-Inspired Type-Safe ORM Built on Kysely for Next.js"
+- Built on Kysely foundation with Django API layer
+- Next.js + SQLite + NextAuth specialization
+- Target audience: Kysely users, Django migrants, Next.js developers
+- Use cases and success criteria
+- What we build vs. what we don't build
 
 **Read This When**:
 - Making architectural decisions
@@ -95,21 +96,21 @@ NOORMME has successfully completed a strategic pivot from a generic multi-framew
 
 ## Key Strategic Changes
 
-### 1. Framework Focus
-- **From**: Generic ORM for any framework
-- **To**: Next.js-first with SQLite specialization
+### 1. Foundation Decision
+- **From**: Attempting to build Django ORM from scratch
+- **To**: Built on Kysely with Django-inspired API wrapper
 
-### 2. Database Strategy
-- **From**: Multi-database support
-- **To**: SQLite-first with WAL mode optimization
+### 2. Technology Stack
+- **From**: Generic multi-framework, multi-database
+- **To**: Next.js + SQLite + Kysely + NextAuth specialization
 
-### 3. Development Approach
-- **From**: Feature-driven development
-- **To**: Phase-based production readiness
+### 3. Scope Clarity
+- **From**: Trying to replicate full Django ORM features
+- **To**: Django-inspired query API patterns only (filter, exclude, etc.)
 
-### 4. Architecture
-- **From**: Monolithic performance modules
-- **To**: Focused services with clear separation of concerns
+### 4. Value Proposition
+- **From**: "Django ORM for JavaScript"
+- **To**: "Django API patterns on top of Kysely for Next.js"
 
 ## 📈 Implementation Timeline
 
@@ -126,12 +127,12 @@ NOORMME has successfully completed a strategic pivot from a generic multi-framew
 
 **Strategic Pivot: COMPLETE** ✅
 
-NOORMME is now positioned as a production-ready Next.js + SQLite ORM with:
-- Django-inspired patterns without framework lock-in
-- Next.js App Router and Edge Runtime optimization
-- SQLite WAL mode performance excellence
-- Auto-discovery and type generation
-- Comprehensive monitoring and optimization
+NOORMME is now positioned as a Kysely-based ORM with Django-inspired API for Next.js:
+- **Built on Kysely**: Type-safe query building foundation
+- **Django-Inspired API**: Familiar `.objects.filter()` patterns
+- **Next.js + NextAuth**: Deep integration with modern Next.js patterns
+- **SQLite Specialized**: Auto-discovery, WAL mode optimization
+- **Escape Hatch**: Direct access to Kysely for complex queries
 
 ### 🚀 Next Steps
 
@@ -156,39 +157,39 @@ NOORMME is now positioned as a production-ready Next.js + SQLite ORM with:
 - 📖 **Documentation**: Django-level quality documentation
 
 ### Market Position
-- 🎯 **Unique Value**: Only ORM bringing Django patterns to Next.js
-- 🔧 **No Lock-in**: Framework-independent, portable architecture
-- ⚡ **Performance**: SQLite specialization with WAL mode optimization
-- 🌟 **Production Ready**: Built for real-world production use
+- 🎯 **Unique Value**: Django-style API wrapper for Kysely, specialized for Next.js + SQLite
+- 🔧 **Built on Kysely**: Not proprietary, can drop to raw Kysely anytime
+- 🚀 **Next.js + NextAuth**: Deep integration for modern full-stack apps
+- ⚡ **Best of Both**: Kysely's type safety + Django's ergonomics
 
 ## 🏗️ Architecture Overview
 
 ```
-NOORMME Architecture
+NOORMME Stack
 │
-├── Core ORM Engine
+├── Next.js App Router Layer
+│   ├── Server Components (data fetching)
+│   ├── Server Actions (mutations)
+│   └── Edge Runtime (compatibility)
+│
+├── NextAuth Integration
+│   └── NOORMME Adapter (SQLite sessions/accounts)
+│
+├── NOORMME (Django-Inspired API Layer)
+│   ├── .objects.filter() / .exclude() / .get()
 │   ├── Auto-Discovery (schema introspection)
-│   ├── Type Generation (TypeScript types)
-│   ├── Repository Pattern (data access)
-│   └── Relationship Loading (eager/lazy)
+│   ├── Type Generation (from SQLite schema)
+│   └── Relationship Helpers (prefetch, eager loading)
 │
-├── Performance Layer
-│   ├── Query Optimization
-│   ├── Connection Pooling
-│   ├── Intelligent Caching
-│   └── Metrics Collection
+├── Kysely (Type-Safe Query Builder)
+│   ├── SQL Generation
+│   ├── TypeScript Type Inference
+│   └── Direct Access (escape hatch)
 │
-├── Next.js Integration
-│   ├── Server Components
-│   ├── Server Actions
-│   ├── API Routes
-│   └── Edge Runtime
-│
-└── Developer Experience
-    ├── Type Safety
-    ├── Error Handling
-    ├── Migration System
-    └── Documentation
+└── SQLite Database
+    ├── WAL Mode (concurrency)
+    ├── Schema Introspection
+    └── Type Mapping
 ```
 
 ## 📖 Getting Started

@@ -30,6 +30,20 @@ test-comprehensive/
 │   ├── cache-performance.test.ts      # Cache performance tests
 │   ├── migration-performance.test.ts  # Migration performance tests
 │   └── stress-tests.test.ts           # Stress and load tests
+├── sqlite/                            # SQLite-specific tests
+│   ├── README.md                      # SQLite tests documentation
+│   ├── sqlite-minimal.test.ts         # Basic SQLite functionality
+│   ├── sqlite-compatibility.test.ts   # SQLite compatibility tests
+│   ├── sqlite-introspection.test.ts   # Schema introspection tests
+│   ├── sqlite-syntax.test.ts          # SQLite syntax tests
+│   ├── sqlite-constraints.test.ts     # Constraint handling tests
+│   └── sqlite-parameter-binding.test.ts # Parameter binding tests
+├── authentication/                    # Authentication and OAuth tests
+│   ├── README.md                      # Authentication tests documentation
+│   ├── nextauth-adapter.test.ts       # NextAuth.js adapter tests
+│   ├── oauth-flow.test.ts             # OAuth callback flow tests
+│   ├── database-strategy.test.ts      # Database session strategy tests
+│   └── error-scenarios.test.ts        # Authentication error scenarios
 └── e2e/                              # End-to-end tests
     ├── full-workflow.test.ts          # Complete workflow tests
     ├── real-world-scenarios.test.ts   # Real-world usage scenarios
@@ -55,7 +69,13 @@ test-comprehensive/
 - ✅ Performance optimization
 
 ### Database Support
-- ✅ SQLite
+- ✅ SQLite (comprehensive SQLite-specific tests in `/sqlite` directory)
+  - Basic functionality and initialization
+  - Compatibility and feature support
+  - Schema introspection and discovery
+  - Syntax and query compilation
+  - Constraint handling and validation
+  - Parameter binding and prepared statements
 
 ### Advanced Features
 - ✅ Batch loading for performance
@@ -85,6 +105,34 @@ pnpm test:unit
 pnpm test:integration
 pnpm test:performance
 pnpm test:e2e
+pnpm test:sqlite
+pnpm test:authentication
+```
+
+### Run SQLite-Specific Tests
+```bash
+# Run all SQLite tests
+npm test -- --testPathPattern=sqlite
+
+# Run specific SQLite test files
+npm test -- test-comprehensive/sqlite/sqlite-minimal.test.ts
+npm test -- test-comprehensive/sqlite/sqlite-compatibility.test.ts
+npm test -- test-comprehensive/sqlite/sqlite-introspection.test.ts
+npm test -- test-comprehensive/sqlite/sqlite-syntax.test.ts
+npm test -- test-comprehensive/sqlite/sqlite-constraints.test.ts
+npm test -- test-comprehensive/sqlite/sqlite-parameter-binding.test.ts
+```
+
+### Run Authentication Tests
+```bash
+# Run all authentication tests
+npm test -- --testPathPattern=authentication
+
+# Run specific authentication test files
+npm test -- test-comprehensive/authentication/nextauth-adapter.test.ts
+npm test -- test-comprehensive/authentication/oauth-flow.test.ts
+npm test -- test-comprehensive/authentication/database-strategy.test.ts
+npm test -- test-comprehensive/authentication/error-scenarios.test.ts
 ```
 
 ### Test Configuration

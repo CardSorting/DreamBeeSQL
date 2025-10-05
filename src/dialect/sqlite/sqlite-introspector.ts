@@ -90,29 +90,17 @@ export class SqliteIntrospector extends DatabaseIntrospector {
   ): Promise<TableMetadata[]> {
     const tablesResult = await this.#tablesQuery(this.#db, options).execute()
 
-    const tableMetadata = await this.#db
-      .with('table_list', (qb) => this.#tablesQuery(qb, options))
-      .selectFrom([
-        'table_list as tl',
-        sql<PragmaTableInfo>`PRAGMA table_info(tl.name)`.as('p'),
-      ])
-      .select([
-        'tl.name as table',
-        'p.cid',
-        'p.name',
-        'p.type',
-        'p.notnull',
-        'p.dflt_value',
-        'p.pk',
-      ])
-      .orderBy('tl.name')
-      .orderBy('p.cid')
-      .execute()
-
-    const columnsByTable: Record<string, typeof tableMetadata> = {}
-    for (const row of tableMetadata) {
-      columnsByTable[row.table] ??= []
-      columnsByTable[row.table].push(row)
+    // Get column metadata for each table separately since PRAGMA doesn't work in joins
+    const columnsByTable: Record<string, PragmaTableInfo[]> = {}
+    
+    for (const table of tablesResult) {
+      try {
+        const columns = await sql`PRAGMA table_info(${sql.lit(table.name)})`.execute(this.#db)
+        columnsByTable[table.name] = columns.rows as PragmaTableInfo[]
+      } catch (error) {
+        console.warn(`Failed to get columns for table ${table.name}:`, error)
+        columnsByTable[table.name] = []
+      }
     }
 
     return tablesResult.map(({ name, sql, type }) => {

@@ -85,18 +85,69 @@ export class TableNotFoundError extends NoormError {
 
 export class ColumnNotFoundError extends NoormError {
   constructor(columnName: string, tableName: string, availableColumns: string[] = []) {
+    // Find similar column names for better suggestions
+    const similarColumns = availableColumns.filter(col => 
+      col.toLowerCase().includes(columnName.toLowerCase()) ||
+      columnName.toLowerCase().includes(col.toLowerCase()) ||
+      ColumnNotFoundError.calculateSimilarity(col, columnName) > 0.6
+    )
+
+    let suggestion = 'Check your column name or run schema discovery'
+    if (availableColumns.length > 0) {
+      suggestion = `Available columns: ${availableColumns.join(', ')}`
+      if (similarColumns.length > 0) {
+        suggestion += `\n  → Did you mean '${similarColumns[0]}'? (${Math.round(ColumnNotFoundError.calculateSimilarity(similarColumns[0], columnName) * 100)}% similarity)`
+      }
+    }
+
     super(
       `Column '${columnName}' not found in table '${tableName}'`,
       {
         table: tableName,
         operation: 'column_lookup',
-        suggestion: availableColumns.length > 0 
-          ? `Available columns: ${availableColumns.join(', ')}`
-          : 'Check your column name or run schema discovery',
+        suggestion: suggestion,
         availableOptions: availableColumns
       }
     )
     this.name = 'ColumnNotFoundError'
+  }
+
+  private static calculateSimilarity(str1: string, str2: string): number {
+    const longer = str1.length > str2.length ? str1 : str2
+    const shorter = str1.length > str2.length ? str2 : str1
+    
+    if (longer.length === 0) return 1.0
+    
+    const editDistance = ColumnNotFoundError.levenshteinDistance(longer, shorter)
+    return (longer.length - editDistance) / longer.length
+  }
+
+  private static levenshteinDistance(str1: string, str2: string): number {
+    const matrix = []
+    
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i]
+    }
+    
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j
+    }
+    
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1]
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          )
+        }
+      }
+    }
+    
+    return matrix[str2.length][str1.length]
   }
 }
 
@@ -156,6 +207,91 @@ export class RelationshipNotFoundError extends NoormError {
       }
     )
     this.name = 'RelationshipNotFoundError'
+  }
+}
+
+export class QueryExecutionError extends NoormError {
+  constructor(query: string, originalError: Error, context?: { table?: string; operation?: string }) {
+    super(
+      `Query execution failed: ${originalError.message}`,
+      {
+        operation: context?.operation || 'query_execution',
+        table: context?.table,
+        suggestion: QueryExecutionError.getQuerySuggestion(query, originalError),
+        originalError
+      }
+    )
+    this.name = 'QueryExecutionError'
+  }
+
+  private static getQuerySuggestion(query: string, error: Error): string {
+    const errorMsg = error.message.toLowerCase()
+    
+    if (errorMsg.includes('syntax error')) {
+      return 'Check your SQL syntax. Common issues: missing commas, unclosed quotes, or invalid keywords.'
+    }
+    
+    if (errorMsg.includes('no such table')) {
+      return 'Table does not exist. Check table name or run schema discovery to see available tables.'
+    }
+    
+    if (errorMsg.includes('no such column')) {
+      return 'Column does not exist. Check column name or run schema discovery to see available columns.'
+    }
+    
+    if (errorMsg.includes('constraint failed')) {
+      return 'Data constraint violation. Check for required fields, unique constraints, or foreign key references.'
+    }
+    
+    if (errorMsg.includes('database is locked')) {
+      return 'Database is locked. Enable WAL mode for better concurrency: optimization: { enableWALMode: true }'
+    }
+    
+    return 'Review your query and check the original error message for specific details.'
+  }
+}
+
+export class SchemaDiscoveryError extends NoormError {
+  constructor(tableName: string, originalError: Error) {
+    super(
+      `Failed to discover schema for table '${tableName}': ${originalError.message}`,
+      {
+        table: tableName,
+        operation: 'schema_discovery',
+        suggestion: 'Check table permissions, table name validity, or database connection',
+        originalError
+      }
+    )
+    this.name = 'SchemaDiscoveryError'
+  }
+}
+
+export class MigrationError extends NoormError {
+  constructor(migrationName: string, originalError: Error, context?: { step?: string }) {
+    super(
+      `Migration '${migrationName}' failed${context?.step ? ` at step: ${context.step}` : ''}: ${originalError.message}`,
+      {
+        operation: 'migration',
+        suggestion: 'Check migration SQL syntax, database permissions, or rollback the migration',
+        originalError
+      }
+    )
+    this.name = 'MigrationError'
+  }
+}
+
+export class TypeGenerationError extends NoormError {
+  constructor(tableName: string, originalError: Error) {
+    super(
+      `Failed to generate types for table '${tableName}': ${originalError.message}`,
+      {
+        table: tableName,
+        operation: 'type_generation',
+        suggestion: 'Check table schema, column types, or custom type mappings configuration',
+        originalError
+      }
+    )
+    this.name = 'TypeGenerationError'
   }
 }
 

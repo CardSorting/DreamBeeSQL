@@ -16,7 +16,7 @@ export class TypeGenerator {
 
     // Generate entity types for each table
     for (const table of schemaInfo.tables) {
-      const entity = this.generateEntityType(table)
+      const entity = this.generateEntityType(table, schemaInfo.relationships)
       entities.push(entity)
       
       interfaces += entity.interface + '\n\n'
@@ -38,12 +38,12 @@ export class TypeGenerator {
   /**
    * Generate entity type for a table
    */
-  private generateEntityType(table: TableInfo): EntityType {
+  private generateEntityType(table: TableInfo, relationships: RelationshipInfo[]): EntityType {
     const entityName = this.toPascalCase(table.name)
     const tableName = table.name
 
     // Generate main entity interface
-    const interfaceCode = this.generateEntityInterface(table, entityName)
+    const interfaceCode = this.generateEntityInterface(table, entityName, relationships)
     
     // Generate insert type (all columns except auto-generated ones)
     const insertType = this.generateInsertType(table, entityName)
@@ -67,7 +67,7 @@ export class TypeGenerator {
   /**
    * Generate main entity interface
    */
-  private generateEntityInterface(table: TableInfo, entityName: string): string {
+  private generateEntityInterface(table: TableInfo, entityName: string, relationships: RelationshipInfo[]): string {
     let interfaceCode = `export interface ${entityName} {\n`
 
     // Add primary key columns first
@@ -89,8 +89,8 @@ export class TypeGenerator {
     }
 
     // Add relationship properties
-    const relationships = this.getRelationshipsForTable(table.name)
-    for (const rel of relationships) {
+    const tableRelationships = this.getRelationshipsForTable(table.name, relationships)
+    for (const rel of tableRelationships) {
       const relType = this.getRelationshipType(rel)
       interfaceCode += `  ${rel.name}?: ${relType}\n`
     }
@@ -234,8 +234,11 @@ export class TypeGenerator {
       'bool': 'boolean',
       'datetime': 'Date',
 
-      // SQLite specific types
+      // SQLite specific types (enhanced)
       'blob': 'Buffer',
+      'int2': 'number',
+      'int8': 'number',
+      'clob': 'string',
 
       // MSSQL specific types
       'nvarchar': 'string',
@@ -248,26 +251,111 @@ export class TypeGenerator {
 
     // Try exact match first
     if (typeMapping[column.type.toLowerCase()]) {
-      return typeMapping[column.type.toLowerCase()]
+      let mappedType = typeMapping[column.type.toLowerCase()]
+      
+      // Handle nullable columns
+      if (column.nullable && mappedType !== 'unknown') {
+        mappedType = `${mappedType} | null`
+      }
+      
+      return mappedType
     }
 
     // Handle parameterized types (e.g., varchar(255), decimal(10,2))
     const baseType = column.type.toLowerCase().split('(')[0]
     if (typeMapping[baseType]) {
-      return typeMapping[baseType]
+      let mappedType = typeMapping[baseType]
+      
+      // Handle nullable columns
+      if (column.nullable && mappedType !== 'unknown') {
+        mappedType = `${mappedType} | null`
+      }
+      
+      return mappedType
     }
 
     // Default to unknown for unknown types
-    return 'unknown'
+    return column.nullable ? 'unknown | null' : 'unknown'
   }
 
   /**
    * Get relationships for a specific table
    */
-  private getRelationshipsForTable(tableName: string): RelationshipInfo[] {
-    // This would be passed from the schema discovery
-    // For now, return empty array
-    return []
+  private getRelationshipsForTable(tableName: string, relationships: RelationshipInfo[]): RelationshipInfo[] {
+    return relationships.filter(rel => 
+      rel.fromTable === tableName || rel.toTable === tableName
+    )
+  }
+
+  /**
+   * Generate relationship interfaces
+   */
+  private generateRelationshipInterfaces(relationships: RelationshipInfo[]): string {
+    if (relationships.length === 0) {
+      return ''
+    }
+
+    let relationshipInterfaces = '// Relationship Types\n\n'
+
+    // Group relationships by type
+    const groupedRelationships = relationships.reduce((acc, rel) => {
+      const key = `${rel.fromTable}_${rel.toTable}_${rel.type}`
+      if (!acc[key]) {
+        acc[key] = []
+      }
+      acc[key].push(rel)
+      return acc
+    }, {} as Record<string, RelationshipInfo[]>)
+
+    for (const [key, rels] of Object.entries(groupedRelationships)) {
+      const rel = rels[0] // Use first relationship as template
+      
+      const fromEntity = this.toPascalCase(rel.fromTable)
+      const toEntity = this.toPascalCase(rel.toTable)
+      
+      switch (rel.type) {
+        case 'one-to-many':
+          relationshipInterfaces += `export interface ${fromEntity}With${toEntity}s extends ${fromEntity} {\n`
+          relationshipInterfaces += `  ${this.toCamelCase(rel.toTable)}s: ${toEntity}[]\n`
+          relationshipInterfaces += `}\n\n`
+          
+          relationshipInterfaces += `export interface ${toEntity}With${fromEntity} extends ${toEntity} {\n`
+          relationshipInterfaces += `  ${this.toCamelCase(rel.fromTable)}: ${fromEntity}\n`
+          relationshipInterfaces += `}\n\n`
+          break
+          
+        case 'many-to-one':
+          relationshipInterfaces += `export interface ${fromEntity}With${toEntity} extends ${fromEntity} {\n`
+          relationshipInterfaces += `  ${this.toCamelCase(rel.toTable)}: ${toEntity}\n`
+          relationshipInterfaces += `}\n\n`
+          
+          relationshipInterfaces += `export interface ${toEntity}With${fromEntity}s extends ${toEntity} {\n`
+          relationshipInterfaces += `  ${this.toCamelCase(rel.fromTable)}s: ${fromEntity}[]\n`
+          relationshipInterfaces += `}\n\n`
+          break
+          
+        case 'many-to-many':
+          relationshipInterfaces += `export interface ${fromEntity}With${toEntity}s extends ${fromEntity} {\n`
+          relationshipInterfaces += `  ${this.toCamelCase(rel.toTable)}s: ${toEntity}[]\n`
+          relationshipInterfaces += `}\n\n`
+          
+          relationshipInterfaces += `export interface ${toEntity}With${fromEntity}s extends ${toEntity} {\n`
+          relationshipInterfaces += `  ${this.toCamelCase(rel.fromTable)}s: ${fromEntity}[]\n`
+          relationshipInterfaces += `}\n\n`
+          break
+      }
+    }
+
+    return relationshipInterfaces
+  }
+
+  /**
+   * Convert string to camelCase
+   */
+  private toCamelCase(str: string): string {
+    return str.replace(/([-_][a-z])/gi, ($1) => {
+      return $1.toUpperCase().replace('-', '').replace('_', '')
+    })
   }
 
   /**

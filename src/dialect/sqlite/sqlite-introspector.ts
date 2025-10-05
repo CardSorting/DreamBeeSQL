@@ -94,7 +94,7 @@ export class SqliteIntrospector extends DatabaseIntrospector {
       .with('table_list', (qb) => this.#tablesQuery(qb, options))
       .selectFrom([
         'table_list as tl',
-        sql<PragmaTableInfo>`pragma_table_info(tl.name)`.as('p'),
+        sql<PragmaTableInfo>`PRAGMA table_info(tl.name)`.as('p'),
       ])
       .select([
         'tl.name as table',
@@ -253,7 +253,7 @@ export class SqliteIntrospector extends DatabaseIntrospector {
 
   async getColumns(tableName: string): Promise<ColumnMetadata[]> {
     try {
-      // SQLite - use raw SQL for pragma_table_info
+      // SQLite - use raw SQL for PRAGMA table_info
       const result = await sql`PRAGMA table_info(${sql.lit(tableName)})`.execute(this.#db)
       const sqliteColumns = result.rows as any[]
 
@@ -273,7 +273,7 @@ export class SqliteIntrospector extends DatabaseIntrospector {
 
   async getIndexes(tableName: string): Promise<IndexMetadata[]> {
     try {
-      // SQLite - use raw SQL for pragma_index_list
+      // SQLite - use raw SQL for PRAGMA index_list
       const result = await sql`PRAGMA index_list(${sql.lit(tableName)})`.execute(this.#db)
       const sqliteIndexes = result.rows as any[]
 
@@ -290,7 +290,7 @@ export class SqliteIntrospector extends DatabaseIntrospector {
 
   async getForeignKeys(tableName: string): Promise<ForeignKeyMetadata[]> {
     try {
-      // SQLite - use raw SQL for pragma_foreign_key_list
+      // SQLite - use raw SQL for PRAGMA foreign_key_list
       const result = await sql`PRAGMA foreign_key_list(${sql.lit(tableName)})`.execute(this.#db)
       const sqliteFks = result.rows as any[]
 

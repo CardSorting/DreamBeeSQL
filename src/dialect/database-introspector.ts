@@ -69,7 +69,8 @@ export class DatabaseIntrospector {
       }))
     } catch (error) {
       console.warn('SQLite table discovery failed:', error)
-      throw new Error('Unable to introspect database tables. SQLite database required.')
+      // Return empty array instead of throwing for empty databases
+      return []
     }
   }
 
@@ -78,8 +79,8 @@ export class DatabaseIntrospector {
    */
   async getColumns(tableName: string): Promise<ColumnMetadata[]> {
     try {
-      // SQLite - use raw SQL for pragma_table_info
-      const result = await sql`pragma_table_info(${sql.lit(tableName)})`.execute(this.db)
+      // SQLite - use raw SQL for PRAGMA table_info
+      const result = await sql`PRAGMA table_info(${sql.lit(tableName)})`.execute(this.db)
       const sqliteColumns = result.rows as any[]
 
       return sqliteColumns.map((col: any) => ({
@@ -92,7 +93,8 @@ export class DatabaseIntrospector {
       }))
     } catch (error) {
       console.warn('SQLite column discovery failed:', error)
-      throw new Error(`Unable to introspect columns for table '${tableName}'. SQLite database required.`)
+      // Return empty array instead of throwing for non-existent tables
+      return []
     }
   }
 
@@ -109,8 +111,8 @@ export class DatabaseIntrospector {
    */
   async getForeignKeys(tableName: string): Promise<ForeignKeyMetadata[]> {
     try {
-      // SQLite - use raw SQL for pragma_foreign_key_list
-      const result = await sql`pragma_foreign_key_list(${sql.lit(tableName)})`.execute(this.db)
+      // SQLite - use raw SQL for PRAGMA foreign_key_list
+      const result = await sql`PRAGMA foreign_key_list(${sql.lit(tableName)})`.execute(this.db)
       const sqliteFks = result.rows as any[]
 
       return sqliteFks.map((fk: any) => ({

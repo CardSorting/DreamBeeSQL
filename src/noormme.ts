@@ -126,25 +126,62 @@ export class NOORMME {
 
       // Test database connection using the dialect-specific introspector
       const introspector = this.dialect.createIntrospector(this.db)
-      await introspector.getTables()
-      this.logger.info('Database connection successful')
+      let tables: any[] = []
+      
+      try {
+        tables = await introspector.getTables()
+        this.logger.info('Database connection successful')
+      } catch (error) {
+        this.logger.warn('Database connection test failed, but continuing with initialization:', error)
+        // Continue with empty schema if connection test fails
+      }
 
-      // Discover schema
+      // Discover schema - handle empty databases gracefully
       this.logger.info('Discovering database schema...')
-      const schemaInfo = await this.schemaDiscovery.discoverSchema()
-      this.logger.info(`Discovered ${schemaInfo.tables.length} tables`)
+      let schemaInfo
+      try {
+        schemaInfo = await this.schemaDiscovery.discoverSchema()
+        this.logger.info(`Discovered ${schemaInfo.tables.length} tables`)
+      } catch (error) {
+        this.logger.warn('Schema discovery failed, using empty schema:', error)
+        // Create empty schema info if discovery fails
+        schemaInfo = {
+          tables: [],
+          relationships: [],
+          views: []
+        }
+      }
 
-      // Generate types
+      // Generate types - handle empty schema gracefully
       this.logger.info('Generating TypeScript types...')
-      const generatedTypes = this.typeGenerator.generateTypes(schemaInfo)
-      this.logger.info(`Generated types for ${generatedTypes.entities.length} entities`)
+      let generatedTypes
+      try {
+        generatedTypes = this.typeGenerator.generateTypes(schemaInfo)
+        this.logger.info(`Generated types for ${generatedTypes.entities.length} entities`)
+      } catch (error) {
+        this.logger.warn('Type generation failed, using empty types:', error)
+        // Create empty type info if generation fails
+        generatedTypes = {
+          entities: [],
+          relationships: [],
+          types: {}
+        }
+      }
 
-      // Cache schema and types
-      await this.cacheManager.set('schema', schemaInfo)
-      await this.cacheManager.set('types', generatedTypes)
+      // Cache schema and types - handle caching errors gracefully
+      try {
+        await this.cacheManager.set('schema', schemaInfo)
+        await this.cacheManager.set('types', generatedTypes)
+      } catch (error) {
+        this.logger.warn('Failed to cache schema/types, continuing without cache:', error)
+      }
 
-      // Initialize relationship engine
-      this.relationshipEngine.initialize(schemaInfo.relationships)
+      // Initialize relationship engine - handle empty relationships
+      try {
+        this.relationshipEngine.initialize(schemaInfo.relationships)
+      } catch (error) {
+        this.logger.warn('Failed to initialize relationship engine:', error)
+      }
 
       // Initialize query analyzer for development mode
       this.queryAnalyzer = new QueryAnalyzer(

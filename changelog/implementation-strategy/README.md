@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains the consolidated, coherent implementation strategy for NOORMME - a batteries-included framework for Next.js that eliminates setup friction through proven patterns and existing tools.
+This directory contains the consolidated, coherent implementation strategy for NOORMME - a Next.js-native development toolkit that applies proven organizational strategies from Django, Laravel, and Rails while remaining framework-agnostic and leveraging Next.js's native patterns.
 
 ## Strategy Documents
 
@@ -24,39 +24,39 @@ This directory contains the consolidated, coherent implementation strategy for N
 
 ## Core Mission
 
-**NOORMME** is a batteries-included framework for Next.js that eliminates setup friction through:
+**NOORMME** is a Next.js-native development toolkit that provides organizational benefits through:
 
-- **Zero-Config Setup** - Working app in 5 minutes
-- **Core Features** - Database, Auth, Admin, RBAC
-- **Modern Patterns** - Server Components, Server Actions, Edge Runtime
+- **Organized Structure** - Django-style project organization
+- **Proven Patterns** - Laravel-style utilities and conventions
+- **Modern Implementation** - Rails-style scaffolding with Next.js patterns
+- **Framework-Agnostic** - No lock-in, pure Next.js
 - **Type Safety** - Full TypeScript integration
-- **Production Ready** - Security, testing, documentation
 
-**Not Django's API, Django's experience.**
-**Not Laravel's complexity, Laravel's productivity.**
+**Not Django's API, Django's organization.**
+**Not Laravel's complexity, Laravel's patterns.**
 **Not Rails' magic, Rails' conventions.**
-**Just Next.js with batteries included.**
+**Just Next.js with proven organizational strategies.**
 
 ## What We're Building
 
 ### Phase 1: Core Foundation (Weeks 1-4)
-- CLI scaffolding tool (`create-noormme-app`)
-- SQLite setup with Kysely
-- NextAuth integration
-- Basic admin dashboard
-- User management
+- Next.js project template with organized structure
+- Database utilities and patterns (Kysely + helpers)
+- Authentication patterns (NextAuth + utilities)
+- Admin panel scaffolding and components
+- User management patterns
 
-### Phase 2: Admin Panel & RBAC (Weeks 5-8)
-- Complete admin panel with CRUD
+### Phase 2: Advanced Patterns (Weeks 5-8)
+- Complete admin panel with CRUD patterns
 - RBAC system (roles & permissions)
-- Middleware protection
-- Admin role management
+- Middleware patterns and utilities
+- Advanced organizational patterns
 
-### Phase 3: CLI Commands & Polish (Weeks 9-12)
-- Basic CLI commands (`generate:model`, `make:migration`)
-- Migration system
-- Testing setup
-- Documentation
+### Phase 3: Developer Experience (Weeks 9-12)
+- CLI utilities and scaffolding tools
+- Migration patterns and utilities
+- Testing patterns and setup
+- Documentation and examples
 
 ## Success Criteria
 
@@ -82,5 +82,5 @@ This directory contains the consolidated, coherent implementation strategy for N
 ---
 
 **Status**: ✅ Strategy consolidated and ready for implementation
-**Timeline**: 3 months to working framework, 12 months to community adoption
-**Goal**: Make Next.js development as productive as Django/Laravel/Rails, but with modern web patterns and TypeScript
+**Timeline**: 3 months to working toolkit, 12 months to community adoption
+**Goal**: Make Next.js development as well-organized as Django/Laravel/Rails, but with Next.js's flexibility and performance

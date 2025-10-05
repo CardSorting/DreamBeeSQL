@@ -2,31 +2,31 @@
 
 ## Overview
 
-This document provides a detailed, phase-by-phase implementation plan for NOORMME. Each phase builds upon the previous one, ensuring we deliver working functionality at each milestone.
+This document provides a detailed, phase-by-phase implementation plan for NOORMME - a Next.js-native development toolkit that applies proven organizational strategies from Django, Laravel, and Rails. Each phase builds upon the previous one, ensuring we deliver working functionality at each milestone.
 
 ## Implementation Timeline
 
 ### Phase 1: Core Foundation (Weeks 1-4)
-**Goal**: Working app in 5 minutes
+**Goal**: Organized Next.js project with proven patterns
 
-### Phase 2: Admin Panel & RBAC (Weeks 5-8)
-**Goal**: Production-ready features
+### Phase 2: Advanced Patterns (Weeks 5-8)
+**Goal**: Complete organizational toolkit
 
-### Phase 3: CLI Commands & Polish (Weeks 9-12)
-**Goal**: Complete developer experience
+### Phase 3: Developer Experience (Weeks 9-12)
+**Goal**: Full developer experience with utilities
 
 ---
 
 ## Phase 1: Core Foundation (Weeks 1-4)
 
-### Week 1-2: CLI Scaffolding Tool
+### Week 1-2: Next.js Project Template
 
-#### 1.1 Project Creation CLI
-**Deliverable**: `create-noormme-app` CLI tool
+#### 1.1 Project Template
+**Deliverable**: Next.js project template with organizational structure
 
 **What it does**:
 ```bash
-npx create-noormme-app my-app
+npx create-next-app my-app --template noormme
 cd my-app
 npm run dev
 ```
@@ -34,9 +34,9 @@ npm run dev
 **Implementation**:
 - Create Next.js 15+ project with App Router
 - Install core dependencies (Kysely, NextAuth, TailwindCSS)
-- Set up basic folder structure
-- Generate configuration files
-- Create initial database file
+- Set up organized folder structure (Django-style)
+- Generate configuration files with smart defaults
+- Create initial database file with utilities
 
 **Dependencies**: Node.js, npm/pnpm, existing Next.js templates
 **Risk**: LOW - Standard scaffolding with proven tools
@@ -47,20 +47,29 @@ npm run dev
 - [ ] Basic folder structure created
 - [ ] Project runs without errors
 
-#### 1.2 Database Setup
-**Deliverable**: Auto-configured SQLite with Kysely
+#### 1.2 Database Utilities and Patterns
+**Deliverable**: Database utilities with Laravel-style patterns
 
 **What it does**:
 ```typescript
-// lib/db.ts (auto-generated)
+// lib/db.ts (template)
 import { Kysely, SqliteDialect } from 'kysely';
 import Database from 'better-sqlite3';
+import { dbUtils } from '@noormme/utils';
 
 const db = new Kysely({
   dialect: new SqliteDialect({
     database: new Database('./database/app.db')
   })
 });
+
+// Laravel-style database utilities
+export const dbUtils = {
+  // Query builder helpers
+  // Transaction helpers
+  // Migration helpers
+  // Seeding helpers
+};
 
 // Basic optimization
 db.executeSync("PRAGMA journal_mode = WAL");
@@ -70,7 +79,7 @@ db.executeSync("PRAGMA foreign_keys = ON");
 **Implementation**:
 - Auto-configure SQLite with WAL mode
 - Set up Kysely with proper typing
-- Create initial database file
+- Create Laravel-style database utilities
 - Basic optimization settings
 
 **Dependencies**: Kysely (stable), better-sqlite3 (stable)
@@ -159,11 +168,11 @@ export default async function AdminPage() {
 - [ ] User listing displays correctly
 - [ ] Basic CRUD operations functional
 
-**Phase 1 Success Criteria**: Developer can create working app with auth in < 5 minutes
+**Phase 1 Success Criteria**: Developer can create organized Next.js project with proven patterns in < 5 minutes
 
 ---
 
-## Phase 2: Admin Panel & RBAC (Weeks 5-8)
+## Phase 2: Advanced Patterns (Weeks 5-8)
 
 ### Week 5-6: Enhanced Admin Panel
 
@@ -287,11 +296,11 @@ export async function requireRole(role: string) {
 - [ ] User role assignment works
 - [ ] Role-based UI rendering
 
-**Phase 2 Success Criteria**: Admin panel works with role-based access control
+**Phase 2 Success Criteria**: Complete organizational toolkit with advanced patterns
 
 ---
 
-## Phase 3: CLI Commands & Polish (Weeks 9-12)
+## Phase 3: Developer Experience (Weeks 9-12)
 
 ### Week 9-10: CLI Commands
 
@@ -389,7 +398,7 @@ afterAll(async () => {
 - [ ] Migration guides clear
 - [ ] Best practices documented
 
-**Phase 3 Success Criteria**: Complete developer experience with testing
+**Phase 3 Success Criteria**: Full developer experience with utilities and patterns
 
 ---
 
@@ -477,4 +486,4 @@ This roadmap provides a clear, achievable path to building NOORMME. Each phase d
 3. **Incremental** - Add features based on actual needs
 4. **Realistic** - Set achievable goals and timelines
 
-**Target**: Working batteries-included Next.js framework in 3 months, with clear path to production use.
+**Target**: Working Next.js organizational toolkit in 3 months, with clear path to production use.

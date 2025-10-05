@@ -2,65 +2,65 @@
 
 ## Executive Summary
 
-NOORMME is a **batteries-included framework for Next.js** that eliminates setup friction by providing instant configuration for SQLite, authentication, admin panel, and RBAC - built on proven tools like Kysely, NextAuth, and TailwindCSS.
+NOORMME is a **Next.js-native development toolkit** that applies proven organizational strategies from Django, Laravel, and Rails while remaining framework-agnostic and leveraging Next.js's native patterns.
 
-**Core Mission**: From idea to deployed app in < 5 minutes with zero boilerplate.
+**Core Mission**: Provide the organizational benefits of full-stack frameworks while maintaining Next.js's flexibility and performance.
 
 ## What We're Building
 
 ### The Promise
 ```bash
-npx create-noormme-app my-app
+npx create-next-app my-app --template noormme
 cd my-app
 npm run dev
 
 # You get:
-# ✅ Working SQLite database (auto-configured)
-# ✅ Working authentication (NextAuth pre-integrated)
-# ✅ Working admin panel at /admin
-# ✅ Working RBAC (roles & permissions)
+# ✅ Organized folder structure (Django-style)
+# ✅ Database utilities (Laravel-style)
+# ✅ Admin scaffolding (Rails-style)
+# ✅ Auth patterns (Next.js-native)
 # ✅ Type-safe queries (Kysely)
-# ✅ Professional UI (TailwindCSS)
+# ✅ Modern UI patterns (TailwindCSS)
 # ✅ Ready to build features
 ```
 
-### The Stack
-- **Database**: Zero-config SQLite with WAL mode
-- **Auth**: NextAuth pre-configured (never rewrite again)
-- **Admin**: Auto-generated admin panel (Django admin vibes)
-- **RBAC**: Built-in role-based access control
-- **UI**: TailwindCSS pre-configured (professional styling)
-- **Framework**: Next.js App Router
-- **Language**: TypeScript
-- **Philosophy**: "Just works"
+### The Approach
+- **Organization**: Django-style project structure and conventions
+- **Database**: Laravel-style query builders and utilities
+- **Scaffolding**: Rails-style generators and templates
+- **Auth**: Next.js-native patterns with NextAuth
+- **UI**: Modern component patterns with TailwindCSS
+- **Framework**: Pure Next.js App Router (no abstraction)
+- **Language**: TypeScript with full type safety
+- **Philosophy**: "Organized by default, flexible by design"
 
 ## Core Principles
 
-### 1. Zero Configuration
-- **Instant Setup**: One command creates a fully-featured app
-- **Smart Defaults**: Optimal configuration out-of-box
-- **Convention Over Configuration**: Common patterns pre-configured
-- **Customizable**: Override defaults when needed
+### 1. Framework-Agnostic Organization
+- **Django Structure**: Organized folders, clear separation of concerns
+- **Laravel Patterns**: Service classes, repository patterns, utilities
+- **Rails Conventions**: Naming conventions, file organization
+- **Next.js Native**: App Router patterns, Server Components, Server Actions
 
-### 2. Batteries Included
-- **Database**: SQLite + Kysely (type-safe queries)
-- **Auth**: NextAuth (OAuth + email/password)
-- **Admin**: Auto-generated CRUD interface
-- **RBAC**: Roles and permissions system
-- **UI**: TailwindCSS with admin styling
-- **Types**: Auto-generated TypeScript types
+### 2. Proven Patterns, Modern Implementation
+- **Database**: Kysely query builder with Laravel-style utilities
+- **Auth**: NextAuth with Django-style permission patterns
+- **Admin**: Rails-style scaffolding with React Server Components
+- **UI**: TailwindCSS with component patterns from all frameworks
+- **Types**: TypeScript with auto-generated types from schemas
 
-### 3. Next.js Native
-- **App Router First**: Optimized for Next.js 13+ App Router
-- **React Server Components**: Leverages RSC patterns
-- **Server Actions**: Built-in form handling
-- **Type-Safe**: Full TypeScript integration
+### 3. Next.js-First Architecture
+- **App Router**: Leverage Next.js 13+ App Router patterns
+- **Server Components**: Use RSC for data fetching and rendering
+- **Server Actions**: Handle mutations with Next.js patterns
+- **Edge Runtime**: Optimize middleware and API routes
+- **Type Safety**: Full TypeScript integration throughout
 
-### 4. Built on Proven Tools
-- **No Abstraction Layer**: Use Kysely directly for queries
-- **Type-Safe Queries**: Leverage Kysely's excellent type inference
-- **Composable**: Full power of Kysely's query builder
-- **Transparent**: No magic, just configured tools
+### 4. Organizational Benefits Without Lock-in
+- **No Framework Abstraction**: Use Next.js, Kysely, NextAuth directly
+- **Proven Patterns**: Apply successful organizational strategies
+- **Flexible Implementation**: Customize or replace any component
+- **Transparent Code**: All generated code is readable and modifiable
 
 ## Target Audience
 
@@ -88,65 +88,77 @@ npm run dev
 
 ## What We're NOT Building
 
-### Not an ORM
-- **Use Kysely Directly**: No abstraction over Kysely's API
-- **No ORM Wrapper**: Kysely is already excellent
-- **No Custom DSL**: TypeScript + Kysely is enough
-- **Transparent**: Developers use Kysely, not a wrapper
+### Not a Meta-Framework
+- **No Abstraction Layer**: Use Next.js, Kysely, NextAuth directly
+- **No Custom APIs**: Leverage existing excellent tools
+- **No Framework Lock-in**: Can migrate away easily
+- **Transparent**: All code is standard Next.js
 
-### Not Multi-Database
-- **SQLite Only**: Specialized for SQLite use cases
-- **No Postgres/MySQL**: Focus on doing one thing well
-- **Simple Stack**: Reduce complexity, increase reliability
-- **Edge Compatible**: Via Turso/LibSQL when needed
+### Not a Full-Stack Framework
+- **No Backend Abstraction**: Use Next.js API routes directly
+- **No Database Abstraction**: Use Kysely directly
+- **No Auth Abstraction**: Use NextAuth directly
+- **No UI Abstraction**: Use TailwindCSS and standard components
 
-### Not Framework Agnostic
-- **Next.js Specific**: Optimized for Next.js patterns
-- **Not Express/Fastify**: Different use cases
-- **App Router Focus**: Built for modern Next.js
-- **Opinionated**: Best practices baked in
+### Not a Code Generator
+- **No Magic Code Generation**: Templates and utilities only
+- **No Runtime Overhead**: Minimal framework code
+- **No Complex Build Process**: Standard Next.js build
+- **No Proprietary Patterns**: Standard web development patterns
 
 ### Not a Headless CMS
-- **We're a Framework**: Not a content management system
+- **We're a Toolkit**: Not a content management system
 - **Not Low-Code**: We're for developers, not no-code users
-- **Not Everything to Everyone**: We're focused on Next.js + SQLite
+- **Not Everything to Everyone**: We're focused on Next.js organization
 
 ## Implementation Approach
 
-### Code Generation over Runtime
-- **Generate Code**: Create working Next.js code instead of runtime wrappers
-- **Templates**: Pre-built, customizable templates
-- **Configuration**: Auto-configure optimal settings
-- **Transparency**: Generated code is readable and modifiable
+### Organizational Patterns over Abstraction
+- **Django Structure**: Organized folders, clear separation of concerns
+- **Laravel Utilities**: Service classes, repository patterns, helpers
+- **Rails Conventions**: Naming conventions, file organization
+- **Next.js Patterns**: App Router, Server Components, Server Actions
 
-### Build-Time over Runtime
-- **CLI-First**: Setup happens at project creation
-- **Static Generation**: Types and code generated upfront
-- **No Runtime Overhead**: Minimal framework code at runtime
-- **Standard Tools**: Use Next.js, Kysely, NextAuth directly
+### Templates over Code Generation
+- **Pre-built Templates**: Next.js project templates with organization
+- **Utility Libraries**: Helper functions and patterns
+- **Configuration**: Smart defaults and conventions
+- **Transparency**: All code is standard Next.js
 
 ### Composition over Complexity
-- **Standard Tools**: Compose existing tools (Next.js, Kysely, NextAuth)
-- **No Reinvention**: Don't rebuild what exists
-- **Integration Layer**: Connect tools seamlessly
-- **Escape Hatches**: Full access to underlying tools
+- **Standard Tools**: Use Next.js, Kysely, NextAuth directly
+- **Proven Patterns**: Apply successful organizational strategies
+- **Integration**: Connect tools with clear patterns
+- **Flexibility**: Full access to underlying tools
+
+### Framework-Agnostic Benefits
+- **No Lock-in**: Use standard Next.js patterns
+- **Proven Strategies**: Apply successful organizational patterns
+- **Modern Implementation**: Next.js 13+ patterns
+- **Type Safety**: Full TypeScript integration
 
 ## Technology Stack
 
-### Core Dependencies
+### Core Dependencies (Standard Next.js)
 - **Next.js 15+** - App Router, Server Components, Server Actions
-- **Kysely** - Type-safe SQL query builder
+- **Kysely** - Type-safe SQL query builder (used directly)
 - **better-sqlite3** - SQLite driver for Node.js
-- **NextAuth** - Authentication (pre-configured)
-- **TailwindCSS** - Styling framework
+- **NextAuth** - Authentication (used directly)
+- **TailwindCSS** - Styling framework (used directly)
 - **TypeScript** - Full type safety
 
-### CLI Tools
+### Organizational Tools
+- **NOORMME Templates** - Next.js project templates with organization
+- **NOORMME Utils** - Helper functions and patterns
+- **NOORMME CLI** - Project scaffolding and utilities
+- **NOORMME Admin** - Admin panel components and patterns
+
+### Development Tools
 - **Commander.js** - CLI framework
 - **fs-extra** - File operations
 - **chalk** - Terminal styling
 
-### Testing
+### Testing (Standard Stack)
 - **Vitest** - Test runner
 - **@testing-library/react** - Component testing
 - **@testing-library/jest-dom** - DOM assertions
@@ -239,25 +251,25 @@ npm run dev
 
 ## Conclusion
 
-NOORMME's mission is to eliminate the tedious setup work that precedes every Next.js project. By providing a batteries-included framework built on proven tools (Next.js, Kysely, NextAuth, SQLite), we let developers focus on building features instead of configuring infrastructure.
+NOORMME's mission is to provide the organizational benefits of full-stack frameworks while maintaining Next.js's flexibility and performance. By applying proven patterns from Django, Laravel, and Rails to Next.js projects, we help developers build better-organized applications without framework lock-in.
 
-Our vision is to become the default starting point for Next.js applications, known for:
-- **Speed**: Fastest setup in the ecosystem
-- **Completeness**: Everything needed out-of-box
-- **Quality**: Production-ready from day 1
-- **Simplicity**: No configuration needed
+Our vision is to become the go-to toolkit for Next.js developers who want:
+- **Organization**: Clear structure and separation of concerns
+- **Patterns**: Proven strategies from successful frameworks
+- **Flexibility**: Standard Next.js with organizational benefits
+- **Performance**: No abstraction overhead, pure Next.js
 
-We succeed when developers say: *"I went from idea to deployed app in a day."*
+We succeed when developers say: *"My Next.js project is as well-organized as a Django/Laravel/Rails project, but with Next.js's performance and flexibility."*
 
 **The Pitch:**
-- Django: Batteries included framework for Python
-- Laravel: Batteries included framework for PHP
-- Rails: Batteries included framework for Ruby
-- **NOORMME: Batteries included framework for Next.js**
+- Django: Excellent organization and patterns for Python
+- Laravel: Great utilities and conventions for PHP
+- Rails: Strong conventions and scaffolding for Ruby
+- **NOORMME: Organizational patterns and utilities for Next.js**
 
-Stop building auth.
-Stop building admin panels.
-Stop building RBAC.
-Start building features. 🚀
+Stop reinventing organizational patterns.
+Stop building from scratch.
+Stop having inconsistent project structure.
+Start with proven patterns. 🚀
 
-**No pain, everything to gain** 🔋
+**Organized by default, flexible by design** 🔋

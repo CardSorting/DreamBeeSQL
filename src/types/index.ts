@@ -3,7 +3,7 @@
  */
 
 export interface NOORMConfig {
-  dialect: 'sqlite'
+  dialect: 'sqlite' | 'postgresql' | 'mysql'
   connection: ConnectionConfig
   introspection?: IntrospectionConfig
   cache?: CacheConfig
@@ -11,6 +11,7 @@ export interface NOORMConfig {
   performance?: PerformanceConfig
   automation?: AutomationConfig
   optimization?: OptimizationConfig
+  sqlite?: SQLiteConfig
 }
 
 export interface ConnectionConfig {
@@ -67,6 +68,16 @@ export interface AutomationConfig {
 }
 
 export interface OptimizationConfig {
+  enableWALMode?: boolean
+  enableForeignKeys?: boolean
+  cacheSize?: number
+  synchronous?: 'OFF' | 'NORMAL' | 'FULL' | 'EXTRA'
+  tempStore?: 'DEFAULT' | 'FILE' | 'MEMORY'
+  autoVacuumMode?: 'NONE' | 'FULL' | 'INCREMENTAL'
+  journalMode?: 'DELETE' | 'TRUNCATE' | 'PERSIST' | 'MEMORY' | 'WAL' | 'OFF'
+}
+
+export interface SQLiteConfig {
   enableWALMode?: boolean
   enableForeignKeys?: boolean
   cacheSize?: number
@@ -207,5 +218,70 @@ export interface RefreshResult {
   schemaInfo: SchemaInfo
   changes: SchemaChange[]
   typesRegenerated: boolean
+}
+
+// Performance optimization interfaces
+export interface ConnectionPoolConfig {
+  min?: number
+  max?: number
+  idleTimeout?: number
+  acquireTimeout?: number
+}
+
+export interface QueryCacheConfig {
+  enabled: boolean
+  ttl: number // Time to live in milliseconds
+  maxSize: number // Maximum cache size
+}
+
+export interface BatchConfig {
+  maxBatchSize: number
+  batchTimeout: number // Maximum time to wait before executing batch
+}
+
+export interface OptimizationRecommendation {
+  type: 'index' | 'query' | 'schema' | 'performance'
+  priority: 'low' | 'medium' | 'high'
+  description: string
+  suggestion: string
+  estimatedImpact: string
+}
+
+// Repository interface improvements
+export interface BaseRepository<T> {
+  // CRUD operations
+  findAll(): Promise<T[]>
+  findById(id: string | number): Promise<T | null>
+  create(data: Partial<T>): Promise<T>
+  update(id: string | number, data: Partial<T>): Promise<T>
+  delete(id: string | number): Promise<boolean>
+  count(): Promise<number>
+}
+
+// Configuration validation function type
+export function validateNOORMConfig(config: NOORMConfig): void {
+  if (!config.dialect) {
+    throw new Error('Dialect is required')
+  }
+  
+  if (!config.connection?.database) {
+    throw new Error('Database path is required')
+  }
+  
+  // Validate dialect-specific requirements
+  if (config.dialect === 'sqlite') {
+    if (!config.connection.database.endsWith('.db') && !config.connection.database.endsWith('.sqlite')) {
+      console.warn('SQLite database path should typically end with .db or .sqlite')
+    }
+  }
+  
+  // Validate performance settings
+  if (config.performance?.maxBatchSize && config.performance.maxBatchSize <= 0) {
+    throw new Error('maxBatchSize must be greater than 0')
+  }
+  
+  if (config.performance?.maxCacheSize && config.performance.maxCacheSize <= 0) {
+    throw new Error('maxCacheSize must be greater than 0')
+  }
 }
 

@@ -151,7 +151,7 @@ async function generateDbFile(
 
 // NOORMME with complete SQLite automation
 // Automatically discovers schema, generates types, and optimizes performance
-export const db = new NOORMME({
+const database = new NOORMME({
   dialect: 'sqlite',
   connection: { database: '${databasePath}' },
   
@@ -185,7 +185,7 @@ export const db = new NOORMME({
 
 // Initialize with complete automation
 export async function initializeDatabase() {
-  await db.initialize()
+  await database.initialize()
   console.log('🎉 NOORMME initialized with complete SQLite automation!')
   console.log('✅ Schema discovered automatically')
   console.log('✅ Types generated automatically')
@@ -194,32 +194,32 @@ export async function initializeDatabase() {
 
 // Get a repository for any table (auto-generated)
 export function getRepository<T>(tableName: string) {
-  return db.getRepository<T>(tableName)
+  return database.getRepository<T>(tableName)
 }
 
 // Get Kysely instance for complex queries
 export function getKysely() {
-  return db.getKysely()
+  return database.getKysely()
 }
 
 // Performance monitoring
 export async function getPerformanceMetrics() {
-  return await db.getSQLitePerformanceMetrics()
+  return await database.getSQLitePerformanceMetrics()
 }
 
 // Get optimization recommendations
 export async function getOptimizationRecommendations() {
-  return await db.getSQLiteIndexRecommendations()
+  return await database.getSQLiteIndexRecommendations()
 }
 
 // Apply optimizations
 export async function applyOptimizations() {
-  return await db.applySQLiteOptimizations()
+  return await database.applySQLiteOptimizations()
 }
 
 // Close database connections
 export async function closeDatabase() {
-  await db.close()
+  await database.close()
 }
 `
 

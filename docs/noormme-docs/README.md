@@ -24,6 +24,7 @@ Noormme is a modern SQLite ORM that provides:
 - [`07-api-reference.md`](./07-api-reference.md) - Full API documentation
 - [`08-troubleshooting.md`](./08-troubleshooting.md) - Common issues and solutions
 - [`09-runtime-orm-features.md`](./09-runtime-orm-features.md) - Runtime ORM capabilities and features
+- [`10-oauth-authentication-fix.md`](./10-oauth-authentication-fix.md) - OAuth authentication implementation and troubleshooting
 
 ### Migration Guides
 - [`migration-guides/`](./migration-guides/) - Complete PostgreSQL to SQLite migration documentation
@@ -119,6 +120,7 @@ Start with [`01-getting-started.md`](./01-getting-started.md) for basic setup, t
 - **Production deployment?** Review [Production Features](./04-production-features.md)
 - **Real-world examples?** Explore [Real-World Examples](./05-real-world-examples.md)
 - **Runtime ORM features?** Learn about [Runtime ORM Features](./09-runtime-orm-features.md)
+- **OAuth authentication issues?** See [OAuth Authentication Fix](./10-oauth-authentication-fix.md)
 
 ## Contributing
 

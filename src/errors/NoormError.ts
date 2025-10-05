@@ -69,34 +69,76 @@ export class NoormError extends Error {
 export class TableNotFoundError extends NoormError {
   constructor(tableName: string, availableTables: string[] = []) {
     super(
-      `Table '${tableName}' not found in schema`,
+      `Table '${tableName}' not found`,
       {
         table: tableName,
-        operation: 'schema_lookup',
-        suggestion: availableTables.length > 0
+        operation: 'table_lookup',
+        suggestion: availableTables.length > 0 
           ? `Available tables: ${availableTables.join(', ')}`
-          : 'Check your database connection and schema',
+          : 'Check your table name or run schema discovery',
         availableOptions: availableTables
       }
-    );
+    )
+    this.name = 'TableNotFoundError'
   }
 }
 
 export class ColumnNotFoundError extends NoormError {
   constructor(columnName: string, tableName: string, availableColumns: string[] = []) {
-    const similar = findSimilarColumns(availableColumns, columnName);
-
     super(
-      `Column '${columnName}' not found on table '${tableName}'`,
+      `Column '${columnName}' not found in table '${tableName}'`,
       {
         table: tableName,
         operation: 'column_lookup',
-        suggestion: similar.length > 0
-          ? `Did you mean '${similar[0]}'?`
-          : `Available columns: ${availableColumns.join(', ')}`,
+        suggestion: availableColumns.length > 0 
+          ? `Available columns: ${availableColumns.join(', ')}`
+          : 'Check your column name or run schema discovery',
         availableOptions: availableColumns
       }
-    );
+    )
+    this.name = 'ColumnNotFoundError'
+  }
+}
+
+export class ConnectionError extends NoormError {
+  constructor(message: string, originalError?: Error) {
+    super(
+      message,
+      {
+        operation: 'connection',
+        suggestion: 'Check your database connection settings and ensure the database server is running',
+        originalError
+      }
+    )
+    this.name = 'ConnectionError'
+  }
+}
+
+export class DatabaseInitializationError extends NoormError {
+  constructor(originalError: Error, databasePath: string) {
+    super(
+      `Failed to initialize database at ${databasePath}: ${originalError.message}`,
+      {
+        operation: 'initialization',
+        suggestion: 'Check database permissions, path validity, and connection settings',
+        originalError
+      }
+    )
+    this.name = 'DatabaseInitializationError'
+  }
+}
+
+export class ValidationError extends NoormError {
+  constructor(message: string, validationIssues: string[] = []) {
+    super(
+      message,
+      {
+        operation: 'validation',
+        suggestion: 'Check your input data and ensure it matches the expected schema',
+        availableOptions: validationIssues
+      }
+    )
+    this.name = 'ValidationError'
   }
 }
 
@@ -112,30 +154,8 @@ export class RelationshipNotFoundError extends NoormError {
           : 'No relationships defined for this table',
         availableOptions: availableRelationships
       }
-    );
-  }
-}
-
-export class ValidationError extends NoormError {
-  constructor(message: string, field?: string, tableName?: string) {
-    super(message, {
-      table: tableName,
-      operation: 'validation',
-      suggestion: field ? `Check the value for field '${field}'` : 'Check your input data'
-    });
-  }
-}
-
-export class ConnectionError extends NoormError {
-  constructor(message: string, originalError?: Error) {
-    super(
-      `Database connection failed: ${message}`,
-      {
-        operation: 'connection',
-        suggestion: 'Check your database connection string and ensure the database is running',
-        originalError
-      }
-    );
+    )
+    this.name = 'RelationshipNotFoundError'
   }
 }
 

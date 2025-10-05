@@ -11,7 +11,7 @@ import { NOORMConfig, SchemaInfo, Repository, RelationshipInfo, SchemaChange } f
 import { NoormError } from './errors/NoormError.js'
 import { config as loadDotenv } from 'dotenv'
 import { SchemaWatcher, WatchOptions } from './watch/schema-watcher.js'
-import { QueryAnalyzer, QueryAnalyzerOptions } from './performance/query-analyzer.js'
+import { MetricsCollector } from './performance/services/metrics-collector.js'
 import { SQLiteAutoOptimizer } from './dialect/sqlite/sqlite-auto-optimizer.js'
 import { SQLiteAutoIndexer } from './dialect/sqlite/sqlite-auto-indexer.js'
 
@@ -33,7 +33,7 @@ export class NOORMME {
   private cacheManager: CacheManager
   private logger: Logger
   private schemaWatcher: SchemaWatcher | null = null
-  private queryAnalyzer: QueryAnalyzer | null = null
+  private metricsCollector: MetricsCollector | null = null
   private sqliteAutoOptimizer: SQLiteAutoOptimizer | null = null
   private sqliteAutoIndexer: SQLiteAutoIndexer | null = null
   private initialized = false
@@ -183,17 +183,15 @@ export class NOORMME {
         this.logger.warn('Failed to initialize relationship engine:', error)
       }
 
-      // Initialize query analyzer for development mode
-      this.queryAnalyzer = new QueryAnalyzer(
-        this.db,
-        this.logger,
-        schemaInfo,
+      // Initialize metrics collector for development mode
+      this.metricsCollector = new MetricsCollector(
         {
-          enabled: this.config.performance?.enableQueryOptimization ?? true,
+          enabled: process.env.NODE_ENV === 'development',
           slowQueryThreshold: 1000,
-          missingIndexDetection: true,
-          largeResultSetThreshold: 1000
-        }
+          nPlusOneDetection: true,
+          missingIndexDetection: true
+        },
+        this.logger
       )
 
       // Initialize SQLite-specific auto-optimization features
@@ -292,8 +290,8 @@ export class NOORMME {
       this.sqliteAutoIndexer.recordQuery(query, executionTime, table)
     }
     
-    if (this.queryAnalyzer) {
-      this.queryAnalyzer.recordQuery(query, executionTime, undefined, table)
+    if (this.metricsCollector) {
+      this.metricsCollector.recordQuery(query, executionTime, { table })
     }
   }
 
@@ -475,10 +473,10 @@ export class NOORMME {
       repositoryCount: this.repositories.size
     }
 
-    if (this.queryAnalyzer) {
+    if (this.metricsCollector) {
       return {
         ...baseMetrics,
-        ...this.queryAnalyzer.getPerformanceStats()
+        ...this.metricsCollector.getPerformanceStats()
       }
     }
 
@@ -488,7 +486,7 @@ export class NOORMME {
   /**
    * Enable query performance monitoring
    */
-  enablePerformanceMonitoring(options?: QueryAnalyzerOptions): void {
+  enablePerformanceMonitoring(options?: any): void {
     if (!this.initialized) {
       throw new NoormError('NOORMME must be initialized before enabling performance monitoring')
     }
@@ -498,11 +496,14 @@ export class NOORMME {
       throw new NoormError('Schema not found. Please reinitialize NOORMME.')
     }
 
-    this.queryAnalyzer = new QueryAnalyzer(
-      this.db,
-      this.logger,
-      schemaInfo,
-      options
+    this.metricsCollector = new MetricsCollector(
+      {
+        enabled: true,
+        slowQueryThreshold: options?.slowQueryThreshold || 1000,
+        nPlusOneDetection: true,
+        missingIndexDetection: true
+      },
+      this.logger
     )
 
     this.logger.info('Query performance monitoring enabled')
@@ -512,9 +513,9 @@ export class NOORMME {
    * Disable query performance monitoring
    */
   disablePerformanceMonitoring(): void {
-    if (this.queryAnalyzer) {
-      this.queryAnalyzer.clearHistory()
-      this.queryAnalyzer = null
+    if (this.metricsCollector) {
+      this.metricsCollector.clear()
+      this.metricsCollector = null
       this.logger.info('Query performance monitoring disabled')
     }
   }

@@ -6,6 +6,9 @@ alwaysApply: true
 
 # NOORMME Database Guidelines
 
+## Marie Kondo Principle
+**CRITICAL**: Database code must spark joy. Delete legacy patterns, keep only what works beautifully.
+
 ## SQLite Configuration
 
 ### WAL Mode Setup
@@ -104,5 +107,11 @@ export class MigrationGenerator {
 ### Migration Validation
 - Validate migration syntax
 - Check for breaking changes
-- Ensure rollback compatibility
+- **FORBIDDEN**: Rollback compatibility - clean breaks only
 - Test migrations in development
+
+## Legacy Database Elimination
+- **MANDATORY**: Delete old database services when creating unified ones
+- **FORBIDDEN**: Multiple database connection patterns
+- **REQUIRED**: Use unified database service architecture only
+- **PROHIBITED**: Legacy repository patterns or old query builders

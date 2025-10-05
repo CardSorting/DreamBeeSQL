@@ -2,7 +2,7 @@
 
 ## Strategic Overview
 
-NOORMME is positioned as a **batteries-included framework for Next.js** that eliminates setup hell by providing instant configuration for SQLite, authentication, admin panel, and RBAC.
+NOORMME is positioned as a **batteries-included framework for Next.js** that eliminates setup hell by providing instant configuration for SQLite, authentication, admin panel, RBAC, and background jobs.
 
 ### Core Positioning
 
@@ -18,7 +18,7 @@ We're not building another ORM - we're building the fastest path from idea to de
 
 ### The Difference:
 **ORM:** Just database access
-**Framework:** Database + Auth + Admin + RBAC + Everything
+**Framework:** Database + Auth + Admin + RBAC + Queue + Everything
 
 ## Market Analysis
 
@@ -34,17 +34,19 @@ We're not building another ORM - we're building the fastest path from idea to de
 // 3. Set up NextAuth (choose adapter, configure)
 // 4. Build admin panel from scratch
 // 5. Implement RBAC (roles, permissions, middleware)
-// 6. Write migrations
-// 7. Configure TypeScript types
+// 6. Set up background jobs (queue, workers, monitoring)
+// 7. Write migrations
+// 8. Configure TypeScript types
 //
-// Result: 6-8 hours before "hello world"
+// Result: 8-10 hours before "hello world"
 ```
 
 **Pain Points**:
-- ❌ Decision fatigue (which ORM? which adapter?)
+- ❌ Decision fatigue (which ORM? which adapter? which queue?)
 - ❌ Configuration complexity
 - ❌ No admin panel solution
 - ❌ RBAC is DIY
+- ❌ Background jobs setup is complex
 - ❌ Boilerplate for every project
 
 **2. Existing ORMs (Prisma, Drizzle, Kysely)**
@@ -66,6 +68,7 @@ We're not building another ORM - we're building the fastest path from idea to de
 // ❌ No code generation
 // ❌ No admin panel
 // ❌ No auth integration
+// ❌ No background jobs
 ```
 
 **Pain Points**:
@@ -73,6 +76,7 @@ We're not building another ORM - we're building the fastest path from idea to de
 - ❌ No admin UI
 - ❌ No authentication story
 - ❌ No authorization (RBAC)
+- ❌ No background job solution
 
 **3. Full-Stack Frameworks (RedwoodJS, Blitz)**
 ```typescript
@@ -121,8 +125,10 @@ We're not building another ORM - we're building the fastest path from idea to de
 │  │ Admin   │  │ Admin   │  │ Admin    │           │
 │  │ +Manual │  │ +Manual │  │ +Manual  │           │
 │  │ RBAC    │  │ RBAC    │  │ RBAC     │           │
+│  │ +Manual │  │ +Manual │  │ +Manual  │           │
+│  │ Queue   │  │ Queue   │  │ Queue    │           │
 │  └─────────┘  └─────────┘  └──────────┘           │
-│     8 hours      8 hours      8 hours              │
+│    10 hours     10 hours     10 hours              │
 │                                                      │
 │  NOORMME = All included, < 2 minutes              │
 │                                                      │
@@ -137,11 +143,12 @@ We're not building another ORM - we're building the fastest path from idea to de
 
 | Feature | NOORMME | Next.js Manual | Prisma Stack | RedwoodJS | Blitz |
 |---------|---------|----------------|--------------|-----------|-------|
-| **Setup Time** | < 2 min | 6-8 hours | 4-6 hours | 1-2 hours | 30 min |
+| **Setup Time** | < 2 min | 8-10 hours | 6-8 hours | 2-3 hours | 1 hour |
 | **Database** | ✅ Auto-configured | ❌ DIY | ✅ Configured | ✅ Configured | ✅ Configured |
 | **Auth (NextAuth)** | ✅ Pre-integrated | ❌ DIY | ❌ DIY | ⚠️ Custom | ✅ Integrated |
 | **Admin Panel** | ✅ Auto-generated | ❌ Build yourself | ❌ Build yourself | ⚠️ Partial | ❌ Build yourself |
 | **RBAC** | ✅ Built-in | ❌ DIY | ❌ DIY | ❌ DIY | ❌ DIY |
+| **Background Jobs** | ✅ Built-in | ❌ DIY | ❌ DIY | ❌ DIY | ❌ DIY |
 | **Next.js Native** | ✅ 100% | ✅ 100% | ✅ Compatible | ❌ Different | ⚠️ Fork |
 | **Kysely (Type-safe)** | ✅ Built on | ⚠️ Optional | ❌ No | ❌ No | ❌ No |
 | **Zero Config** | ✅ Yes | ❌ No | ❌ No | ⚠️ Opinionated | ⚠️ Opinionated |
@@ -164,6 +171,7 @@ npm run dev
 # ✅ Auth working
 # ✅ Admin panel live
 # ✅ RBAC enabled
+# ✅ Background jobs ready
 # ✅ Type-safe queries
 ```
 
@@ -176,10 +184,11 @@ npm create next-app my-app
 # Now set up NextAuth...
 # Now build admin panel...
 # Now implement RBAC...
+# Now set up background jobs...
 # Now configure types...
 ```
 
-**Value**: Save 6-8 hours per project
+**Value**: Save 8-10 hours per project
 
 ### 2. Complete Solution (Not Just Database)
 
@@ -188,6 +197,7 @@ npm create next-app my-app
 - ✅ Authentication (NextAuth)
 - ✅ Admin Panel (CRUD UI)
 - ✅ Authorization (RBAC)
+- ✅ Background Jobs (Queuebase)
 - ✅ Type Safety (Auto-generated)
 - ✅ Migrations (Automated)
 
@@ -196,6 +206,7 @@ npm create next-app my-app
 - ⚠️ Framework only (RedwoodJS, Blitz)
 - ❌ Admin panel (none)
 - ❌ RBAC (none)
+- ❌ Background jobs (none)
 
 **Value**: Everything needed, nothing more
 

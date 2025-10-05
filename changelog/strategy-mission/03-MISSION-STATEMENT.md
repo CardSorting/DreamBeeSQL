@@ -4,7 +4,7 @@
 
 **"Django's Batteries-Included Philosophy for Next.js"**
 
-NOORMME is a batteries-included framework for Next.js that eliminates setup hell by providing instant configuration for SQLite, authentication, admin panel, and RBAC - built on proven tools like Kysely and NextAuth.
+NOORMME is a batteries-included framework for Next.js that eliminates setup hell by providing instant configuration for SQLite, authentication, admin panel, RBAC, and background jobs - built on proven tools like Kysely, NextAuth, and Queuebase.
 
 ## Vision
 
@@ -25,6 +25,7 @@ To become the fastest way to start a production-ready Next.js application, elimi
 - **Auth**: NextAuth pre-configured (never rewrite again)
 - **Admin**: Auto-generated admin panel (Django admin vibes)
 - **RBAC**: Built-in role-based access control
+- **Queue**: Background jobs & task management (Queuebase)
 - **Framework**: Next.js App Router
 - **Language**: TypeScript
 - **Philosophy**: "Just works"
@@ -55,6 +56,7 @@ To become the fastest way to start a production-ready Next.js application, elimi
 - **Authentication**: NextAuth pre-integrated with adapters
 - **Admin Panel**: Auto-generated CRUD interface (Django admin vibes)
 - **RBAC System**: Role-based access control ready to use
+- **Queue System**: Background jobs & task management (Queuebase)
 - **Schema Management**: Zero-boilerplate schema definition
 
 ### The Promise
@@ -68,21 +70,24 @@ npm run dev
 # Working auth ✅
 # Working admin panel ✅
 # Working permissions ✅
+# Working background jobs ✅
 # Ready to build features ✅
 
 # Batteries included. 🔋
 ```
 
 ### Developer Tools
-- **CLI Commands**: `noormme dev`, `db:migrate`, `generate:model`
+- **CLI Commands**: `noormme dev`, `db:migrate`, `generate:model`, `generate:task`
 - **Type Generation**: Auto-generate TypeScript types from schemas
 - **Hot Reload**: Schema changes reflected immediately (dev mode)
 - **Migration System**: Automatic in dev, files in production
+- **Task Management**: Queue dashboard, retry failed tasks
 
 ### Integration Layer
 - **NextAuth Adapter**: Kysely-based adapter for SQLite
 - **Admin Components**: Reusable UI components for CRUD
 - **RBAC Helpers**: Middleware and Server Action decorators
+- **Queue Integration**: Task management in admin panel
 - **Template System**: Customizable project templates
 
 ## What We Don't Build
@@ -208,8 +213,13 @@ export const Subscription = schema.table('subscriptions', {
 # - TypeScript types
 # - Admin UI routes
 # - RBAC permissions
+# - Background task handlers
 
-# Day 3: Ship to production
+# Day 3: Add background jobs
+# Queue welcome emails, process payments, send notifications
+await tasks.sendWelcomeEmail.enqueue({ userId: user.id });
+
+# Day 4: Ship to production
 ```
 
 ### 2. Internal Tool
@@ -328,6 +338,7 @@ Checklist:
 - ✅ Authentication (NextAuth)
 - ✅ User Management (admin panel)
 - ✅ Authorization (RBAC)
+- ✅ Background Jobs (Queuebase)
 - ✅ Type Safety (TypeScript + Kysely)
 - ✅ Migrations (auto + manual)
 - ✅ Admin UI (CRUD)
@@ -405,6 +416,7 @@ npm install orm
 - ✅ Auth (NextAuth)
 - ✅ Admin (auto-generated)
 - ✅ RBAC (roles + permissions)
+- ✅ Queue (background jobs + Queuebase)
 - ✅ Types (auto-generated)
 - ✅ Migrations (automated)
 
@@ -433,6 +445,11 @@ export default {
   },
   auth: {
     providers: ['google', 'github'], // add provider
+  },
+  queue: {
+    tasks: {
+      'send-notification': { retries: 3 }, // add custom task
+    },
   },
 };
 ```
@@ -497,7 +514,7 @@ export default {
 
 ## Conclusion
 
-NOORMME's mission is to eliminate the tedious setup work that precedes every Next.js project. By providing a batteries-included framework built on proven tools (Next.js, Kysely, NextAuth, SQLite), we let developers focus on building features instead of configuring infrastructure.
+NOORMME's mission is to eliminate the tedious setup work that precedes every Next.js project. By providing a batteries-included framework built on proven tools (Next.js, Kysely, NextAuth, Queuebase, SQLite), we let developers focus on building features instead of configuring infrastructure.
 
 Our vision is to become the default starting point for Next.js applications, known for:
 - **Speed**: Fastest setup in the ecosystem
@@ -516,6 +533,7 @@ We succeed when developers say: *"I went from idea to deployed app in a day."*
 Stop building auth.
 Stop building admin panels.
 Stop building RBAC.
+Stop setting up background jobs.
 Start building features. 🚀
 
 **No pain, everything to gain** 🔋

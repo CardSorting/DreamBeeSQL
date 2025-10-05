@@ -37,6 +37,7 @@ npm run dev
 ✅ **Auth:** NextAuth pre-configured (never rewrite again)
 ✅ **Admin:** Auto-generated admin panel (Django admin vibes)
 ✅ **RBAC:** Built-in role-based access control
+✅ **Queue:** Background jobs & task management (Queuebase)
 ✅ **Framework:** Next.js App Router
 ✅ **Language:** TypeScript
 ✅ **Philosophy:** "Just works"
@@ -59,6 +60,9 @@ npm run dev
 │  │(Modern) │(Server   │Actions)  │  │
 │  │         │Components)│          │  │
 │  └─────────┴──────────┴──────────┘  │
+├─────────────────────────────────────┤
+│         Queuebase                   │
+│   (Background Jobs & Tasks)         │
 ├─────────────────────────────────────┤
 │         Kysely                      │
 │   (Type-safe Query Builder)         │
@@ -98,6 +102,13 @@ npm run dev
 - Server Actions for mutations
 - Redirect patterns (not exceptions)
 - Type-safe helpers
+
+### 5. Background Jobs & Tasks (Queuebase)
+- Zero-config task queue with Queuebase
+- Auto-generated task definitions
+- Admin panel integration for monitoring
+- Type-safe task handlers
+- Scheduled jobs and retries
 
 ---
 
@@ -189,7 +200,8 @@ my-app/
 │   ├── admin/              # Auto-generated admin panel
 │   │   ├── page.tsx
 │   │   ├── users/
-│   │   └── roles/
+│   │   ├── roles/
+│   │   └── tasks/          # Task management dashboard
 │   │
 │   ├── api/
 │   │   └── auth/
@@ -201,7 +213,10 @@ my-app/
 ├── lib/
 │   ├── db.ts               # Auto-configured database
 │   ├── auth.ts             # NextAuth config
-│   └── rbac.ts             # RBAC helpers
+│   ├── rbac.ts             # RBAC helpers
+│   ├── queue.ts            # Queuebase configuration
+│   ├── tasks.ts            # Task definitions
+│   └── task-handlers.ts    # Task execution logic
 │
 ├── schemas/                # Your models (optional)
 │   └── user.ts
@@ -221,6 +236,7 @@ After `npx create-noormme-app`:
 - [x] **NextAuth** with User/Session/Account models
 - [x] **Admin panel** at `/admin` with login protection
 - [x] **RBAC** with Role/Permission system
+- [x] **Background jobs** with Queuebase integration
 - [x] **Type-safe queries** via Kysely
 - [x] **Auto-generated TypeScript types**
 - [x] **Hot reload** for schema changes (dev mode)
@@ -276,6 +292,16 @@ npm run dev
 - OAuth provider support
 - Session management
 - User registration flow
+
+### Priority 5: Queue & Task Management (Week 6) ⚡
+**Task:** Background jobs with Queuebase integration
+**Features:**
+- Zero-config task queue setup
+- Auto-generated task definitions
+- Admin panel integration for monitoring
+- Type-safe task handlers
+- Scheduled jobs and retries
+- CLI commands for task management
 
 ---
 
@@ -341,6 +367,31 @@ export async function middleware(request) {
   }
   return NextResponse.next();
 }
+
+// Background job with Queuebase
+// lib/tasks.ts
+import { queue } from '@/lib/queue';
+
+export const tasks = {
+  sendWelcomeEmail: queue.task('send-welcome-email'),
+  processUserUpload: queue.task('process-user-upload'),
+  cleanupExpiredSessions: queue.task('cleanup-expired-sessions'),
+};
+
+// Task handler
+// lib/task-handlers.ts
+import { db } from '@/lib/db';
+
+export async function handleSendWelcomeEmail(payload: { userId: string }) {
+  const user = await db
+    .selectFrom('users')
+    .where('id', '=', payload.userId)
+    .selectAll()
+    .executeTakeFirstOrThrow();
+    
+  // Send email logic here
+  console.log(`Sending welcome email to ${user.email}`);
+}
 ```
 
 ---
@@ -361,6 +412,7 @@ export async function middleware(request) {
 - No database configuration
 - No auth setup
 - No admin panel building
+- No queue setup required
 - Focus on features, not plumbing
 
 ---
@@ -370,6 +422,7 @@ export async function middleware(request) {
 - [Kysely Docs](https://kysely.dev/) - Query builder we use
 - [NextAuth Docs](https://authjs.dev/) - Auth system
 - [SQLite Docs](https://www.sqlite.org/docs.html) - Database
+- [Queuebase Docs](https://queuebase.dev/) - Background jobs
 
 ---
 
@@ -391,10 +444,14 @@ npm run dev
 # ✅ Server Actions for mutations
 # ✅ Modern middleware with Edge Runtime
 # ✅ Auth.js v5 integration
+# ✅ Background jobs with Queuebase
 # ✅ Progressive enhancement
 
 # Add a model (optional)
 noormme generate:model Post title:string content:text
+
+# Add a background task (optional)
+noormme generate:task send-notification
 
 # Database migrates automatically in dev
 # Server Components auto-update

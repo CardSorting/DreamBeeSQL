@@ -2,7 +2,7 @@
 
 ## What You're Building
 
-**NOORMME** = Batteries-included framework for Next.js with zero-config SQLite, auth, admin, and RBAC.
+**NOORMME** = Batteries-included framework for Next.js with zero-config SQLite, auth, admin, RBAC, and background jobs.
 
 ```bash
 # One command creates a fully-featured app
@@ -15,6 +15,7 @@ npm run dev
 # ✅ NextAuth (working)
 # ✅ Admin panel (/admin)
 # ✅ RBAC (roles & permissions)
+# ✅ Background jobs (Queuebase)
 ```
 
 ## The Stack:
@@ -23,6 +24,7 @@ npm run dev
 ✅ **Auth:** NextAuth pre-configured (never rewrite again)
 ✅ **Admin:** Auto-generated admin panel (Django admin vibes)
 ✅ **RBAC:** Built-in role-based access control
+✅ **Queue:** Background jobs & task management (Queuebase)
 ✅ **Framework:** Next.js App Router
 ✅ **Language:** TypeScript
 ✅ **Philosophy:** "Just works"
@@ -35,7 +37,8 @@ npm run dev
 1. **Kysely** - Type-safe query builder (we use it directly, no wrapper)
 2. **better-sqlite3** - SQLite driver for Node.js
 3. **NextAuth** - Authentication (pre-configured)
-4. **TypeScript** - Full type safety
+4. **Queuebase** - Background jobs and task management
+5. **TypeScript** - Full type safety
 
 ### Framework Stack
 1. **Next.js 13+** - App Router (required)
@@ -55,6 +58,7 @@ npm run dev
 - Creates auth schemas (User, Session, Account)
 - Generates admin panel routes
 - Configures RBAC (Role, Permission models)
+- Sets up Queuebase for background jobs
 
 **Key files created:**
 ```
@@ -62,9 +66,13 @@ my-app/
 ├── lib/
 │   ├── db.ts          # Kysely instance, auto-configured
 │   ├── auth.ts        # NextAuth config, pre-integrated
-│   └── rbac.ts        # Role/permission helpers
+│   ├── rbac.ts        # Role/permission helpers
+│   ├── queue.ts       # Queuebase configuration
+│   ├── tasks.ts       # Task definitions
+│   └── task-handlers.ts # Task execution logic
 ├── app/
 │   ├── admin/         # Auto-generated admin panel
+│   │   └── tasks/     # Task management dashboard
 │   └── api/auth/      # NextAuth routes
 └── noormme.config.ts  # Framework configuration
 ```
@@ -213,6 +221,68 @@ CREATE TABLE user_roles (
   role_id INTEGER REFERENCES roles(id),
   PRIMARY KEY (user_id, role_id)
 );
+```
+
+### Layer 6: Queue & Task Management (Queuebase)
+**What it does:**
+- Zero-config background job processing
+- Auto-generated task definitions
+- Admin panel integration for monitoring
+- Type-safe task handlers
+- Scheduled jobs and retries
+
+**Auto-generated queue setup:**
+```typescript
+// lib/queue.ts (auto-generated)
+import { Queuebase } from '@queuebase/sdk';
+
+export const queue = new Queuebase({
+  apiKey: process.env.QUEUEBASE_API_KEY,
+  projectId: process.env.QUEUEBASE_PROJECT_ID,
+});
+
+// lib/tasks.ts (auto-generated)
+export const tasks = {
+  // Auth-related tasks
+  sendWelcomeEmail: queue.task('send-welcome-email'),
+  sendPasswordReset: queue.task('send-password-reset'),
+  
+  // Data processing tasks
+  processUserUpload: queue.task('process-user-upload'),
+  generateUserReport: queue.task('generate-user-report'),
+  
+  // Maintenance tasks
+  cleanupExpiredSessions: queue.task('cleanup-expired-sessions'),
+  backupDatabase: queue.task('backup-database'),
+};
+
+// lib/task-handlers.ts (auto-generated)
+import { db } from './db';
+
+export async function handleSendWelcomeEmail(payload: { userId: string }) {
+  const user = await db
+    .selectFrom('users')
+    .where('id', '=', payload.userId)
+    .selectAll()
+    .executeTakeFirstOrThrow();
+    
+  // Send email logic here
+  console.log(`Sending welcome email to ${user.email}`);
+}
+
+export async function handleProcessUserUpload(payload: { userId: string, fileUrl: string }) {
+  // File processing logic here
+  console.log(`Processing upload for user ${payload.userId}`);
+}
+
+export async function handleCleanupExpiredSessions() {
+  const deleted = await db
+    .deleteFrom('sessions')
+    .where('expires', '<', new Date())
+    .execute();
+    
+  console.log(`Cleaned up ${deleted.length} expired sessions`);
+}
 ```
 
 ---
@@ -373,6 +443,76 @@ export const config = {
 - User registration flow with Server Actions
 - Progressive enhancement
 
+### Phase 5: Queue & Task Management (Week 6) ⚡
+
+**Goal:** Background jobs with Queuebase integration
+
+**Features:**
+- Zero-config task queue setup
+- Auto-generated task definitions
+- Admin panel integration for monitoring
+- Type-safe task handlers
+- Scheduled jobs and retries
+- CLI commands for task management
+
+**Modern Implementation:**
+```typescript
+// Auto-generated task management in admin panel
+// app/admin/tasks/page.tsx (Server Component)
+import { DataTable } from '@/components/DataTable';
+import { getCachedTasks } from '@/lib/task-utils';
+
+export default async function TasksPage() {
+  const tasks = await getCachedTasks();
+  
+  return (
+    <div className="container mx-auto py-6">
+      <h1 className="text-2xl font-bold mb-6">Background Tasks</h1>
+      <DataTable 
+        data={tasks}
+        columns={[
+          { key: 'name', label: 'Task Name' },
+          { key: 'status', label: 'Status' },
+          { key: 'createdAt', label: 'Created' },
+          { key: 'attempts', label: 'Attempts' },
+        ]}
+      />
+    </div>
+  );
+}
+
+// Task usage in Server Actions
+// app/admin/users/actions.ts
+'use server';
+
+import { requireRole } from '@/lib/rbac';
+import { withDatabase } from '@/lib/db';
+import { tasks } from '@/lib/tasks';
+import { revalidatePath } from 'next/cache';
+
+export async function createUser(userData: UserData) {
+  await requireRole('admin');
+  
+  const user = await withDatabase(async (db) => {
+    return await db
+      .insertInto('users')
+      .values(userData)
+      .returningAll()
+      .executeTakeFirstOrThrow();
+  });
+  
+  // Queue welcome email
+  await tasks.sendWelcomeEmail.enqueue({
+    userId: user.id,
+    email: user.email,
+    name: user.name,
+  });
+  
+  revalidatePath('/admin/users');
+  return user;
+}
+```
+
 **Modern Implementation:**
 ```typescript
 // app/login/page.tsx (Server Component)
@@ -488,6 +628,7 @@ program
       'better-sqlite3',
       'next-auth',
       '@noormme/nextauth-adapter',
+      '@queuebase/sdk',
     ]);
 
     // 3. Copy templates
@@ -569,6 +710,31 @@ export default defineConfig({
     roles: {
       // Custom roles
     }
+  },
+  
+  // Queue (optional, customize if wanted)
+  queue: {
+    provider: 'queuebase',
+    apiKey: process.env.QUEUEBASE_API_KEY,
+    projectId: process.env.QUEUEBASE_PROJECT_ID,
+    
+    // Auto-configured tasks
+    tasks: {
+      'send-welcome-email': {
+        retries: 3,
+        timeout: 30000,
+        description: 'Send welcome email to new users'
+      },
+      'process-upload': {
+        retries: 5,
+        timeout: 60000,
+        description: 'Process user file uploads'
+      },
+      'cleanup-sessions': {
+        schedule: '0 2 * * *',
+        description: 'Clean up expired sessions daily'
+      },
+    },
   }
 })
 ```
@@ -836,6 +1002,9 @@ export async function generateMigration(
 2. `noormme db:migrate` - run migrations
 3. `noormme db:seed` - seed database
 4. `noormme generate:model` - scaffold model
+5. `noormme generate:task` - scaffold background task
+6. `noormme queue:dashboard` - view task dashboard
+7. `noormme queue:retry` - retry failed tasks
 
 **CLI implementation:**
 ```typescript
@@ -867,6 +1036,28 @@ program
   .description('Generate a new model')
   .action(async (name) => {
     await generateModel(name);
+  });
+
+program
+  .command('generate:task <name>')
+  .description('Generate a new background task')
+  .action(async (name) => {
+    await generateTask(name);
+  });
+
+program
+  .command('queue:dashboard')
+  .description('View task dashboard')
+  .action(async () => {
+    await openTaskDashboard();
+  });
+
+program
+  .command('queue:retry')
+  .description('Retry failed tasks')
+  .option('--all', 'Retry all failed tasks')
+  .action(async (options) => {
+    await retryFailedTasks(options.all);
   });
 
 program.parse();
@@ -940,6 +1131,10 @@ AdminLayout (auth check, navigation)
 │   └── DataTable (reusable)
 ├── ModelDetail (view/edit)
 │   └── Form (reusable)
+├── TaskManagement (background jobs)
+│   ├── TaskList (queue status)
+│   ├── TaskDetail (execution logs)
+│   └── TaskActions (retry, cancel)
 └── ModelDelete (confirmation)
 ```
 
@@ -1052,6 +1247,29 @@ describe('RBAC', () => {
 });
 ```
 
+### 4. Queue & Task Tests
+```typescript
+describe('Queue System', () => {
+  it('should enqueue welcome email task', async () => {
+    const result = await tasks.sendWelcomeEmail.enqueue({
+      userId: 'user-123',
+      email: 'test@example.com',
+      name: 'Test User',
+    });
+    
+    expect(result.id).toBeDefined();
+    expect(result.status).toBe('pending');
+  });
+  
+  it('should handle task execution', async () => {
+    const payload = { userId: 'user-123' };
+    await expect(
+      handleSendWelcomeEmail(payload)
+    ).resolves.not.toThrow();
+  });
+});
+```
+
 ---
 
 ## Performance Considerations
@@ -1071,6 +1289,12 @@ describe('RBAC', () => {
 - Only regenerate on schema changes
 - Use incremental build
 
+### 4. Queue & Task Management
+- Background job processing with Queuebase
+- Task retry logic and error handling
+- Admin panel integration for monitoring
+- Type-safe task definitions and handlers
+
 ---
 
 ## Success Criteria
@@ -1081,6 +1305,7 @@ describe('RBAC', () => {
 - Admin panel shows all tables
 - CRUD operations work
 - RBAC protects routes
+- Background jobs work out-of-box
 - All batteries included
 
 **Developer Experience:**
@@ -1088,6 +1313,7 @@ describe('RBAC', () => {
 - Never write auth setup again
 - Never build admin CRUD again
 - Never implement RBAC again
+- Never set up background jobs again
 - Just build features
 
 ## Comparison:

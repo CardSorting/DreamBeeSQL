@@ -45,6 +45,8 @@ npm run dev
 2. **React Server Components** - For admin UI
 3. **Server Actions** - For CRUD operations
 4. **SQLite + WAL** - Database with optimal config
+5. **TailwindCSS** - Zero-config utility-first CSS framework
+6. **PostCSS** - CSS processing with TailwindCSS integration
 
 ---
 
@@ -73,7 +75,10 @@ my-app/
 ├── app/
 │   ├── admin/         # Auto-generated admin panel
 │   │   └── tasks/     # Task management dashboard
-│   └── api/auth/      # NextAuth routes
+│   ├── api/auth/      # NextAuth routes
+│   └── globals.css    # TailwindCSS imports & custom styles
+├── tailwind.config.js # Auto-configured TailwindCSS
+├── postcss.config.js  # PostCSS configuration
 └── noormme.config.ts  # Framework configuration
 ```
 
@@ -155,12 +160,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 });
 ```
 
-### Layer 4: Modern Admin Panel (Server Components + Server Actions)
+### Layer 4: Modern Admin Panel (Server Components + Server Actions + TailwindCSS)
 **What it does:**
 - Auto-generated CRUD UI using Server Components
 - Authentication-protected with modern middleware
-- Responsive design with Tailwind CSS
+- Responsive design with pre-configured TailwindCSS
 - Role-based access control with Server Actions
+- Zero-config styling with utility-first CSS
 
 **Modern File structure:**
 ```
@@ -182,7 +188,99 @@ app/admin/
 │   ├── Form.tsx            # Client Component with Server Actions
 │   ├── Navigation.tsx      # Server Component
 │   └── DeleteButton.tsx    # Client Component
-└── middleware.ts           # Route protection
+├── middleware.ts           # Route protection
+└── globals.css             # TailwindCSS imports + custom admin styles
+```
+
+**Auto-generated TailwindCSS Configuration:**
+```javascript
+// tailwind.config.js (auto-generated)
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // NOORMME brand colors
+        primary: {
+          50: '#eff6ff',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+        },
+        // Admin panel specific colors
+        admin: {
+          sidebar: '#1f2937',
+          header: '#374151',
+          content: '#f9fafb',
+        }
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+  ],
+}
+```
+
+**Auto-generated Global CSS:**
+```css
+/* app/globals.css (auto-generated) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* NOORMME Admin Panel Custom Styles */
+@layer components {
+  .admin-sidebar {
+    @apply bg-admin-sidebar text-white min-h-screen w-64 fixed left-0 top-0;
+  }
+  
+  .admin-header {
+    @apply bg-admin-header text-white p-4 ml-64;
+  }
+  
+  .admin-content {
+    @apply bg-admin-content min-h-screen ml-64 p-6;
+  }
+  
+  .data-table {
+    @apply bg-white shadow-sm rounded-lg overflow-hidden;
+  }
+  
+  .data-table th {
+    @apply bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+  
+  .data-table td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-md transition-colors;
+  }
+  
+  .form-input {
+    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+}
 ```
 
 ### Layer 5: RBAC System
@@ -629,15 +727,24 @@ program
       'next-auth',
       '@noormme/nextauth-adapter',
       '@queuebase/sdk',
+      // TailwindCSS and styling dependencies
+      'tailwindcss',
+      'postcss',
+      'autoprefixer',
+      '@tailwindcss/forms',
+      '@tailwindcss/typography',
     ]);
 
     // 3. Copy templates
     await scaffold.copyTemplates(projectName);
 
-    // 4. Initialize database
+    // 4. Configure TailwindCSS
+    await scaffold.configureTailwindCSS(projectName);
+
+    // 5. Initialize database
     await scaffold.initializeDatabase(projectName);
 
-    // 5. Run initial migration
+    // 6. Run initial migration
     await scaffold.runMigration(projectName, '001_initial.sql');
 
     console.log('✅ Done! Run: cd', projectName, '&& npm run dev');
@@ -671,6 +778,115 @@ export async function initializeDatabase(projectPath: string) {
   db.pragma('foreign_keys = ON');
 
   db.close();
+}
+
+// TailwindCSS configuration
+export async function configureTailwindCSS(projectPath: string) {
+  // Create tailwind.config.js
+  const tailwindConfig = `/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#eff6ff',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+        },
+        admin: {
+          sidebar: '#1f2937',
+          header: '#374151',
+          content: '#f9fafb',
+        }
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+  ],
+}`;
+
+  await fs.writeFile(
+    path.join(projectPath, 'tailwind.config.js'),
+    tailwindConfig
+  );
+
+  // Create postcss.config.js
+  const postcssConfig = `module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}`;
+
+  await fs.writeFile(
+    path.join(projectPath, 'postcss.config.js'),
+    postcssConfig
+  );
+
+  // Create enhanced globals.css with admin panel styles
+  const globalsCSS = `@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* NOORMME Admin Panel Custom Styles */
+@layer components {
+  .admin-sidebar {
+    @apply bg-admin-sidebar text-white min-h-screen w-64 fixed left-0 top-0;
+  }
+  
+  .admin-header {
+    @apply bg-admin-header text-white p-4 ml-64;
+  }
+  
+  .admin-content {
+    @apply bg-admin-content min-h-screen ml-64 p-6;
+  }
+  
+  .data-table {
+    @apply bg-white shadow-sm rounded-lg overflow-hidden;
+  }
+  
+  .data-table th {
+    @apply bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+  
+  .data-table td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-md transition-colors;
+  }
+  
+  .form-input {
+    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+}`;
+
+  await fs.writeFile(
+    path.join(projectPath, 'app', 'globals.css'),
+    globalsCSS
+  );
 }
 ```
 

@@ -2,7 +2,7 @@
 
 ## Strategic Overview
 
-NOORMME is positioned as a **batteries-included framework for Next.js** that eliminates setup hell by providing instant configuration for SQLite, authentication, admin panel, RBAC, and background jobs.
+NOORMME is positioned as a **batteries-included framework for Next.js** that eliminates setup hell by providing instant configuration for SQLite, authentication, admin panel, RBAC, background jobs, and modern UI styling with TailwindCSS.
 
 ### Core Positioning
 
@@ -173,6 +173,8 @@ npm run dev
 # ✅ RBAC enabled
 # ✅ Background jobs ready
 # ✅ Type-safe queries
+# ✅ TailwindCSS configured
+# ✅ Professional UI ready
 ```
 
 **Competitors**:
@@ -186,6 +188,8 @@ npm create next-app my-app
 # Now implement RBAC...
 # Now set up background jobs...
 # Now configure types...
+# Now set up TailwindCSS...
+# Now design UI components...
 ```
 
 **Value**: Save 8-10 hours per project
@@ -200,6 +204,9 @@ npm create next-app my-app
 - ✅ Background Jobs (Queuebase)
 - ✅ Type Safety (Auto-generated)
 - ✅ Migrations (Automated)
+- ✅ UI Framework (TailwindCSS)
+- ✅ Professional Styling (Pre-configured)
+- ✅ Responsive Design (Built-in)
 
 **Competitors Provide**:
 - ✅ Database only (Prisma, Drizzle, Kysely)
@@ -207,6 +214,8 @@ npm create next-app my-app
 - ❌ Admin panel (none)
 - ❌ RBAC (none)
 - ❌ Background jobs (none)
+- ❌ UI framework (none)
+- ❌ Professional styling (none)
 
 **Value**: Everything needed, nothing more
 
@@ -220,10 +229,19 @@ npm create next-app my-app
 // Default (works out-of-box)
 import { db } from '@/lib/db';
 
+// TailwindCSS classes work immediately
+<div className="admin-sidebar">
+  <button className="btn-primary">Save</button>
+</div>
+
 // Custom (if needed)
 // noormme.config.ts
 export default {
   admin: { path: '/dashboard' },
+  ui: { 
+    theme: 'dark',
+    primaryColor: 'blue'
+  },
 };
 ```
 
@@ -236,6 +254,8 @@ export default {
 // NextAuth: [...nextauth].ts
 // Admin: Build from scratch
 // RBAC: Implement yourself
+// TailwindCSS: Configure from scratch
+// UI: Design components from scratch
 ```
 
 **Value**: Start building features, not infrastructure
@@ -247,10 +267,12 @@ export default {
 - Kysely (standard, can drop down)
 - SQLite (standard)
 - NextAuth (standard)
+- TailwindCSS (standard utility-first)
 
 **Lock-in Risk**: **Low**
 - Use Kysely directly anytime
 - Standard Next.js patterns
+- Standard TailwindCSS patterns
 - Can migrate away easily
 
 **Competitor Lock-in**:

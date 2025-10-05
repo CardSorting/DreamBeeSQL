@@ -38,6 +38,7 @@ npm run dev
 ✅ **Admin:** Auto-generated admin panel (Django admin vibes)
 ✅ **RBAC:** Built-in role-based access control
 ✅ **Queue:** Background jobs & task management (Queuebase)
+✅ **UI:** TailwindCSS pre-configured (professional styling)
 ✅ **Framework:** Next.js App Router
 ✅ **Language:** TypeScript
 ✅ **Philosophy:** "Just works"
@@ -60,6 +61,9 @@ npm run dev
 │  │(Modern) │(Server   │Actions)  │  │
 │  │         │Components)│          │  │
 │  └─────────┴──────────┴──────────┘  │
+├─────────────────────────────────────┤
+│         TailwindCSS                 │
+│   (Zero-config UI Framework)        │
 ├─────────────────────────────────────┤
 │         Queuebase                   │
 │   (Background Jobs & Tasks)         │
@@ -89,11 +93,12 @@ npm run dev
 - Modern middleware with Edge Runtime
 - Progressive enhancement
 
-### 3. Modern Admin Panel (Server Components)
+### 3. Modern Admin Panel (Server Components + TailwindCSS)
 - `/admin` route with Server Components
 - CRUD with Server Actions
 - Role-based access control
-- Responsive UI with Tailwind CSS
+- Responsive UI with pre-configured TailwindCSS
+- Professional styling out-of-box
 - Progressive enhancement
 
 ### 4. Modern RBAC (Server Actions)
@@ -109,6 +114,13 @@ npm run dev
 - Admin panel integration for monitoring
 - Type-safe task handlers
 - Scheduled jobs and retries
+
+### 6. Zero-Config UI Framework (TailwindCSS)
+- Pre-configured TailwindCSS setup
+- Professional admin panel styling
+- Custom component classes ready
+- Responsive design built-in
+- No CSS configuration required
 
 ---
 
@@ -217,6 +229,8 @@ my-app/
 │   ├── queue.ts            # Queuebase configuration
 │   ├── tasks.ts            # Task definitions
 │   └── task-handlers.ts    # Task execution logic
+├── tailwind.config.js      # Auto-configured TailwindCSS
+├── postcss.config.js       # PostCSS configuration
 │
 ├── schemas/                # Your models (optional)
 │   └── user.ts
@@ -239,6 +253,8 @@ After `npx create-noormme-app`:
 - [x] **Background jobs** with Queuebase integration
 - [x] **Type-safe queries** via Kysely
 - [x] **Auto-generated TypeScript types**
+- [x] **TailwindCSS** pre-configured with admin styling
+- [x] **Professional UI** components ready to use
 - [x] **Hot reload** for schema changes (dev mode)
 - [x] **Migration system** for production
 
@@ -413,6 +429,8 @@ export async function handleSendWelcomeEmail(payload: { userId: string }) {
 - No auth setup
 - No admin panel building
 - No queue setup required
+- No UI framework setup
+- No CSS configuration
 - Focus on features, not plumbing
 
 ---
@@ -445,6 +463,8 @@ npm run dev
 # ✅ Modern middleware with Edge Runtime
 # ✅ Auth.js v5 integration
 # ✅ Background jobs with Queuebase
+# ✅ TailwindCSS pre-configured
+# ✅ Professional admin UI styling
 # ✅ Progressive enhancement
 
 # Add a model (optional)

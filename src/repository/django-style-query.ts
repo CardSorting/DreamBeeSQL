@@ -256,13 +256,11 @@ export class DjangoQuerySet<T = any> {
    */
   async get(filters?: Record<string, any>): Promise<T> {
     let querySet = this
-    
     if (filters) {
-      querySet = this.filter(filters)
+      querySet = (this.filter(filters) as this)
     }
 
     const results = await querySet.all()
-    
     if (results.length === 0) {
       throw new Error(`No ${this.table.name} found matching the given query`)
     }

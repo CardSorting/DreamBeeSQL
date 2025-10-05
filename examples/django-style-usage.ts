@@ -242,7 +242,7 @@ async function demonstrateDjangoPatterns() {
   
   // Bulk delete
   const deletedCount = await User.objects
-    .filter({ email: 'endswith', '@temp.com' })
+    .filter({ email__endswith: '@temp.com' })
     .delete()
   console.log(`Bulk deleted ${deletedCount} temporary users`)
   console.log()

@@ -43,19 +43,21 @@ npm run dev
 
 ---
 
-## 🏗️ Technology Stack
+## 🏗️ Modern Technology Stack
 
 ```
 ┌─────────────────────────────────────┐
-│         Next.js 13+                 │
-│         (App Router)                │
+│         Next.js 15+                 │
+│    (App Router + Server Components) │
 ├─────────────────────────────────────┤
 │         NOORMME CLI                 │
 │    (Setup & Code Generation)        │
 ├─────────────────────────────────────┤
 │  ┌─────────┬──────────┬──────────┐  │
-│  │ NextAuth│  Admin   │   RBAC   │  │
-│  │ (Setup) │  Panel   │ (Setup)  │  │
+│  │ Auth.js │  Admin   │   RBAC   │  │
+│  │   v5    │  Panel   │(Server   │  │
+│  │(Modern) │(Server   │Actions)  │  │
+│  │         │Components)│          │  │
 │  └─────────┴──────────┴──────────┘  │
 ├─────────────────────────────────────┤
 │         Kysely                      │
@@ -76,23 +78,26 @@ npm run dev
 - Type-safe queries via Kysely
 - No manual setup required
 
-### 2. Instant Authentication
-- NextAuth pre-integrated
+### 2. Modern Authentication (Auth.js v5)
+- Auth.js v5 pre-integrated
 - User/Session/Account tables ready
 - OAuth providers (GitHub, Google, etc.)
-- Protected routes out-of-box
+- Modern middleware with Edge Runtime
+- Progressive enhancement
 
-### 3. Auto-Generated Admin Panel
-- `/admin` route created automatically
-- CRUD for all models
+### 3. Modern Admin Panel (Server Components)
+- `/admin` route with Server Components
+- CRUD with Server Actions
 - Role-based access control
-- Responsive, production-ready UI
+- Responsive UI with Tailwind CSS
+- Progressive enhancement
 
-### 4. Built-in RBAC
+### 4. Modern RBAC (Server Actions)
 - Role and Permission models
-- Middleware for access control
-- Helpers for Server Actions
-- Admin UI for role management
+- Modern middleware with Edge Runtime
+- Server Actions for mutations
+- Redirect patterns (not exceptions)
+- Type-safe helpers
 
 ---
 
@@ -142,7 +147,7 @@ const user = await User.objects
 
 **Why?** Kysely is excellent. We focus on setup automation, not API replacement.
 
-### 3. **Auto-Generate Everything**
+### 3. **Modern Code Generation**
 ```typescript
 // Define schema (simple TypeScript)
 // schemas/user.ts
@@ -156,9 +161,11 @@ export const userSchema = {
 // NOORMME auto-generates:
 // ✅ Database tables
 // ✅ TypeScript types
-// ✅ Admin UI routes
-// ✅ RBAC permissions
-// ✅ NextAuth callbacks
+// ✅ Server Components for admin UI
+// ✅ Server Actions for mutations
+// ✅ Modern middleware for RBAC
+// ✅ Auth.js v5 integration
+// ✅ Progressive enhancement
 ```
 
 ### 4. **Convention Over Configuration**
@@ -280,34 +287,60 @@ npm run dev
 
 ---
 
-## 🎯 Usage Example
+## 🎯 Modern Usage Example
 
 ```typescript
-// After setup, use Kysely directly:
-import { db } from '@/lib/db';
-import { requireRole } from '@/lib/rbac';
+// Server Component for data fetching
+// app/admin/users/page.tsx
+import { getCachedUsers } from '@/lib/db-utils';
+import { DataTable } from '@/components/DataTable';
 
-// Type-safe queries
-const users = await db
-  .selectFrom('users')
-  .where('isActive', '=', true)
-  .selectAll()
-  .execute();
-
-// Server Action with RBAC
-'use server';
-
-export async function deleteUser(id: number) {
-  await requireRole('admin');
-
-  return db
-    .deleteFrom('users')
-    .where('id', '=', id)
-    .execute();
+export default async function UsersPage() {
+  const users = await getCachedUsers();
+  
+  return (
+    <div className="container mx-auto py-6">
+      <h1 className="text-2xl font-bold mb-6">Users</h1>
+      <DataTable data={users} />
+    </div>
+  );
 }
 
-// Admin panel - auto-generated
-// Just visit /admin after login
+// Server Action with modern RBAC
+// app/admin/users/actions.ts
+'use server';
+
+import { requireRole } from '@/lib/rbac';
+import { withDatabase } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
+
+export async function deleteUser(id: string) {
+  await requireRole('admin');
+
+  await withDatabase(async (db) => {
+    await db
+      .deleteFrom('users')
+      .where('id', '=', id)
+      .execute();
+  });
+  
+  revalidatePath('/admin/users');
+}
+
+// Modern middleware for route protection
+// middleware.ts
+import { NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+
+export async function middleware(request) {
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+  return NextResponse.next();
+}
 ```
 
 ---
@@ -340,10 +373,10 @@ export async function deleteUser(id: number) {
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Modern Quick Start
 
 ```bash
-# Create new app
+# Create new app with modern Next.js patterns
 npx create-noormme-app my-app
 
 # Start dev server
@@ -353,10 +386,18 @@ npm run dev
 # Visit http://localhost:3000
 # Admin panel: http://localhost:3000/admin
 
+# Modern features:
+# ✅ Server Components for data fetching
+# ✅ Server Actions for mutations
+# ✅ Modern middleware with Edge Runtime
+# ✅ Auth.js v5 integration
+# ✅ Progressive enhancement
+
 # Add a model (optional)
 noormme generate:model Post title:string content:text
 
 # Database migrates automatically in dev
+# Server Components auto-update
 ```
 
 ---

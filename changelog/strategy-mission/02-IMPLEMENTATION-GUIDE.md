@@ -99,59 +99,82 @@ db.executeSync("PRAGMA synchronous = NORMAL");
 db.executeSync("PRAGMA foreign_keys = ON");
 ```
 
-### Layer 3: NextAuth Integration
+### Layer 3: Modern Authentication (Auth.js v5)
 **What it does:**
-- Pre-configured NextAuth setup
+- Pre-configured Auth.js v5 setup
 - SQLite adapter (using Kysely)
 - User/Session/Account tables
 - OAuth providers ready
+- Modern middleware integration
 
-**Auto-generated:**
+**Auto-generated (Modern Auth.js v5):**
 ```typescript
 // lib/auth.ts
 import NextAuth from 'next-auth';
-import GithubProvider from 'next-auth/providers/github';
-import { KyselyAdapter } from '@noormme/nextauth-adapter';
+import GitHub from 'next-auth/providers/github';
+import { KyselyAdapter } from '@noormme/auth-adapter';
 import { db } from './db';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: KyselyAdapter(db),
   providers: [
-    GithubProvider({
+    GitHub({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
     }),
   ],
   pages: {
-    signIn: '/admin/login',
+    signIn: '/login',
+    error: '/auth/error',
+  },
+  callbacks: {
+    async session({ session, user }) {
+      if (session?.user && user?.id) {
+        session.user.id = user.id;
+      }
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+  },
+  session: {
+    strategy: 'database',
   },
 });
 ```
 
-### Layer 4: Admin Panel
+### Layer 4: Modern Admin Panel (Server Components + Server Actions)
 **What it does:**
-- Auto-generated CRUD UI for all models
-- Authentication-protected
-- Responsive design
-- Role-based access control
+- Auto-generated CRUD UI using Server Components
+- Authentication-protected with modern middleware
+- Responsive design with Tailwind CSS
+- Role-based access control with Server Actions
 
-**File structure:**
+**Modern File structure:**
 ```
 app/admin/
-├── layout.tsx        # Admin layout with navigation
-├── page.tsx          # Dashboard
+├── layout.tsx              # Admin layout (Server Component)
+├── page.tsx                # Dashboard (Server Component)
 ├── users/
-│   ├── page.tsx      # List users
+│   ├── page.tsx            # List users (Server Component)
 │   ├── [id]/
-│   │   ├── page.tsx  # View/edit user
-│   │   └── delete/
-│   │       └── page.tsx
+│   │   ├── page.tsx        # View/edit user (Server Component)
+│   │   └── edit/
+│   │       └── page.tsx    # Edit form (Client Component)
+│   └── actions.ts          # Server Actions for mutations
 ├── roles/
-├── permissions/
-└── components/
-    ├── DataTable.tsx
-    ├── Form.tsx
-    └── Navigation.tsx
+│   ├── page.tsx            # List roles (Server Component)
+│   └── actions.ts          # Server Actions
+├── components/
+│   ├── DataTable.tsx       # Server Component with Client actions
+│   ├── Form.tsx            # Client Component with Server Actions
+│   ├── Navigation.tsx      # Server Component
+│   └── DeleteButton.tsx    # Client Component
+└── middleware.ts           # Route protection
 ```
 
 ### Layer 5: RBAC System
@@ -210,41 +233,217 @@ CREATE TABLE user_roles (
 
 **Success:** User has working app in 2 minutes
 
-### Phase 2: Admin Panel (Week 2-3) ⚡
+### Phase 2: Modern Admin Panel (Week 2-3) ⚡
 
-**Goal:** Auto-generated admin interface
+**Goal:** Auto-generated admin interface using modern Next.js patterns
 
 **Features:**
+- Server Components for data fetching
+- Client Components for interactivity
+- Server Actions for mutations
 - Table list view (all tables from DB)
 - CRUD operations per table
 - Relationship handling
 - Search and filters
 - Bulk actions
 - Export to CSV
+- Progressive enhancement
 
-**Inspiration:** Django admin, but React
+**Modern Implementation:**
+```typescript
+// app/admin/users/page.tsx (Server Component)
+import { DataTable } from '@/components/DataTable';
+import { getCachedUsers } from '@/lib/db-utils';
 
-### Phase 3: RBAC System (Week 4) 📋
+export default async function UsersPage() {
+  const users = await getCachedUsers();
+  
+  return (
+    <div className="container mx-auto py-6">
+      <h1 className="text-2xl font-bold mb-6">Users</h1>
+      <DataTable 
+        data={users}
+        columns={[
+          { key: 'name', label: 'Name' },
+          { key: 'email', label: 'Email' },
+          { key: 'createdAt', label: 'Created' },
+        ]}
+      />
+    </div>
+  );
+}
 
-**Goal:** Built-in permission system
+// app/admin/users/actions.ts (Server Actions)
+'use server';
+
+import { requireRole } from '@/lib/rbac';
+import { withDatabase } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
+
+export async function deleteUser(id: string) {
+  await requireRole('admin');
+  
+  await withDatabase(async (db) => {
+    await db
+      .deleteFrom('users')
+      .where('id', '=', id)
+      .execute();
+  });
+  
+  revalidatePath('/admin/users');
+}
+```
+
+**Inspiration:** Django admin, but React with modern patterns
+
+### Phase 3: Modern RBAC System (Week 4) 📋
+
+**Goal:** Built-in permission system with modern Next.js patterns
 
 **Features:**
-- Role definitions
-- Permission checks
-- Middleware integration
-- API route protection
+- Role definitions with database storage
+- Permission checks with Server Actions
+- Modern middleware with Edge Runtime
+- Route protection with redirects
 - Component-level protection
+- Progressive enhancement
 
-### Phase 4: Auth Integration (Week 5) 📋
+**Modern Implementation:**
+```typescript
+// lib/rbac.ts (Modern patterns)
+import { auth } from './auth';
+import { withDatabase } from './db';
+import { redirect } from 'next/navigation';
 
-**Goal:** NextAuth fully configured and working
+export async function requireRole(role: string) {
+  const session = await auth();
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  const hasRole = await withDatabase(async (db) => {
+    return await db
+      .selectFrom('user_roles')
+      .innerJoin('roles', 'roles.id', 'user_roles.role_id')
+      .where('user_roles.user_id', '=', session.user.id)
+      .where('roles.name', '=', role)
+      .executeTakeFirst();
+  });
+
+  if (!hasRole) {
+    redirect('/unauthorized');
+  }
+  
+  return session;
+}
+
+// middleware.ts (Edge Runtime)
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { auth } from '@/lib/auth';
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
+  if (pathname.startsWith('/admin')) {
+    const session = await auth();
+    
+    if (!session?.user) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+  
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ['/admin/:path*'],
+};
+```
+
+### Phase 4: Modern Auth Integration (Week 5) 📋
+
+**Goal:** Auth.js v5 fully configured and working with modern patterns
 
 **Features:**
-- Pre-configured for SQLite
-- Email/password working
-- OAuth provider support
-- Session management
-- User registration flow
+- Pre-configured for SQLite with Kysely adapter
+- Email/password authentication
+- OAuth provider support (GitHub, Google, etc.)
+- Modern session management
+- User registration flow with Server Actions
+- Progressive enhancement
+
+**Modern Implementation:**
+```typescript
+// app/login/page.tsx (Server Component)
+import { SignInForm } from '@/components/SignInForm';
+
+export default function LoginPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="max-w-md w-full space-y-8">
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Sign in to your account
+        </h2>
+        <SignInForm />
+      </div>
+    </div>
+  );
+}
+
+// components/SignInForm.tsx (Client Component with Server Actions)
+'use client';
+
+import { signIn } from 'next-auth/react';
+import { useState } from 'react';
+
+export function SignInForm() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (formData: FormData) => {
+    setIsLoading(true);
+    try {
+      await signIn('credentials', {
+        email: formData.get('email'),
+        password: formData.get('password'),
+        callbackUrl: '/admin',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form action={handleSubmit} className="mt-8 space-y-6">
+      <div>
+        <input
+          name="email"
+          type="email"
+          required
+          className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="Email address"
+        />
+      </div>
+      <div>
+        <input
+          name="password"
+          type="password"
+          required
+          className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="Password"
+        />
+      </div>
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+      >
+        {isLoading ? 'Signing in...' : 'Sign in'}
+      </button>
+    </form>
+  );
+}
+```
 
 **Files to create:**
 ```

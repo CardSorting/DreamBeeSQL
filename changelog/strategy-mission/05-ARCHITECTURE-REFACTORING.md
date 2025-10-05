@@ -352,72 +352,108 @@ export default async function ${model.name}ListPage() {
 - ✅ Fully typed output
 - ✅ No magic, just code generation
 
-### 4. Admin Panel Architecture
+### 4. Admin Panel Architecture (Next.js 15 Patterns)
 
-**Purpose**: Auto-generated CRUD interface
+**Purpose**: Auto-generated CRUD interface using modern Next.js patterns
 
-**Component Hierarchy**:
+**Modern Component Architecture**:
 ```
-AdminLayout
-├── Navigation (sidebar)
-├── Header (user menu)
+AdminLayout (Server Component)
+├── Navigation (Server Component)
+├── Header (Client Component - user menu)
 └── Content
-    ├── Dashboard (overview)
-    ├── ModelList
-    │   └── DataTable (generic)
-    ├── ModelDetail
-    │   └── Form (generic)
-    └── Settings
+    ├── Dashboard (Server Component)
+    ├── ModelList (Server Component)
+    │   └── DataTable (Server Component + Client actions)
+    ├── ModelDetail (Server Component)
+    │   └── Form (Client Component + Server Actions)
+    └── Settings (Server Component)
 ```
 
-**Generic Components**:
+**Server Components with Server Actions**:
 ```typescript
 // packages/noormme-admin/components/DataTable.tsx
+import { deleteRecord } from './actions';
+
 export function DataTable<T>({ data, columns }: Props<T>) {
   return (
-    <table>
-      <thead>
-        {columns.map(col => <th key={col.key}>{col.label}</th>)}
-      </thead>
-      <tbody>
-        {data.map(row => (
-          <tr key={row.id}>
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
             {columns.map(col => (
-              <td key={col.key}>{row[col.key]}</td>
+              <th key={String(col.key)} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {col.label}
+              </th>
             ))}
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {data.map(row => (
+            <tr key={row.id}>
+              {columns.map(col => (
+                <td key={String(col.key)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {row[col.key]}
+                </td>
+              ))}
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <EditButton id={row.id} />
+                <DeleteButton id={row.id} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
+}
+
+// Server Action for mutations
+async function deleteRecord(id: string) {
+  'use server';
+  
+  await db
+    .deleteFrom('users')
+    .where('id', '=', id)
+    .execute();
+    
+  revalidatePath('/admin/users');
 }
 ```
 
-**Page Generation**:
-- CRUD pages generated per model
-- Uses generic components
-- Server Components by default
+**Modern Page Generation**:
+- Server Components for data fetching
+- Client Components for interactivity
 - Server Actions for mutations
+- Progressive enhancement
+- Type-safe with generics
 
 **Design Decisions**:
-- ✅ Generate pages, not dynamic routing
-- ✅ Reusable components from package
-- ✅ Type-safe with generics
-- ✅ Customizable post-generation
+- ✅ Server Components by default (better performance)
+- ✅ Client Components only when needed
+- ✅ Server Actions for mutations
+- ✅ Modern CSS patterns (Tailwind)
+- ✅ Progressive enhancement
 
-### 5. RBAC System
+### 5. RBAC System (Modern Next.js 15 Patterns)
 
-**Purpose**: Role-based access control built-in
+**Purpose**: Role-based access control with modern middleware and Server Actions
 
-**Architecture**:
+**Modern RBAC Architecture**:
 ```typescript
 // lib/rbac.ts (generated)
 import { auth } from './auth';
 import { db } from './db';
+import { redirect } from 'next/navigation';
 
 export async function requireRole(role: string) {
   const session = await auth();
-  if (!session?.user) throw new Error('Unauthorized');
+  if (!session?.user) {
+    redirect('/login');
+  }
 
   const hasRole = await db
     .selectFrom('user_roles')
@@ -426,63 +462,199 @@ export async function requireRole(role: string) {
     .where('roles.name', '=', role)
     .executeTakeFirst();
 
-  if (!hasRole) throw new Error(`Requires ${role} role`);
+  if (!hasRole) {
+    redirect('/unauthorized');
+  }
+  
+  return session;
 }
 
 export async function requirePermission(
   resource: string,
   action: string
 ) {
-  // Similar implementation
+  const session = await auth();
+  if (!session?.user) {
+    redirect('/login');
+  }
+
+  const hasPermission = await db
+    .selectFrom('user_roles')
+    .innerJoin('role_permissions', 'role_permissions.role_id', 'user_roles.role_id')
+    .innerJoin('permissions', 'permissions.id', 'role_permissions.permission_id')
+    .where('user_roles.user_id', '=', session.user.id)
+    .where('permissions.resource', '=', resource)
+    .where('permissions.action', '=', action)
+    .executeTakeFirst();
+
+  if (!hasPermission) {
+    redirect('/unauthorized');
+  }
+  
+  return session;
 }
 ```
 
-**Middleware**:
+**Modern Middleware (Edge Runtime)**:
 ```typescript
-// Generated middleware for routes
-export { auth as middleware } from '@/lib/auth';
+// middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { auth } from '@/lib/auth';
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
+  // Admin routes require authentication
+  if (pathname.startsWith('/admin')) {
+    const session = await auth();
+    
+    if (!session?.user) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    
+    // Check admin role
+    const isAdmin = await checkUserRole(session.user.id, 'admin');
+    if (!isAdmin) {
+      return NextResponse.redirect(new URL('/unauthorized', request.url));
+    }
+  }
+  
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    '/admin/:path*',
+    '/dashboard/:path*',
+    '/api/protected/:path*'
+  ],
 };
 ```
 
+**Server Actions with RBAC**:
+```typescript
+// app/admin/users/actions.ts
+'use server';
+
+import { requireRole } from '@/lib/rbac';
+import { db } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
+
+export async function deleteUser(id: string) {
+  await requireRole('admin');
+  
+  await db
+    .deleteFrom('users')
+    .where('id', '=', id)
+    .execute();
+    
+  revalidatePath('/admin/users');
+}
+
+export async function updateUserRole(userId: string, roleId: number) {
+  await requireRole('admin');
+  
+  await db
+    .insertInto('user_roles')
+    .values({ user_id: userId, role_id: roleId })
+    .onConflict(['user_id', 'role_id'])
+    .doUpdateSet({ role_id: roleId })
+    .execute();
+    
+  revalidatePath('/admin/users');
+}
+```
+
 **Design Decisions**:
-- ✅ Database-backed (not JWT claims)
-- ✅ Flexible permission model
-- ✅ Easy to extend
+- ✅ Modern middleware with Edge Runtime
+- ✅ Server Actions for mutations
+- ✅ Redirect patterns (not exceptions)
 - ✅ Type-safe helpers
+- ✅ Progressive enhancement
 
-### 6. Database Layer
+### 6. Database Layer (Modern Patterns)
 
-**Purpose**: Optimized SQLite with Kysely
+**Purpose**: Optimized SQLite with Kysely and modern connection patterns
 
-**Configuration**:
+**Modern Database Configuration**:
 ```typescript
 // lib/db.ts (generated)
 import { Kysely, SqliteDialect } from 'kysely';
 import Database from 'better-sqlite3';
+import { type DB } from './types';
 
-const db = new Database('./database/app.db');
+// Connection singleton with proper error handling
+let db: Database.Database | null = null;
 
-// Optimize for production
-db.pragma('journal_mode = WAL');        // Better concurrency
-db.pragma('synchronous = NORMAL');      // Performance
-db.pragma('cache_size = -64000');       // 64MB cache
-db.pragma('temp_store = MEMORY');       // Speed
-db.pragma('mmap_size = 30000000000');   // 30GB mmap
-db.pragma('foreign_keys = ON');         // Integrity
+function getDatabase(): Database.Database {
+  if (!db) {
+    db = new Database('./database/app.db', {
+      verbose: process.env.NODE_ENV === 'development' ? console.log : undefined,
+    });
 
+    // Optimize for production
+    db.pragma('journal_mode = WAL');        // Better concurrency
+    db.pragma('synchronous = NORMAL');      // Performance
+    db.pragma('cache_size = -64000');       // 64MB cache
+    db.pragma('temp_store = MEMORY');       // Speed
+    db.pragma('mmap_size = 30000000000');   // 30GB mmap
+    db.pragma('foreign_keys = ON');         // Integrity
+    db.pragma('optimize');                  // Auto-optimize on connection
+  }
+  
+  return db;
+}
+
+// Kysely instance with proper typing
 export const kysely = new Kysely<DB>({
-  dialect: new SqliteDialect({ database: db }),
+  dialect: new SqliteDialect({ database: getDatabase() }),
 });
+
+// Server-side helper for Server Actions
+export async function withDatabase<T>(
+  operation: (db: Kysely<DB>) => Promise<T>
+): Promise<T> {
+  return await operation(kysely);
+}
+```
+
+**Modern Connection Patterns**:
+```typescript
+// lib/db-utils.ts
+import { kysely } from './db';
+import { unstable_cache } from 'next/cache';
+
+// Cached queries for better performance
+export const getCachedUsers = unstable_cache(
+  async () => {
+    return await kysely
+      .selectFrom('users')
+      .selectAll()
+      .where('isActive', '=', true)
+      .execute();
+  },
+  ['users-active'],
+  {
+    tags: ['users'],
+    revalidate: 300, // 5 minutes
+  }
+);
+
+// Transaction helper
+export async function withTransaction<T>(
+  operation: (db: Kysely<DB>) => Promise<T>
+): Promise<T> {
+  return await kysely.transaction().execute(operation);
+}
 ```
 
 **Design Decisions**:
-- ✅ WAL mode for concurrency
-- ✅ Optimized pragmas
-- ✅ Direct Kysely usage (no wrapper)
-- ✅ Connection singleton
+- ✅ Connection singleton with lazy initialization
+- ✅ Proper error handling and logging
+- ✅ Cached queries with Next.js cache
+- ✅ Transaction helpers
+- ✅ Type-safe with generated types
 
 ## Design Patterns
 

@@ -1,892 +1,627 @@
-# Performance Module Refactoring Summary
+# NOORMME Framework Architecture
 
 ## Overview
 
-The performance module has been completely refactored from monolithic, assumption-heavy code into focused services, utilities, and classes with clear responsibilities and no legacy dependencies.
+NOORMME is architected as a **batteries-included framework** built around code generation, templating, and configuration automation - not as a runtime ORM layer.
 
-## Problems with Original Architecture
+## Core Architectural Principles
 
-### 1. Monolithic Design
-- **Single Responsibility Violation**: Classes handling multiple concerns
-- **Tight Coupling**: Components dependent on each other
-- **Hard to Test**: Complex interdependencies
-- **Hard to Maintain**: Changes required understanding entire system
+### 1. Generate, Don't Abstract
+- **Code Generation**: Generate working Next.js code instead of runtime wrappers
+- **Templates**: Pre-built, customizable templates
+- **Configuration**: Auto-configure optimal settings
+- **Transparency**: Generated code is readable and modifiable
 
-### 2. Hidden Assumptions
-- **Database-Specific Logic**: Assumed SQLite without clear abstraction
-- **Framework Dependencies**: Assumed specific patterns without flexibility
-- **Performance Assumptions**: Hard-coded thresholds and behaviors
-- **Configuration Assumptions**: Default values scattered throughout code
+### 2. Build-Time over Runtime
+- **CLI-First**: Setup happens at project creation
+- **Static Generation**: Types and code generated upfront
+- **No Runtime Overhead**: Minimal framework code at runtime
+- **Standard Tools**: Use Next.js, Kysely, NextAuth directly
 
-### 3. Legacy Code Issues
-- **Backward Compatibility**: Maintaining old APIs for compatibility
-- **Deprecated Patterns**: Outdated code patterns and practices
-- **Inconsistent Interfaces**: Different APIs for similar functionality
-- **Technical Debt**: Accumulated complexity over time
+### 3. Composition over Complexity
+- **Standard Tools**: Compose existing tools (Next.js, Kysely, NextAuth)
+- **No Reinvention**: Don't rebuild what exists
+- **Integration Layer**: Connect tools seamlessly
+- **Escape Hatches**: Full access to underlying tools
 
-## Refactoring Strategy
+## Architecture Layers
 
-### 1. Separation of Concerns
-- **Query Parsing**: Dedicated utility for SQL analysis
-- **Caching**: Generic cache service with TTL and metrics
-- **Metrics Collection**: Performance monitoring and analysis
-- **Connection Management**: Database connection lifecycle
-- **Query Optimization**: High-level optimization orchestration
-
-### 2. Service-Oriented Architecture
-- **Single Responsibility**: Each service has one clear purpose
-- **Loose Coupling**: Services communicate through well-defined interfaces
-- **High Cohesion**: Related functionality grouped together
-- **Testability**: Each service can be tested independently
-
-### 3. Clean Interfaces
-- **Consistent APIs**: Similar patterns across all services
-- **Type Safety**: Full TypeScript support with proper types
-- **Error Handling**: Comprehensive error handling and recovery
-- **Configuration**: Clear, documented configuration options
-
-## New Architecture
-
-### Visual Architecture Overview
+### Visual Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    NOORMME Performance Layer                     │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │                  Query Optimizer                        │    │
-│  │  (High-level orchestration, index recommendations)     │    │
-│  └──────────────────────┬─────────────────────────────────┘    │
-│                         │                                        │
-│         ┌───────────────┼───────────────┐                       │
-│         ▼               ▼               ▼                       │
-│  ┌─────────────┐ ┌──────────────┐ ┌─────────────┐             │
-│  │   Query     │ │    Cache     │ │   Metrics   │             │
-│  │   Parser    │ │   Service    │ │  Collector  │             │
-│  │             │ │              │ │             │             │
-│  │ • Parse SQL │ │ • TTL Cache  │ │ • Tracking  │             │
-│  │ • Normalize │ │ • Key-value  │ │ • Warnings  │             │
-│  │ • Extract   │ │ • Statistics │ │ • Analysis  │             │
-│  │ • N+1 Detect│ │ • Eviction   │ │ • Reporting │             │
-│  └─────────────┘ └──────────────┘ └─────────────┘             │
-│         │               │               │                       │
-│         └───────────────┼───────────────┘                       │
-│                         ▼                                        │
-│              ┌─────────────────────┐                            │
-│              │ Connection Factory  │                            │
-│              │ • Pool management   │                            │
-│              │ • Health monitoring │                            │
-│              │ • Lifecycle control │                            │
-│              └─────────────────────┘                            │
-│                         │                                        │
-└─────────────────────────┼────────────────────────────────────────┘
-                          ▼
-                   SQLite Database
+┌─────────────────────────────────────────────────────────┐
+│              NOORMME Framework Architecture              │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │          CLI Layer (create-noormme-app)         │   │
+│  │  • Project scaffolding                          │   │
+│  │  • Template copying                             │   │
+│  │  • Dependency installation                      │   │
+│  │  • Database initialization                      │   │
+│  └────────────────────┬────────────────────────────┘   │
+│                       │                                  │
+│                       ▼                                  │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │          Code Generation Layer                  │   │
+│  │  • TypeScript types from schemas               │   │
+│  │  • Admin UI routes                              │   │
+│  │  • RBAC middleware                              │   │
+│  │  • Migration files                              │   │
+│  └────────────────────┬────────────────────────────┘   │
+│                       │                                  │
+│                       ▼                                  │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │          Generated Next.js App                  │   │
+│  │                                                  │   │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐     │   │
+│  │  │ Database │  │   Auth   │  │  Admin   │     │   │
+│  │  │ (Kysely) │  │(NextAuth)│  │  Panel   │     │   │
+│  │  └──────────┘  └──────────┘  └──────────┘     │   │
+│  │                                                  │   │
+│  │  ┌──────────────────────────────────────┐      │   │
+│  │  │           RBAC System                │      │   │
+│  │  │  (Roles, Permissions, Middleware)    │      │   │
+│  │  └──────────────────────────────────────┘      │   │
+│  └─────────────────────────────────────────────────┘   │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+
+Runtime: Minimal framework code, mostly standard Next.js/Kysely
 ```
 
 ### Directory Structure
+
+**Framework Repository**:
 ```
-src/performance/
-├── index.ts                    # Clean exports, no implementation
-├── query-optimizer.ts          # Orchestration layer (refactored)
+noormme/
+├── packages/
+│   ├── create-noormme-app/         # CLI tool
+│   │   ├── src/
+│   │   │   ├── cli.ts              # Command line interface
+│   │   │   ├── scaffold.ts         # Project scaffolding
+│   │   │   ├── database.ts         # DB initialization
+│   │   │   └── templates/          # Project templates
+│   │   │       ├── base/           # Base Next.js setup
+│   │   │       ├── lib/            # Generated utilities
+│   │   │       ├── app/            # App Router structure
+│   │   │       └── migrations/     # Initial migrations
+│   │   └── package.json
+│   │
+│   ├── noormme-admin/              # Admin panel components
+│   │   ├── components/
+│   │   │   ├── DataTable.tsx
+│   │   │   ├── Form.tsx
+│   │   │   ├── Navigation.tsx
+│   │   │   └── Layout.tsx
+│   │   ├── generators/
+│   │   │   ├── page-generator.ts   # Generate CRUD pages
+│   │   │   └── action-generator.ts # Generate Server Actions
+│   │   └── package.json
+│   │
+│   ├── noormme-core/               # Core utilities
+│   │   ├── schema/                 # Schema DSL
+│   │   ├── migrations/             # Migration tools
+│   │   ├── generators/             # Code generators
+│   │   └── package.json
+│   │
+│   ├── noormme-cli/                # CLI commands
+│   │   ├── commands/
+│   │   │   ├── dev.ts
+│   │   │   ├── migrate.ts
+│   │   │   └── generate.ts
+│   │   └── package.json
+│   │
+│   └── noormme-nextauth-adapter/   # NextAuth adapter
+│       ├── src/
+│       │   └── adapter.ts
+│       └── package.json
 │
-├── utils/                      # Pure utility functions
-│   └── query-parser.ts         # SQL parsing and analysis
+└── examples/
+    └── basic-app/                  # Example generated app
+```
+
+**Generated App Structure**:
+```
+my-app/                             # Created by CLI
+├── app/
+│   ├── admin/                      # Auto-generated admin
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── users/
+│   │   │   ├── page.tsx
+│   │   │   └── [id]/
+│   │   │       └── page.tsx
+│   │   └── roles/
+│   │       └── page.tsx
+│   │
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/
+│   │           └── route.ts        # Pre-configured
+│   │
+│   └── page.tsx
 │
-└── services/                   # Business logic services
-    ├── cache-service.ts        # Generic caching with TTL
-    ├── metrics-collector.ts    # Performance monitoring
-    └── connection-factory.ts   # Database connections
+├── lib/
+│   ├── db.ts                       # Auto-configured Kysely
+│   ├── auth.ts                     # Pre-configured NextAuth
+│   └── rbac.ts                     # RBAC helpers
+│
+├── schemas/                        # Optional user schemas
+│   └── .gitkeep
+│
+├── database/
+│   └── app.db                      # Auto-created SQLite
+│
+├── migrations/
+│   └── 001_initial.sql             # Initial schema
+│
+└── noormme.config.ts               # Framework config
 ```
 
-### Architecture Principles
+## Core Components
 
-**Before Refactoring**:
-```
-┌─────────────────────────────────────┐
-│     Monolithic Performance Module    │
-│  ┌─────────────────────────────────┐│
-│  │  All Functionality Mixed:       ││
-│  │  • Query parsing                ││
-│  │  • Caching logic                ││
-│  │  • Metrics collection           ││
-│  │  • Connection management        ││
-│  │  • Assumptions everywhere       ││
-│  │  • Legacy code intertwined      ││
-│  └─────────────────────────────────┘│
-└─────────────────────────────────────┘
-       Problems:
-       ❌ Hard to test
-       ❌ Hard to maintain
-       ❌ Hidden dependencies
-       ❌ Unclear responsibilities
-```
+### 1. CLI Scaffolding Tool
 
-**After Refactoring**:
-```
-┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-│    Query     │  │    Cache     │  │   Metrics    │
-│   Parser     │  │   Service    │  │  Collector   │
-│              │  │              │  │              │
-│ Single       │  │ Single       │  │ Single       │
-│ Responsibility│  │ Responsibility│  │ Responsibility│
-│              │  │              │  │              │
-│ ✅ Testable   │  │ ✅ Testable   │  │ ✅ Testable   │
-│ ✅ Clear API  │  │ ✅ Clear API  │  │ ✅ Clear API  │
-│ ✅ No deps    │  │ ✅ No deps    │  │ ✅ No deps    │
-└──────────────┘  └──────────────┘  └──────────────┘
-       Benefits:
-       ✅ Easy to test in isolation
-       ✅ Clear, maintainable code
-       ✅ Explicit dependencies
-       ✅ Single responsibilities
-```
+**Purpose**: Generate complete Next.js project with zero configuration
 
-### Service Responsibilities & Code Examples
-
-#### 1. QueryParser (utils/query-parser.ts)
-**Purpose**: Pure utility for SQL parsing and analysis
-
-**Responsibilities**:
-- Query normalization and comparison
-- Pattern detection (SELECT, JOIN, aggregate)
-- Column extraction (WHERE, ORDER BY, GROUP BY)
-- N+1 query detection
-- Cache key generation
-
-**Before (Monolithic)**:
+**Architecture**:
 ```typescript
-// Buried inside large class with many other concerns
-class PerformanceMonitor {
-  private parseQuery(sql: string) {
-    // Query parsing mixed with caching logic
-    const cached = this.cache.get(sql);
-    if (cached) return cached;
+// packages/create-noormme-app/src/cli.ts
+export class ProjectScaffolder {
+  async create(projectName: string) {
+    // 1. Create Next.js base
+    await this.createNextApp(projectName);
 
-    // Parsing logic mixed with metrics
-    this.metrics.increment('parse_count');
-    const parsed = /* complex parsing */;
+    // 2. Install framework dependencies
+    await this.installDependencies(projectName);
 
-    // Hidden assumptions about database type
-    if (this.dbType === 'sqlite') { /* ... */ }
+    // 3. Copy templates
+    await this.copyTemplates(projectName);
 
-    return parsed;
+    // 4. Initialize database
+    await this.initDatabase(projectName);
+
+    // 5. Run initial migration
+    await this.runMigration(projectName);
+
+    // 6. Generate types
+    await this.generateTypes(projectName);
+  }
+
+  private async copyTemplates(projectPath: string) {
+    // Copy all templates to project
+    await fs.copy(
+      path.join(__dirname, 'templates/lib'),
+      path.join(projectPath, 'lib')
+    );
+
+    await fs.copy(
+      path.join(__dirname, 'templates/app/admin'),
+      path.join(projectPath, 'app/admin')
+    );
+
+    // Process templates (replace variables)
+    await this.processTemplates(projectPath);
   }
 }
 ```
 
-**After (Focused Utility)**:
+**Design Decisions**:
+- ✅ Generate code, don't provide runtime wrappers
+- ✅ Create readable, modifiable files
+- ✅ Use standard Next.js structure
+- ✅ Pre-configure optimal settings
+
+### 2. Template System
+
+**Purpose**: Provide pre-built, customizable code templates
+
+**Template Types**:
+1. **Base Templates**: Core files (db.ts, auth.ts)
+2. **Admin Templates**: CRUD pages and components
+3. **RBAC Templates**: Middleware and helpers
+4. **Migration Templates**: Database schemas
+
+**Example Template**:
 ```typescript
-// Clean, testable, reusable utility
-export class QueryParser {
-  static normalize(sql: string): string {
-    return sql.trim().replace(/\s+/g, ' ').toLowerCase();
-  }
-
-  static extractColumns(sql: string, clause: 'where' | 'order' | 'group'): string[] {
-    // Pure function, no side effects
-    const pattern = /* regex for clause */;
-    return sql.match(pattern) || [];
-  }
-
-  static detectN1Pattern(queries: string[]): boolean {
-    // Pure logic, easy to test
-    const normalized = queries.map(q => this.normalize(q));
-    return this.hasRepeatingPattern(normalized);
-  }
-
-  static generateCacheKey(sql: string, params: any[]): string {
-    return `${this.normalize(sql)}:${JSON.stringify(params)}`;
-  }
-}
-
-// Usage: Simple, clear, testable
-const key = QueryParser.generateCacheKey(sql, params);
-const columns = QueryParser.extractColumns(sql, 'where');
-```
-
-#### 2. CacheService (services/cache-service.ts)
-**Purpose**: Generic caching with TTL and metrics
-
-**Responsibilities**:
-- Key-value caching with expiration
-- Cache statistics and metrics
-- Memory management and eviction
-- Health monitoring and reporting
-
-**Before (Tightly Coupled)**:
-```typescript
-// Cache logic mixed with query execution
-class PerformanceMonitor {
-  private cache = new Map();
-
-  async executeQuery(sql: string) {
-    // Caching logic mixed with execution
-    const cacheKey = /* some logic */;
-    const cached = this.cache.get(cacheKey);
-
-    if (cached && cached.expiry > Date.now()) {
-      return cached.data;
-    }
-
-    const result = await this.db.execute(sql);
-    this.cache.set(cacheKey, { data: result, expiry: Date.now() + 300000 });
-
-    // No metrics, no eviction, no cleanup
-    return result;
-  }
-}
-```
-
-**After (Dedicated Service)**:
-```typescript
-// Generic, reusable cache service
-export class CacheService<T> {
-  private cache = new Map<string, CacheEntry<T>>();
-  private stats = { hits: 0, misses: 0, evictions: 0 };
-
-  constructor(private config: CacheConfig) {}
-
-  get(key: string): T | null {
-    const entry = this.cache.get(key);
-
-    if (!entry || entry.expiry < Date.now()) {
-      this.stats.misses++;
-      if (entry) this.evict(key);
-      return null;
-    }
-
-    this.stats.hits++;
-    return entry.data;
-  }
-
-  set(key: string, value: T): void {
-    if (this.cache.size >= this.config.maxSize) {
-      this.evictOldest();
-    }
-
-    this.cache.set(key, {
-      data: value,
-      expiry: Date.now() + this.config.ttl
-    });
-  }
-
-  getStats() {
-    return {
-      ...this.stats,
-      size: this.cache.size,
-      hitRate: this.stats.hits / (this.stats.hits + this.stats.misses)
-    };
-  }
-}
-
-// Specialized for queries
-export class QueryCacheService extends CacheService<QueryResult> {
-  generateKey(sql: string, params: any[]): string {
-    return QueryParser.generateCacheKey(sql, params);
-  }
-}
-
-// Usage: Clean, testable, reusable
-const cache = new QueryCacheService({ ttl: 300000, maxSize: 1000 });
-const key = cache.generateKey(sql, params);
-const cached = cache.get(key);
-if (!cached) {
-  const result = await db.execute(sql, params);
-  cache.set(key, result);
-}
-```
-
-#### 3. MetricsCollector (services/metrics-collector.ts)
-**Purpose**: Performance monitoring and analysis
-
-**Responsibilities**:
-- Query execution tracking
-- Performance warning generation
-- N+1 pattern detection
-- Slow query identification
-
-**Before (Mixed Concerns)**:
-```typescript
-// Metrics scattered throughout code
-class PerformanceMonitor {
-  private queryCount = 0;
-  private slowQueries = [];
-
-  async executeQuery(sql: string) {
-    this.queryCount++;
-    const start = Date.now();
-    const result = await this.db.execute(sql);
-    const duration = Date.now() - start;
-
-    if (duration > 100) {
-      this.slowQueries.push({ sql, duration });
-    }
-
-    // No proper tracking, no warnings, no analysis
-    return result;
-  }
-}
-```
-
-**After (Focused Service)**:
-```typescript
-export class MetricsCollector {
-  private queries: QueryMetric[] = [];
-  private warnings: PerformanceWarning[] = [];
-
-  trackQuery(sql: string, duration: number, params?: any[]): void {
-    this.queries.push({
-      sql: QueryParser.normalize(sql),
-      duration,
-      timestamp: Date.now(),
-      params
-    });
-
-    // Automatic analysis
-    if (duration > 100) {
-      this.addWarning({
-        type: 'slow_query',
-        message: `Query took ${duration}ms (threshold: 100ms)`,
-        sql,
-        suggestion: 'Consider adding indexes or optimizing query'
-      });
-    }
-
-    // N+1 detection
-    if (this.detectN1Pattern()) {
-      this.addWarning({
-        type: 'n_plus_one',
-        message: 'Potential N+1 query pattern detected',
-        suggestion: 'Use prefetch() to load relationships eagerly'
-      });
-    }
-  }
-
-  getReport(): PerformanceReport {
-    return {
-      totalQueries: this.queries.length,
-      avgDuration: this.calculateAverage(),
-      p95Duration: this.calculateP95(),
-      slowQueries: this.getSlowQueries(),
-      warnings: this.warnings,
-      recommendations: this.generateRecommendations()
-    };
-  }
-
-  private detectN1Pattern(): boolean {
-    const recent = this.queries.slice(-10);
-    return QueryParser.detectN1Pattern(recent.map(q => q.sql));
-  }
-}
-
-// Usage: Clear, actionable insights
-const metrics = new MetricsCollector();
-const start = Date.now();
-const result = await db.execute(sql, params);
-metrics.trackQuery(sql, Date.now() - start, params);
-
-const report = metrics.getReport();
-if (report.warnings.length > 0) {
-  console.log('⚠️ Performance issues detected:');
-  report.warnings.forEach(w => console.log(`  ${w.message}\n  💡 ${w.suggestion}`));
-}
-```
-
-#### 4. ConnectionFactory (services/connection-factory.ts)
-**Purpose**: Database connection lifecycle management
-
-**Responsibilities**:
-- Connection pooling
-- Health monitoring
-- Resource cleanup
-- Statistics tracking
-
-**Before (No Pooling)**:
-```typescript
-// New connection for every query
-class Database {
-  async query(sql: string) {
-    const conn = new sqlite3.Database(this.dbPath); // New connection!
-    const result = await conn.all(sql);
-    await conn.close(); // Close immediately
-    return result;
-  }
-}
-```
-
-**After (Connection Pooling)**:
-```typescript
-export class ConnectionFactory {
-  private pool: Connection[] = [];
-  private active = new Set<Connection>();
-  private stats = { created: 0, reused: 0, errors: 0 };
-
-  constructor(private config: PoolConfig) {
-    this.initializePool();
-  }
-
-  async acquire(): Promise<Connection> {
-    // Try to reuse existing connection
-    const available = this.pool.find(c => !this.active.has(c));
-
-    if (available && await this.isHealthy(available)) {
-      this.active.add(available);
-      this.stats.reused++;
-      return available;
-    }
-
-    // Create new if pool not full
-    if (this.active.size < this.config.maxSize) {
-      const conn = await this.createConnection();
-      this.pool.push(conn);
-      this.active.add(conn);
-      this.stats.created++;
-      return conn;
-    }
-
-    // Wait for available connection
-    return this.waitForConnection();
-  }
-
-  release(conn: Connection): void {
-    this.active.delete(conn);
-  }
-
-  async isHealthy(conn: Connection): Promise<boolean> {
-    try {
-      await conn.query('SELECT 1');
-      return true;
-    } catch {
-      this.stats.errors++;
-      return false;
-    }
-  }
-
-  getStats() {
-    return {
-      ...this.stats,
-      poolSize: this.pool.length,
-      activeConnections: this.active.size,
-      utilizationRate: this.active.size / this.config.maxSize
-    };
-  }
-}
-
-// Usage: Efficient connection reuse
-const factory = new ConnectionFactory({ maxSize: 10, minSize: 2 });
-const conn = await factory.acquire();
-try {
-  const result = await conn.query(sql);
-  return result;
-} finally {
-  factory.release(conn); // Return to pool
-}
-```
-
-#### 5. QueryOptimizer (query-optimizer.ts)
-**Purpose**: Orchestrate optimization services
-
-**Responsibilities**:
-- Coordinate services
-- Generate recommendations
-- Track improvements
-
-**After (Clean Orchestration)**:
-```typescript
-export class QueryOptimizer {
-  constructor(
-    private cache: QueryCacheService,
-    private metrics: MetricsCollector,
-    private connFactory: ConnectionFactory
-  ) {}
-
-  async execute(sql: string, params: any[] = []): Promise<any> {
-    // 1. Check cache
-    const cacheKey = this.cache.generateKey(sql, params);
-    const cached = this.cache.get(cacheKey);
-    if (cached) return cached;
-
-    // 2. Acquire connection from pool
-    const conn = await this.connFactory.acquire();
-
-    try {
-      // 3. Execute with timing
-      const start = Date.now();
-      const result = await conn.query(sql, params);
-      const duration = Date.now() - start;
-
-      // 4. Track metrics
-      this.metrics.trackQuery(sql, duration, params);
-
-      // 5. Cache result
-      this.cache.set(cacheKey, result);
-
-      return result;
-    } finally {
-      // 6. Always release connection
-      this.connFactory.release(conn);
-    }
-  }
-
-  getOptimizationReport(): OptimizationReport {
-    return {
-      cacheStats: this.cache.getStats(),
-      performanceMetrics: this.metrics.getReport(),
-      connectionStats: this.connFactory.getStats(),
-      recommendations: this.generateRecommendations()
-    };
-  }
-
-  private generateRecommendations(): Recommendation[] {
-    const metrics = this.metrics.getReport();
-    const recommendations: Recommendation[] = [];
-
-    if (metrics.p95Duration > 100) {
-      recommendations.push({
-        priority: 'high',
-        message: 'Consider adding database indexes',
-        impact: 'Reduce query time by 50-90%'
-      });
-    }
-
-    // More intelligent recommendations...
-    return recommendations;
-  }
-}
-```
-
-## Key Improvements
-
-### 1. Clear Responsibilities
-- **Single Purpose**: Each service has one clear responsibility
-- **Well-Defined Interfaces**: Clear APIs and contracts
-- **Focused Testing**: Each service can be tested independently
-- **Easy Maintenance**: Changes are localized and predictable
-
-### 2. No Hidden Assumptions
-- **Explicit Configuration**: All options are configurable
-- **Clear Dependencies**: Dependencies are explicit and documented
-- **Flexible Patterns**: Adaptable to different use cases
-- **Database Agnostic**: Core logic independent of database
-
-### 3. Modern Patterns
-- **TypeScript First**: Full type safety throughout
-- **Async/Await**: Modern asynchronous patterns
-- **Error Handling**: Comprehensive error handling
-- **Performance Monitoring**: Built-in metrics and monitoring
-
-### 4. Production Ready
-- **Connection Pooling**: Efficient connection management
-- **Query Caching**: Intelligent caching with TTL
-- **Performance Analysis**: Built-in monitoring and analysis
-- **Error Recovery**: Robust error handling and recovery
-
-## Migration Impact
-
-### 1. API Changes
-- **Simplified Interfaces**: Cleaner, more consistent APIs
-- **Better Type Safety**: Improved TypeScript support
-- **Clearer Errors**: More descriptive error messages
-- **Better Documentation**: Comprehensive documentation
-
-### 2. Performance Improvements
-- **Faster Query Execution**: Optimized query processing
-- **Better Caching**: More intelligent caching strategies
-- **Reduced Memory Usage**: Efficient memory management
-- **Improved Concurrency**: Better connection pooling
-
-### 3. Developer Experience
-- **Easier Debugging**: Clear separation of concerns
-- **Better Testing**: Focused, testable components
-- **Clearer Documentation**: Well-documented services
-- **Easier Extension**: Simple to add new features
-
-## Code Quality Improvements
-
-### 1. Maintainability
-- **Clear Structure**: Logical organization of code
-- **Consistent Patterns**: Similar patterns across services
-- **Good Documentation**: Comprehensive inline documentation
-- **Easy Testing**: Each service can be tested independently
-
-### 2. Reliability
-- **Error Handling**: Comprehensive error handling
-- **Input Validation**: Proper validation of inputs
-- **Resource Management**: Proper cleanup and resource management
-- **Performance Monitoring**: Built-in performance tracking
-
-### 3. Extensibility
-- **Plugin Architecture**: Easy to add new features
-- **Configuration Driven**: Behavior controlled by configuration
-- **Service Composition**: Services can be combined in different ways
-- **Clear Interfaces**: Well-defined extension points
-
-## Testing Strategy
-
-### 1. Unit Testing
-- **Service Isolation**: Each service tested independently
-- **Mock Dependencies**: External dependencies mocked
-- **Edge Cases**: Comprehensive edge case testing
-- **Performance Testing**: Performance regression testing
-
-### 2. Integration Testing
-- **Service Interaction**: Testing service interactions
-- **End-to-End**: Full workflow testing
-- **Performance Benchmarks**: Performance regression testing
-- **Error Scenarios**: Error handling and recovery testing
-
-### 3. Production Testing
-- **Load Testing**: High-load scenario testing
-- **Concurrency Testing**: Multi-threaded access testing
-- **Memory Testing**: Memory leak and usage testing
-- **Performance Monitoring**: Real-world performance tracking
-
-## Future Enhancements
-
-### 1. Advanced Features
-- **Query Plan Analysis**: Detailed query execution analysis
-- **Automatic Indexing**: Intelligent index recommendation
-- **Performance Tuning**: Automatic performance optimization
-- **Advanced Caching**: More sophisticated caching strategies
-
-### 2. Monitoring and Observability
-- **Performance Dashboard**: Real-time performance monitoring
-- **Alerting**: Performance threshold alerting
-- **Metrics Export**: Export metrics to external systems
-- **Tracing**: Distributed tracing support
-
-### 3. Developer Experience
-- **IDE Integration**: Better IDE support and tooling
-- **Debugging Tools**: Enhanced debugging capabilities
-- **Performance Profiler**: Built-in performance profiler
-- **Documentation**: Interactive documentation and examples
-
-## Measurable Improvements
-
-### Code Quality Metrics
-
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Lines of Code** | 2,500 | 1,800 | 28% reduction |
-| **Cyclomatic Complexity** | 45 (high) | 12 (low) | 73% reduction |
-| **Test Coverage** | 40% | 85% | +45% |
-| **Number of Services** | 1 monolith | 5 focused | Better separation |
-| **Average Function Length** | 85 lines | 25 lines | 71% reduction |
-| **Dependencies per Module** | 15 (tightly coupled) | 3 (loose coupling) | 80% reduction |
-
-### Performance Improvements
-
-| Feature | Before | After | Impact |
-|---------|--------|-------|--------|
-| **Query Caching** | Basic, no eviction | TTL + LRU eviction | 85% hit rate |
-| **Connection Pooling** | None (new per query) | 10-connection pool | 60% faster |
-| **Memory Usage** | 120MB baseline | 45MB baseline | 62% reduction |
-| **Metrics Collection** | Manual, incomplete | Automatic, comprehensive | Full visibility |
-| **Error Recovery** | Manual handling | Automatic retry | 99.9% reliability |
-
-### Developer Experience
-
-| Aspect | Before | After | Benefit |
-|--------|--------|-------|---------|
-| **Testing** | Hard to test, mocked DB | Easy unit tests | 3x faster test dev |
-| **Debugging** | Mixed concerns | Clear boundaries | 5x faster debugging |
-| **Adding Features** | 3-5 days | 1-2 days | 60% faster |
-| **Bug Fixes** | 2-4 hours | 30-60 min | 75% faster |
-| **Code Review** | Complex, risky | Clear, confident | Higher quality |
-
-## Real-World Impact
-
-### Before Refactoring Issues
-```typescript
-// Problem 1: Hard to test
-class PerformanceMonitor {
-  async executeQuery(sql: string) {
-    // Mixed: parsing, caching, execution, metrics
-    // To test caching, need real database
-    // To test metrics, need real execution
-    // Cannot test in isolation!
-  }
-}
-
-// Problem 2: Hidden assumptions
-class PerformanceMonitor {
-  private dbType = 'sqlite'; // Hardcoded!
-
-  parseQuery(sql: string) {
-    if (this.dbType === 'sqlite') {
-      // SQLite-specific logic
-      // What if we need PostgreSQL support?
-    }
-  }
-}
-
-// Problem 3: Memory leaks
-class PerformanceMonitor {
-  private cache = new Map(); // Never evicts!
-
-  async executeQuery(sql: string) {
-    this.cache.set(sql, result);
-    // Cache grows unbounded = memory leak!
-  }
-}
-```
-
-### After Refactoring Solutions
-```typescript
-// Solution 1: Easy to test
-describe('CacheService', () => {
-  it('should evict expired entries', () => {
-    const cache = new CacheService({ ttl: 100, maxSize: 10 });
-    cache.set('key', 'value');
-    jest.advanceTimersByTime(101);
-    expect(cache.get('key')).toBeNull();
-  });
+// packages/create-noormme-app/templates/lib/db.ts.template
+import { Kysely, SqliteDialect } from 'kysely';
+import Database from 'better-sqlite3';
+import type { DB } from '@/types/db';
+
+const dialect = new SqliteDialect({
+  database: new Database('{{DATABASE_PATH}}', {
+    verbose: {{VERBOSE_MODE}},
+  }),
 });
 
-// Solution 2: No assumptions
-class QueryParser {
-  static normalize(sql: string): string {
-    // Pure function, no database assumptions
-    return sql.trim().toLowerCase();
+export const db = new Kysely<DB>({ dialect });
+
+// Optimize SQLite settings
+db.executeSync("PRAGMA journal_mode = WAL");
+db.executeSync("PRAGMA synchronous = NORMAL");
+db.executeSync("PRAGMA foreign_keys = ON");
+
+// Template variables replaced at generation time
+```
+
+**Design Decisions**:
+- ✅ Simple variable substitution
+- ✅ No complex templating engine
+- ✅ Readable generated code
+- ✅ Easy to customize post-generation
+
+### 3. Code Generation Layer
+
+**Purpose**: Auto-generate types, pages, and migrations
+
+**Generators**:
+
+**A. Type Generator**:
+```typescript
+// packages/noormme-core/generators/type-generator.ts
+export class TypeGenerator {
+  async generateFromSchema(schemaPath: string) {
+    // 1. Read schema definitions
+    const schemas = await this.readSchemas(schemaPath);
+
+    // 2. Generate TypeScript interfaces
+    const types = schemas.map(schema =>
+      this.generateInterface(schema)
+    );
+
+    // 3. Generate Kysely DB type
+    const dbType = this.generateDBType(schemas);
+
+    // 4. Write to types/db.ts
+    await fs.writeFile(
+      'types/db.ts',
+      `${types.join('\n\n')}\n\n${dbType}`
+    );
+  }
+
+  private generateInterface(schema: Schema): string {
+    return `
+export interface ${schema.name}Table {
+  ${schema.fields.map(f =>
+    `${f.name}: ${this.mapType(f.type)};`
+  ).join('\n  ')}
+}
+    `.trim();
+  }
+}
+```
+
+**B. Admin Page Generator**:
+```typescript
+// packages/noormme-admin/generators/page-generator.ts
+export class AdminPageGenerator {
+  generateListPage(model: ModelSchema): string {
+    return `
+import { db } from '@/lib/db';
+import { DataTable } from '@noormme/admin';
+
+export default async function ${model.name}ListPage() {
+  const items = await db
+    .selectFrom('${model.tableName}')
+    .selectAll()
+    .execute();
+
+  return (
+    <div>
+      <h1>${model.displayName}</h1>
+      <DataTable
+        data={items}
+        columns={${JSON.stringify(model.columns)}}
+      />
+    </div>
+  );
+}
+    `.trim();
+  }
+}
+```
+
+**Design Decisions**:
+- ✅ Generate at build time, not runtime
+- ✅ Readable, standard code
+- ✅ Fully typed output
+- ✅ No magic, just code generation
+
+### 4. Admin Panel Architecture
+
+**Purpose**: Auto-generated CRUD interface
+
+**Component Hierarchy**:
+```
+AdminLayout
+├── Navigation (sidebar)
+├── Header (user menu)
+└── Content
+    ├── Dashboard (overview)
+    ├── ModelList
+    │   └── DataTable (generic)
+    ├── ModelDetail
+    │   └── Form (generic)
+    └── Settings
+```
+
+**Generic Components**:
+```typescript
+// packages/noormme-admin/components/DataTable.tsx
+export function DataTable<T>({ data, columns }: Props<T>) {
+  return (
+    <table>
+      <thead>
+        {columns.map(col => <th key={col.key}>{col.label}</th>)}
+      </thead>
+      <tbody>
+        {data.map(row => (
+          <tr key={row.id}>
+            {columns.map(col => (
+              <td key={col.key}>{row[col.key]}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+```
+
+**Page Generation**:
+- CRUD pages generated per model
+- Uses generic components
+- Server Components by default
+- Server Actions for mutations
+
+**Design Decisions**:
+- ✅ Generate pages, not dynamic routing
+- ✅ Reusable components from package
+- ✅ Type-safe with generics
+- ✅ Customizable post-generation
+
+### 5. RBAC System
+
+**Purpose**: Role-based access control built-in
+
+**Architecture**:
+```typescript
+// lib/rbac.ts (generated)
+import { auth } from './auth';
+import { db } from './db';
+
+export async function requireRole(role: string) {
+  const session = await auth();
+  if (!session?.user) throw new Error('Unauthorized');
+
+  const hasRole = await db
+    .selectFrom('user_roles')
+    .innerJoin('roles', 'roles.id', 'user_roles.role_id')
+    .where('user_roles.user_id', '=', session.user.id)
+    .where('roles.name', '=', role)
+    .executeTakeFirst();
+
+  if (!hasRole) throw new Error(`Requires ${role} role`);
+}
+
+export async function requirePermission(
+  resource: string,
+  action: string
+) {
+  // Similar implementation
+}
+```
+
+**Middleware**:
+```typescript
+// Generated middleware for routes
+export { auth as middleware } from '@/lib/auth';
+
+export const config = {
+  matcher: ['/admin/:path*'],
+};
+```
+
+**Design Decisions**:
+- ✅ Database-backed (not JWT claims)
+- ✅ Flexible permission model
+- ✅ Easy to extend
+- ✅ Type-safe helpers
+
+### 6. Database Layer
+
+**Purpose**: Optimized SQLite with Kysely
+
+**Configuration**:
+```typescript
+// lib/db.ts (generated)
+import { Kysely, SqliteDialect } from 'kysely';
+import Database from 'better-sqlite3';
+
+const db = new Database('./database/app.db');
+
+// Optimize for production
+db.pragma('journal_mode = WAL');        // Better concurrency
+db.pragma('synchronous = NORMAL');      // Performance
+db.pragma('cache_size = -64000');       // 64MB cache
+db.pragma('temp_store = MEMORY');       // Speed
+db.pragma('mmap_size = 30000000000');   // 30GB mmap
+db.pragma('foreign_keys = ON');         // Integrity
+
+export const kysely = new Kysely<DB>({
+  dialect: new SqliteDialect({ database: db }),
+});
+```
+
+**Design Decisions**:
+- ✅ WAL mode for concurrency
+- ✅ Optimized pragmas
+- ✅ Direct Kysely usage (no wrapper)
+- ✅ Connection singleton
+
+## Design Patterns
+
+### 1. Code Generation over Runtime
+
+**Anti-pattern** (Runtime wrapper):
+```typescript
+// ❌ Don't do this
+class NOORMME {
+  model(name: string) {
+    return new QueryBuilder(name);
   }
 }
 
-// Solution 3: Proper eviction
-export class CacheService<T> {
-  set(key: string, value: T): void {
-    if (this.cache.size >= this.config.maxSize) {
-      this.evictOldest(); // LRU eviction
-    }
-    // Entries also have TTL expiry
-  }
-}
+const User = db.model('users');
+const users = await User.filter({ active: true });
 ```
 
-## Migration Guide
-
-### For Existing Code
-
-**Step 1: Update Imports**
+**Pattern** (Generated code):
 ```typescript
-// Before
-import { PerformanceMonitor } from './performance';
-
-// After
-import { QueryOptimizer, MetricsCollector } from './performance';
+// ✅ Do this
+// Generate standard Kysely code
+const users = await db
+  .selectFrom('users')
+  .where('active', '=', true)
+  .selectAll()
+  .execute();
 ```
 
-**Step 2: Replace Initialization**
+### 2. Template-Based Scaffolding
+
+**Pattern**:
+1. Define templates with variables
+2. CLI copies and processes templates
+3. Generated code is standard Next.js
+4. Developer can modify freely
+
+### 3. Composition over Complexity
+
+**Pattern**:
+- Use existing tools (Next.js, Kysely, NextAuth)
+- Don't reinvent (admin UI uses Shadcn, Tailwind)
+- Generate integration code
+- Provide helper utilities
+
+### 4. Progressive Enhancement
+
+**Pattern**:
+1. **Level 0**: Generated code works
+2. **Level 1**: Customize via config
+3. **Level 2**: Modify generated files
+4. **Level 3**: Replace components
+
+## Performance Considerations
+
+### Build-Time Performance
+
+**Strategies**:
+- Fast template copying
+- Efficient code generation
+- Parallel processing where possible
+- Minimal dependencies
+
+### Runtime Performance
+
+**Strategies**:
+- Minimal framework overhead
+- Direct Kysely usage (no wrapper)
+- SQLite optimization (WAL, pragmas)
+- Static type checking
+
+### Database Optimization
+
+**Auto-configured**:
+- WAL mode enabled
+- Optimal pragma settings
+- Connection pooling (if needed)
+- Index recommendations (future)
+
+## Testing Architecture
+
+### Framework Testing
+
+**Unit Tests**:
 ```typescript
-// Before
-const monitor = new PerformanceMonitor(db);
-
-// After
-const cache = new QueryCacheService({ ttl: 300000, maxSize: 1000 });
-const metrics = new MetricsCollector();
-const connFactory = new ConnectionFactory({ maxSize: 10 });
-const optimizer = new QueryOptimizer(cache, metrics, connFactory);
+// Test code generators
+describe('TypeGenerator', () => {
+  it('generates correct interfaces', () => {
+    const schema = { name: 'User', fields: [...] };
+    const output = generator.generateInterface(schema);
+    expect(output).toContain('export interface UserTable');
+  });
+});
 ```
 
-**Step 3: Update Query Execution**
+**Integration Tests**:
 ```typescript
-// Before
-const result = await monitor.executeQuery(sql, params);
-
-// After
-const result = await optimizer.execute(sql, params);
+// Test full scaffolding
+describe('CLI', () => {
+  it('creates working app', async () => {
+    await createApp('test-app');
+    expect(fs.existsSync('test-app/lib/db.ts')).toBe(true);
+    expect(fs.existsSync('test-app/app/admin')).toBe(true);
+  });
+});
 ```
 
-**Step 4: Access Performance Data**
+### Generated App Testing
+
+**Tests Generated**:
+- Admin page tests
+- RBAC helper tests
+- API route tests
+
+## Migration Strategy
+
+### From Manual Setup
+
+**Before** (Manual):
 ```typescript
-// Before
-const stats = monitor.getStats(); // Limited data
-
-// After
-const report = optimizer.getOptimizationReport();
-console.log('Cache hit rate:', report.cacheStats.hitRate);
-console.log('Avg query time:', report.performanceMetrics.avgDuration);
-console.log('Pool utilization:', report.connectionStats.utilizationRate);
+// Hours of setup
+// 1. Choose ORM
+// 2. Configure database
+// 3. Set up NextAuth
+// 4. Build admin panel
+// 5. Implement RBAC
 ```
 
-## Lessons Learned
+**After** (NOORMME):
+```bash
+# 2 minutes
+npx create-noormme-app my-app
+```
 
-### What Worked Well ✅
+### From Other ORMs
 
-1. **Service Decomposition**
-   - Breaking monolith into focused services improved testability dramatically
-   - Each service can be developed, tested, and debugged independently
-   - Clear interfaces made integration straightforward
+**Gradual Migration**:
+1. Create NOORMME project
+2. Copy business logic
+3. Adapt to Kysely queries
+4. Use generated admin
+5. Enable RBAC
 
-2. **Pure Utilities**
-   - QueryParser as pure utility functions eliminated side effects
-   - Easy to test, easy to reason about, easy to reuse
-   - No hidden dependencies or assumptions
+## Future Architecture
 
-3. **Explicit Configuration**
-   - Making all options configurable removed hidden assumptions
-   - Services are flexible and adaptable to different use cases
-   - Clear documentation of all configuration options
+### Phase 2: Enhanced Generation
+- Schema hot reload
+- Admin theme system
+- Plugin architecture
 
-### Challenges & Solutions ⚠️
-
-1. **Challenge**: Breaking existing APIs
-   - **Solution**: Provided backward compatibility layer during migration
-   - **Result**: Zero breaking changes for existing users
-
-2. **Challenge**: Performance overhead from service composition
-   - **Solution**: Benchmarked thoroughly, optimized hot paths
-   - **Result**: Actually faster due to better caching and pooling
-
-3. **Challenge**: Increased complexity from more files
-   - **Solution**: Clear documentation and architecture diagrams
-   - **Result**: Easier to navigate despite more files
-
-### Best Practices Established 📋
-
-1. **Single Responsibility Principle**
-   - Each service has ONE clear purpose
-   - Easy to name, easy to understand, easy to maintain
-
-2. **Dependency Injection**
-   - Services receive dependencies via constructor
-   - Easy to mock, easy to test, easy to replace
-
-3. **Interface-Based Design**
-   - Services communicate through well-defined interfaces
-   - Implementation details are hidden
-   - Easy to refactor internals without breaking users
-
-4. **Comprehensive Testing**
-   - Unit tests for each service in isolation
-   - Integration tests for service composition
-   - Performance regression tests
+### Phase 3: Advanced Features
+- Multi-database support
+- Advanced RBAC (attribute-based)
+- Audit logging system
 
 ## Conclusion
 
-The performance module refactoring has transformed a monolithic, assumption-heavy codebase into a clean, focused, and maintainable architecture. The new design provides:
+NOORMME's architecture prioritizes:
 
-### Key Achievements
-- ✅ **Clear Responsibilities**: Each service has a single, well-defined purpose
-- ✅ **No Hidden Assumptions**: All behavior is explicit and configurable
-- ✅ **Modern Patterns**: TypeScript-first with proper error handling
-- ✅ **Production Ready**: Built-in monitoring, caching, and optimization
-- ✅ **Easy Maintenance**: Clean, testable, and extensible code
+1. **Code Generation**: Generate readable code, not runtime abstractions
+2. **Standard Tools**: Use Next.js, Kysely, NextAuth directly
+3. **Zero Config**: Everything works out-of-box
+4. **Transparency**: Generated code is readable and modifiable
 
-### Quantifiable Results
-- 📉 **28% less code** while doing more
-- 📈 **85% test coverage** (up from 40%)
-- ⚡ **60% faster execution** with connection pooling
-- 💾 **62% less memory** with proper caching
-- 🐛 **75% faster bug fixes** with clear boundaries
-
-### Long-term Impact
-This refactoring establishes a solid foundation for future development and ensures that NOORMME's performance features are:
-- **Robust**: Comprehensive error handling and recovery
-- **Reliable**: 99.9% uptime with automatic retries
-- **Maintainable**: Clean code that's easy to understand and modify
-- **Scalable**: Architecture supports future enhancements
-- **Observable**: Full visibility into performance metrics
-
-The refactoring represents a complete transformation from legacy monolithic code to modern, service-oriented architecture that will serve NOORMME well into the future.
+This approach provides the speed of scaffolding with the flexibility of hand-written code, avoiding the pitfalls of heavy runtime frameworks.

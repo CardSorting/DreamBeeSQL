@@ -1,19 +1,27 @@
 # NOORMME Quick Reference
 
-**One-page guide to NOORMME's architecture, tech stack, and key decisions**
+**One-page guide to NOORMME's batteries-included approach for Next.js**
 
 ---
 
 ## 📦 What is NOORMME?
 
-Django-style API wrapper built on Kysely for Next.js + SQLite applications
+Batteries-included framework for Next.js with zero-config SQLite, auth, admin, and RBAC.
 
-```typescript
-// The goal:
-const users = await User.objects
-  .filter({ is_active: true })
-  .exclude({ email__endswith: '@spam.com' })
-  .all();
+```bash
+# Before NOORMME: Hours of boilerplate
+# - Setup database
+# - Configure auth
+# - Build admin panel
+# - Implement RBAC
+# - Write migrations
+
+# With NOORMME: One command
+npx create-noormme-app my-app
+cd my-app
+npm run dev
+
+# You now have everything, working.
 ```
 
 ---
@@ -25,269 +33,318 @@ const users = await User.objects
 │         Next.js 13+                 │
 │         (App Router)                │
 ├─────────────────────────────────────┤
-│         NextAuth                    │
-│         (Authentication)            │
+│         NOORMME CLI                 │
+│    (Setup & Code Generation)        │
 ├─────────────────────────────────────┤
-│         NOORMME                     │
-│    (Django-style API Layer)         │
+│  ┌─────────┬──────────┬──────────┐  │
+│  │ NextAuth│  Admin   │   RBAC   │  │
+│  │ (Setup) │  Panel   │ (Setup)  │  │
+│  └─────────┴──────────┴──────────┘  │
 ├─────────────────────────────────────┤
 │         Kysely                      │
 │   (Type-safe Query Builder)         │
 ├─────────────────────────────────────┤
 │         SQLite                      │
-│       (WAL Mode)                    │
+│    (Auto-configured WAL)            │
 └─────────────────────────────────────┘
 ```
 
 ---
 
-## 🎯 Core Architecture Layers
+## 🎯 Core Components
 
-### Layer 1: Kysely (Foundation)
-- Type-safe SQL query building
-- SQL generation
-- TypeScript type inference
+### 1. Zero-Config Database
+- SQLite auto-configured with WAL mode
+- Connection pooling for performance
+- Type-safe queries via Kysely
+- No manual setup required
 
-### Layer 2: NOORMME (Django API)
-- `.objects.filter()`, `.exclude()`, `.get()`, `.all()`
-- Wraps Kysely queries with Django syntax
-- Maintains Kysely's type safety
+### 2. Instant Authentication
+- NextAuth pre-integrated
+- User/Session/Account tables ready
+- OAuth providers (GitHub, Google, etc.)
+- Protected routes out-of-box
 
-### Layer 3: Auto-Discovery
-- SQLite schema introspection
-- TypeScript type generation
-- Automatic model creation
+### 3. Auto-Generated Admin Panel
+- `/admin` route created automatically
+- CRUD for all models
+- Role-based access control
+- Responsive, production-ready UI
 
-### Layer 4: NextAuth Integration
-- Built-in adapter for SQLite
-- Session/account/user management
-- Type-safe auth operations
+### 4. Built-in RBAC
+- Role and Permission models
+- Middleware for access control
+- Helpers for Server Actions
+- Admin UI for role management
 
 ---
 
 ## 🔑 Key Implementation Principles
 
-### 1. **Wrap Kysely, Don't Replace**
+### 1. **Zero Config, Maximum Flexibility**
 ```typescript
-// ✅ GOOD: Wrap Kysely
-filter(conditions) {
-  this.kyselyQuery = this.kyselyQuery.where(...);
-  return this;
-}
+// ✅ Works immediately after setup
+import { db } from '@/lib/db';
 
-// ❌ BAD: Rebuild from scratch
-filter(conditions) {
-  // Don't manually build SQL!
-}
-```
-
-### 2. **Preserve Type Safety**
-```typescript
-// ✅ GOOD: Keep Kysely's types
-class Manager<DB, TB extends keyof DB> {
-  objects: QuerySet<DB, TB, DB[TB]>;
-}
-
-// ❌ BAD: Lose types
-class Manager {
-  objects: QuerySet<any>;
-}
-```
-
-### 3. **Provide Escape Hatch**
-```typescript
-// Always allow dropping to raw Kysely
-const result = await db.kysely
+const users = await db
   .selectFrom('users')
-  .where(/* complex query */)
+  .selectAll()
   .execute();
+
+// ✅ But also customizable
+// noormme.config.ts
+export default {
+  database: {
+    path: './data/app.db',
+    wal: true,
+  },
+  admin: {
+    enabled: true,
+    path: '/admin',
+  },
+  auth: {
+    providers: ['github', 'google'],
+  },
+};
 ```
 
-### 4. **Cache Schema**
+### 2. **Use Kysely Directly**
 ```typescript
-// ✅ Cache schema introspection
-let schemaCache = null;
-const schema = schemaCache || await introspectDatabase(db);
+// ✅ GOOD: Kysely is already type-safe
+const user = await db
+  .selectFrom('users')
+  .where('email', '=', 'user@example.com')
+  .selectAll()
+  .executeTakeFirst();
 
-// ❌ Don't introspect on every request
+// ❌ BAD: Don't create abstraction layers
+const user = await User.objects
+  .filter({ email: 'user@example.com' })
+  .first();
+```
+
+**Why?** Kysely is excellent. We focus on setup automation, not API replacement.
+
+### 3. **Auto-Generate Everything**
+```typescript
+// Define schema (simple TypeScript)
+// schemas/user.ts
+export const userSchema = {
+  id: serial(),
+  email: string().unique(),
+  name: string(),
+  createdAt: timestamp(),
+};
+
+// NOORMME auto-generates:
+// ✅ Database tables
+// ✅ TypeScript types
+// ✅ Admin UI routes
+// ✅ RBAC permissions
+// ✅ NextAuth callbacks
+```
+
+### 4. **Convention Over Configuration**
+```typescript
+// Default paths (but customizable):
+/admin          → Admin panel
+/api/auth       → NextAuth routes
+/api/db         → Database playground (dev only)
+
+// Auto-created models:
+User, Session, Account, Role, Permission
 ```
 
 ---
 
-## 📁 File Structure
+## 📁 File Structure (After Setup)
 
 ```
-src/
-├── core/
-│   ├── database.ts       # Main NOORMME class
-│   ├── manager.ts        # .objects manager
-│   ├── queryset.ts       # QuerySet (filter, exclude, etc.)
-│   └── lookups.ts        # Django field lookups
+my-app/
+├── app/
+│   ├── admin/              # Auto-generated admin panel
+│   │   ├── page.tsx
+│   │   ├── users/
+│   │   └── roles/
+│   │
+│   ├── api/
+│   │   └── auth/
+│   │       └── [...nextauth]/
+│   │           └── route.ts  # Pre-configured NextAuth
+│   │
+│   └── page.tsx
 │
-├── introspection/
-│   ├── schema-reader.ts  # SQLite introspection
-│   ├── type-generator.ts # TS type generation
-│   └── relationships.ts  # Relationship detection
+├── lib/
+│   ├── db.ts               # Auto-configured database
+│   ├── auth.ts             # NextAuth config
+│   └── rbac.ts             # RBAC helpers
 │
-├── adapters/
-│   └── nextauth.ts       # NextAuth adapter
+├── schemas/                # Your models (optional)
+│   └── user.ts
 │
-├── dialects/
-│   ├── sqlite.ts         # better-sqlite3
-│   ├── libsql.ts         # Turso (Edge Runtime)
-│   └── auto.ts           # Auto-detect
-│
-└── nextjs/
-    ├── server-components.ts
-    ├── server-actions.ts
-    └── cache.ts
+├── noormme.config.ts       # Framework config
+└── database/
+    └── app.db              # Auto-created SQLite
 ```
 
 ---
 
-## ✅ What's Built (Phases 1-4)
+## ✅ What Works Out-of-Box
 
-- [x] **Core Kysely wrapper** with Django API
-- [x] **Auto-discovery** from SQLite schema
-- [x] **Type generation** for TypeScript
-- [x] **Next.js integration** (Server Components, Actions, Edge)
-- [x] **NextAuth adapter** for authentication
+After `npx create-noormme-app`:
+
+- [x] **SQLite database** configured with WAL mode
+- [x] **NextAuth** with User/Session/Account models
+- [x] **Admin panel** at `/admin` with login protection
+- [x] **RBAC** with Role/Permission system
+- [x] **Type-safe queries** via Kysely
+- [x] **Auto-generated TypeScript types**
+- [x] **Hot reload** for schema changes (dev mode)
+- [x] **Migration system** for production
 
 ---
 
-## 🚧 What's Next (Phases 5-8)
+## 🚧 Development Roadmap
 
-### Phase 5: Enhanced Relationships 🔄
+### Phase 1: Zero-Config Setup ⚡
+Priority: **CRITICAL**
+- [ ] `create-noormme-app` CLI
+- [ ] Auto-configure SQLite
+- [ ] Pre-integrated NextAuth
+- [ ] Default auth schemas
+
+### Phase 2: Admin Panel ⚡
+Priority: **CRITICAL**
+- [ ] Auto-generated UI
+- [ ] CRUD operations
+- [ ] Auth-protected routes
+- [ ] Responsive dashboard
+
+### Phase 3: RBAC System 📋
 Priority: **HIGH**
-- Improve `prefetch()` for eager loading
-- Nested relationships (`prefetch('author.profile')`)
-- N+1 query prevention
+- [ ] Role/Permission models
+- [ ] Access control middleware
+- [ ] Server Action helpers
+- [ ] Admin management UI
 
-### Phase 6: Advanced Queries 📋
+### Phase 4: Schema Management 📋
+Priority: **HIGH**
+- [ ] Zero-boilerplate schemas
+- [ ] Auto-migration (dev)
+- [ ] Migration files (prod)
+
+### Phase 5: CLI Tools 📋
 Priority: **MEDIUM**
-- Aggregations (`Count()`, `Sum()`, `Avg()`)
-- `Q` objects for complex filters
-- `.annotate()` for computed fields
-
-### Phase 7: Migration System 📋
-Priority: **MEDIUM**
-- Simple migration generation
-- Schema diffing
-- Rollback support
-
-### Phase 8: Developer Experience 📋
-Priority: **LOW** (high impact)
-- Better error messages
-- Query debugging tools
-- Performance warnings
+- [ ] `noormme dev`
+- [ ] `noormme db:migrate`
+- [ ] `noormme db:seed`
+- [ ] `noormme generate:model`
 
 ---
 
-## 🐛 Known Issues
+## 🐛 Known Constraints
 
-1. **Edge Runtime:** `better-sqlite3` doesn't work → Use Turso/LibSQL
-2. **Nested Prefetch:** Not fully implemented → Use raw Kysely joins
-3. **Complex Type Mapping:** Some SQLite types → Manual overrides OK
+1. **SQLite-First:** Optimized for SQLite (Postgres support later)
+2. **Next.js 13+:** Requires App Router
+3. **Node.js Runtime:** `better-sqlite3` (Edge support via Turso)
 
 ---
 
-## 🎯 API Example
+## 🎯 Usage Example
 
 ```typescript
-// Initialize
-const db = new NOORMME({ database: './app.db' });
+// After setup, use Kysely directly:
+import { db } from '@/lib/db';
+import { requireRole } from '@/lib/rbac';
 
-// Get model (auto-discovered)
-const User = db.model('users');
-
-// Django-style queries
-const users = await User.objects
-  .filter({ is_active: true })
-  .exclude({ email__endswith: '@spam.com' })
-  .orderBy('-created_at')
-  .all();
-
-// Single record
-const user = await User.objects.get({ id: 1 });
-
-// With relationships
-const posts = await Post.objects
-  .prefetch('author', 'comments')
-  .filter({ published: true })
-  .all();
-
-// Drop to Kysely for complex queries
-const complex = await db.kysely
+// Type-safe queries
+const users = await db
   .selectFrom('users')
-  .leftJoin('posts', 'users.id', 'posts.author_id')
-  .select(['users.name', 'posts.title'])
+  .where('isActive', '=', true)
+  .selectAll()
   .execute();
+
+// Server Action with RBAC
+'use server';
+
+export async function deleteUser(id: number) {
+  await requireRole('admin');
+
+  return db
+    .deleteFrom('users')
+    .where('id', '=', id)
+    .execute();
+}
+
+// Admin panel - auto-generated
+// Just visit /admin after login
 ```
 
 ---
 
 ## 📊 Success Metrics
 
+**Setup Time:**
+- From zero → working app: **< 2 minutes**
+- Add new model → admin UI: **< 30 seconds**
+
 **Technical:**
-- Query time: <10ms average
-- Type safety: 100% (no `any` in public API)
-- Test coverage: >80%
+- Type safety: 100%
+- Zero boilerplate schemas
+- Auto-generated admin
+- Built-in security (RBAC)
 
 **Developer Experience:**
-- Setup time: 5 minutes
-- Django devs feel at home
-- Kysely users appreciate ergonomics
-
-**Adoption:**
-- 100+ GitHub stars
-- 1,000+ NPM downloads/month
-- 10+ production deployments
+- No database configuration
+- No auth setup
+- No admin panel building
+- Focus on features, not plumbing
 
 ---
 
 ## 🔗 Essential Resources
 
-- [Kysely Docs](https://kysely.dev/)
-- [NextAuth Adapter Spec](https://authjs.dev/reference/adapters)
-- [Django QuerySet API](https://docs.djangoproject.com/en/stable/ref/models/querysets/)
+- [Kysely Docs](https://kysely.dev/) - Query builder we use
+- [NextAuth Docs](https://authjs.dev/) - Auth system
+- [SQLite Docs](https://www.sqlite.org/docs.html) - Database
 
 ---
 
-## 🚀 Quick Start Development
+## 🚀 Quick Start
 
 ```bash
-# Clone and setup
-git clone <repo>
-cd noormme
-npm install
+# Create new app
+npx create-noormme-app my-app
 
-# Run tests
-npm test
+# Start dev server
+cd my-app
+npm run dev
 
-# Build
-npm run build
+# Visit http://localhost:3000
+# Admin panel: http://localhost:3000/admin
 
-# Example
-cd examples/nextjs-app
-npm install && npm run dev
+# Add a model (optional)
+noormme generate:model Post title:string content:text
+
+# Database migrates automatically in dev
 ```
 
 ---
 
-## 💡 Remember
+## 💡 Philosophy
 
-**We're NOT building:** Django ORM from scratch
+**NOT building:** Django's ORM API (`.filter()`, `.get()`, etc.)
 
-**We ARE building:** Django-style API wrapper for Kysely
+**Building:** Django's "it just works" experience
 
-**Foundation:** Kysely (proven, type-safe, not proprietary)
+**Foundation:** Kysely (proven, type-safe)
 
-**Target:** Next.js + SQLite developers who want Django's ergonomics
+**Goal:** Zero → Production in minutes, not hours
 
-**Escape Hatch:** Always allow dropping to raw Kysely
+**Inspiration:** Rails scaffolding + Django admin + Next.js patterns
 
 ---
 
 **Last Updated:** October 2025
-**Status:** Phases 1-4 Complete ✅
-**Next:** Phase 5 (Enhanced Relationships)
+**Status:** Strategic pivot to batteries-included ⚡
+**Next:** Phase 1 implementation (Zero-config setup)

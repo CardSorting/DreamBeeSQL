@@ -1,732 +1,823 @@
 # NOORMME Implementation Guide
 
-## Quick Start: What You're Building
+## What You're Building
 
-**NOORMME** = Django-style API wrapper on top of Kysely for Next.js + SQLite + NextAuth
+**NOORMME** = Batteries-included framework for Next.js with zero-config SQLite, auth, admin, and RBAC.
 
-```typescript
-// The end goal API:
-const users = await User.objects
-  .filter({ is_active: true })
-  .exclude({ email__endswith: '@spam.com' })
-  .all(); // ← Django-style API powered by Kysely underneath
+```bash
+# One command creates a fully-featured app
+npx create-noormme-app my-app
+cd my-app
+npm run dev
+
+# You now have:
+# ✅ SQLite database (configured)
+# ✅ NextAuth (working)
+# ✅ Admin panel (/admin)
+# ✅ RBAC (roles & permissions)
 ```
+
+---
 
 ## Technology Stack
 
 ### Core Dependencies
-1. **Kysely** - Type-safe SQL query builder (foundation)
+1. **Kysely** - Type-safe query builder (we use it directly, no wrapper)
 2. **better-sqlite3** - SQLite driver for Node.js
-3. **TypeScript** - Full type safety throughout
+3. **NextAuth** - Authentication (pre-configured)
+4. **TypeScript** - Full type safety
 
-### Integration Stack
-1. **Next.js** - App Router, Server Components, Server Actions
-2. **NextAuth** - Authentication (we provide the adapter)
-3. **SQLite** - Database with WAL mode
+### Framework Stack
+1. **Next.js 13+** - App Router (required)
+2. **React Server Components** - For admin UI
+3. **Server Actions** - For CRUD operations
+4. **SQLite + WAL** - Database with optimal config
 
-## Architecture Layers
+---
 
-### Layer 1: Kysely Foundation
-**What Kysely Provides:**
-- Type-safe query builder
-- SQL generation
-- TypeScript type inference
-- Database connection management
+## Architecture Overview
 
-**How We Use It:**
+### Layer 1: CLI & Setup
+**What it does:**
+- Scaffolds Next.js project
+- Auto-configures SQLite with WAL mode
+- Sets up NextAuth with default providers
+- Creates auth schemas (User, Session, Account)
+- Generates admin panel routes
+- Configures RBAC (Role, Permission models)
+
+**Key files created:**
+```
+my-app/
+├── lib/
+│   ├── db.ts          # Kysely instance, auto-configured
+│   ├── auth.ts        # NextAuth config, pre-integrated
+│   └── rbac.ts        # Role/permission helpers
+├── app/
+│   ├── admin/         # Auto-generated admin panel
+│   └── api/auth/      # NextAuth routes
+└── noormme.config.ts  # Framework configuration
+```
+
+### Layer 2: Database (Kysely Direct)
+**What it does:**
+- Provides configured Kysely instance
+- Auto-generates TypeScript types
+- Connection pooling for serverless
+- WAL mode for performance
+
+**NOT building:** ORM abstraction layer
+**Using:** Kysely's native API
+
 ```typescript
-// NOORMME wraps Kysely queries
-class DjangoQuerySet<T> {
-  filter(conditions: Partial<T>) {
-    // Internally uses kysely.selectFrom().where()
-    return this.kyselyQuery.where(/* convert conditions */);
+// lib/db.ts (auto-generated)
+import { Kysely } from 'kysely';
+import { SqliteDialect } from 'kysely';
+import Database from 'better-sqlite3';
+
+export const db = new Kysely<DB>({
+  dialect: new SqliteDialect({
+    database: new Database('./database/app.db', {
+      verbose: console.log, // dev only
+    }),
+  }),
+});
+
+// Enable WAL mode for performance
+db.executeSync("PRAGMA journal_mode = WAL");
+db.executeSync("PRAGMA synchronous = NORMAL");
+db.executeSync("PRAGMA foreign_keys = ON");
+```
+
+### Layer 3: NextAuth Integration
+**What it does:**
+- Pre-configured NextAuth setup
+- SQLite adapter (using Kysely)
+- User/Session/Account tables
+- OAuth providers ready
+
+**Auto-generated:**
+```typescript
+// lib/auth.ts
+import NextAuth from 'next-auth';
+import GithubProvider from 'next-auth/providers/github';
+import { KyselyAdapter } from '@noormme/nextauth-adapter';
+import { db } from './db';
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: KyselyAdapter(db),
+  providers: [
+    GithubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
+    }),
+  ],
+  pages: {
+    signIn: '/admin/login',
+  },
+});
+```
+
+### Layer 4: Admin Panel
+**What it does:**
+- Auto-generated CRUD UI for all models
+- Authentication-protected
+- Responsive design
+- Role-based access control
+
+**File structure:**
+```
+app/admin/
+├── layout.tsx        # Admin layout with navigation
+├── page.tsx          # Dashboard
+├── users/
+│   ├── page.tsx      # List users
+│   ├── [id]/
+│   │   ├── page.tsx  # View/edit user
+│   │   └── delete/
+│   │       └── page.tsx
+├── roles/
+├── permissions/
+└── components/
+    ├── DataTable.tsx
+    ├── Form.tsx
+    └── Navigation.tsx
+```
+
+### Layer 5: RBAC System
+**What it does:**
+- Role and Permission models (auto-created)
+- Middleware for route protection
+- Helpers for Server Actions
+- Admin UI for management
+
+**Auto-generated models:**
+```typescript
+// Auto-created tables:
+CREATE TABLE roles (
+  id INTEGER PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  description TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE permissions (
+  id INTEGER PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  resource TEXT NOT NULL,
+  action TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE role_permissions (
+  role_id INTEGER REFERENCES roles(id),
+  permission_id INTEGER REFERENCES permissions(id),
+  PRIMARY KEY (role_id, permission_id)
+);
+
+CREATE TABLE user_roles (
+  user_id TEXT REFERENCES users(id),
+  role_id INTEGER REFERENCES roles(id),
+  PRIMARY KEY (user_id, role_id)
+);
+```
+
+---
+
+## Implementation Roadmap
+
+### Phase 1: CLI & Zero-Config Setup ⚡
+
+**Goal:** One command creates working app
+
+**Tasks:**
+1. Build `create-noormme-app` CLI
+2. Scaffold Next.js project with templates
+3. Auto-configure SQLite (WAL, pragmas, optimal settings)
+4. Generate auth schemas
+5. Set up NextAuth with adapter
+6. Create initial migration
+
+**Files to create:**
+```
+packages/
+├── create-noormme-app/
+│   ├── index.ts              # CLI entry
+│   ├── templates/
+│   │   ├── base/             # Next.js base
+│   │   ├── lib/
+│   │   │   ├── db.ts.template
+│   │   │   ├── auth.ts.template
+│   │   │   └── rbac.ts.template
+│   │   ├── app/
+│   │   │   └── api/auth/
+│   │   └── migrations/
+│   │       └── 001_initial.sql
+│   └── utils/
+│       ├── scaffold.ts
+│       └── database.ts
+```
+
+**Key implementation:**
+```typescript
+// packages/create-noormme-app/index.ts
+import { Command } from 'commander';
+import { scaffold } from './utils/scaffold';
+
+const program = new Command();
+
+program
+  .name('create-noormme-app')
+  .argument('<project-name>')
+  .action(async (projectName) => {
+    console.log(`Creating NOORMME app: ${projectName}`);
+
+    // 1. Scaffold Next.js project
+    await scaffold.createNextApp(projectName);
+
+    // 2. Install dependencies
+    await scaffold.installDependencies([
+      'kysely',
+      'better-sqlite3',
+      'next-auth',
+      '@noormme/nextauth-adapter',
+    ]);
+
+    // 3. Copy templates
+    await scaffold.copyTemplates(projectName);
+
+    // 4. Initialize database
+    await scaffold.initializeDatabase(projectName);
+
+    // 5. Run initial migration
+    await scaffold.runMigration(projectName, '001_initial.sql');
+
+    console.log('✅ Done! Run: cd', projectName, '&& npm run dev');
+  });
+
+program.parse();
+```
+
+**Database initialization:**
+```typescript
+// utils/database.ts
+export async function initializeDatabase(projectPath: string) {
+  const dbPath = path.join(projectPath, 'database', 'app.db');
+
+  // Create database directory
+  await fs.mkdir(path.dirname(dbPath), { recursive: true });
+
+  // Initialize SQLite with optimal settings
+  const db = new Database(dbPath);
+
+  // Enable WAL mode for better concurrency
+  db.pragma('journal_mode = WAL');
+
+  // Optimize for performance
+  db.pragma('synchronous = NORMAL');
+  db.pragma('cache_size = -64000'); // 64MB cache
+  db.pragma('temp_store = MEMORY');
+  db.pragma('mmap_size = 30000000000'); // 30GB mmap
+
+  // Enable foreign keys
+  db.pragma('foreign_keys = ON');
+
+  db.close();
+}
+```
+
+### Phase 2: Admin Panel Generation ⚡
+
+**Goal:** Auto-generated admin UI for all models
+
+**Tasks:**
+1. Create admin layout and navigation
+2. Build reusable DataTable component
+3. Generate CRUD pages for each model
+4. Implement Server Actions for mutations
+5. Add authentication protection
+
+**File structure:**
+```
+packages/
+├── noormme-admin/
+│   ├── components/
+│   │   ├── DataTable.tsx      # Generic table
+│   │   ├── Form.tsx           # Generic form
+│   │   ├── Navigation.tsx     # Sidebar
+│   │   └── Field/
+│   │       ├── TextField.tsx
+│   │       ├── SelectField.tsx
+│   │       └── DateField.tsx
+│   ├── generators/
+│   │   ├── page-generator.ts   # Generate CRUD pages
+│   │   └── action-generator.ts # Generate Server Actions
+│   └── templates/
+│       ├── list-page.tsx.template
+│       ├── detail-page.tsx.template
+│       └── form-page.tsx.template
+```
+
+**DataTable component:**
+```typescript
+// packages/noormme-admin/components/DataTable.tsx
+'use client';
+
+interface Column<T> {
+  key: keyof T;
+  label: string;
+  render?: (value: any) => React.ReactNode;
+}
+
+interface DataTableProps<T> {
+  data: T[];
+  columns: Column<T>[];
+  onEdit?: (item: T) => void;
+  onDelete?: (item: T) => void;
+}
+
+export function DataTable<T>({
+  data,
+  columns,
+  onEdit,
+  onDelete
+}: DataTableProps<T>) {
+  return (
+    <table className="min-w-full divide-y divide-gray-200">
+      <thead>
+        <tr>
+          {columns.map(col => (
+            <th key={String(col.key)}>{col.label}</th>
+          ))}
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((item, idx) => (
+          <tr key={idx}>
+            {columns.map(col => (
+              <td key={String(col.key)}>
+                {col.render
+                  ? col.render(item[col.key])
+                  : String(item[col.key])}
+              </td>
+            ))}
+            <td>
+              {onEdit && (
+                <button onClick={() => onEdit(item)}>Edit</button>
+              )}
+              {onDelete && (
+                <button onClick={() => onDelete(item)}>Delete</button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+```
+
+**Page generator:**
+```typescript
+// packages/noormme-admin/generators/page-generator.ts
+export function generateListPage(model: ModelSchema) {
+  return `
+import { db } from '@/lib/db';
+import { DataTable } from '@noormme/admin/components/DataTable';
+
+export default async function ${model.name}ListPage() {
+  const items = await db
+    .selectFrom('${model.tableName}')
+    .selectAll()
+    .execute();
+
+  return (
+    <div>
+      <h1>${model.displayName}</h1>
+      <DataTable
+        data={items}
+        columns={[
+          ${model.fields.map(f => `{ key: '${f.name}', label: '${f.label}' }`).join(',\n          ')}
+        ]}
+      />
+    </div>
+  );
+}
+  `.trim();
+}
+```
+
+### Phase 3: RBAC Implementation 📋
+
+**Goal:** Role-based access control out-of-box
+
+**Tasks:**
+1. Create Role and Permission models
+2. Build middleware for route protection
+3. Create helpers for Server Actions
+4. Add admin UI for role management
+
+**RBAC helpers:**
+```typescript
+// lib/rbac.ts (auto-generated)
+import { auth } from './auth';
+import { db } from './db';
+
+export async function requireRole(roleName: string) {
+  const session = await auth();
+
+  if (!session?.user) {
+    throw new Error('Unauthorized');
+  }
+
+  const hasRole = await db
+    .selectFrom('user_roles')
+    .innerJoin('roles', 'roles.id', 'user_roles.role_id')
+    .where('user_roles.user_id', '=', session.user.id)
+    .where('roles.name', '=', roleName)
+    .selectAll()
+    .executeTakeFirst();
+
+  if (!hasRole) {
+    throw new Error(`Forbidden: Requires ${roleName} role`);
+  }
+}
+
+export async function requirePermission(
+  resource: string,
+  action: string
+) {
+  const session = await auth();
+
+  if (!session?.user) {
+    throw new Error('Unauthorized');
+  }
+
+  const hasPermission = await db
+    .selectFrom('user_roles')
+    .innerJoin('role_permissions', 'role_permissions.role_id', 'user_roles.role_id')
+    .innerJoin('permissions', 'permissions.id', 'role_permissions.permission_id')
+    .where('user_roles.user_id', '=', session.user.id)
+    .where('permissions.resource', '=', resource)
+    .where('permissions.action', '=', action)
+    .selectAll()
+    .executeTakeFirst();
+
+  if (!hasPermission) {
+    throw new Error(`Forbidden: Requires ${action} on ${resource}`);
   }
 }
 ```
 
-### Layer 2: Django-Style API
-**What We Build:**
-- `.objects` manager
-- `.filter()`, `.exclude()`, `.get()`, `.all()` methods
-- Relationship loading helpers
-- QuerySet chaining
-
-**Implementation Pattern:**
+**Usage in Server Actions:**
 ```typescript
-// Core pattern: Wrap Kysely with Django API
-export class Manager<T> {
-  constructor(
-    private kysely: Kysely<Database>,
-    private tableName: string
-  ) {}
+'use server';
 
-  get objects() {
-    return new QuerySet<T>(this.kysely, this.tableName);
-  }
-}
+import { requireRole } from '@/lib/rbac';
+import { db } from '@/lib/db';
 
-class QuerySet<T> {
-  private kyselyQuery: SelectQueryBuilder<Database, any, any>;
+export async function deleteUser(id: string) {
+  await requireRole('admin');
 
-  filter(conditions: Partial<T>): QuerySet<T> {
-    // Convert Django-style conditions to Kysely where clauses
-    this.kyselyQuery = this.kyselyQuery.where(/* ... */);
-    return this;
-  }
-
-  async all(): Promise<T[]> {
-    // Execute the Kysely query
-    return await this.kyselyQuery.execute();
-  }
+  return db
+    .deleteFrom('users')
+    .where('id', '=', id)
+    .execute();
 }
 ```
 
-### Layer 3: Auto-Discovery & Type Generation
-**What We Build:**
-- SQLite schema introspection
-- TypeScript type generation
-- Automatic model creation
+### Phase 4: Schema Management 📋
 
-**How It Works:**
+**Goal:** Zero-boilerplate schema definition and migrations
+
+**Tasks:**
+1. Create schema DSL (TypeScript-based)
+2. Auto-generate migrations from schema changes
+3. Migration runner (dev auto-applies, prod generates files)
+4. Type generation from schemas
+
+**Schema DSL:**
 ```typescript
-// 1. Introspect SQLite database
-const schema = await introspectDatabase(db);
-// {
-//   users: {
-//     columns: { id: 'INTEGER', email: 'TEXT', ... },
-//     foreignKeys: [...],
-//     indexes: [...]
-//   }
-// }
+// schemas/user.ts
+import { schema } from '@noormme/core';
 
-// 2. Generate TypeScript types
-generateTypes(schema);
-// Creates: types/database.ts with Kysely types
+export const User = schema.table('users', {
+  id: schema.text().primaryKey(),
+  email: schema.text().unique().notNull(),
+  name: schema.text(),
+  emailVerified: schema.datetime(),
+  image: schema.text(),
+  createdAt: schema.datetime().default('CURRENT_TIMESTAMP'),
+  updatedAt: schema.datetime().default('CURRENT_TIMESTAMP'),
+});
 
-// 3. Create models automatically
-const User = db.model('users'); // Returns Manager<User>
+// Auto-generates migration:
+// migrations/002_add_users.sql
 ```
 
-### Layer 4: NextAuth Integration
-**What We Build:**
-- NextAuth adapter for SQLite
-- Session/account/user table management
-- Type-safe auth operations
-
-**Implementation:**
+**Migration generator:**
 ```typescript
-export function NOORMMEAdapter(db: NOORMME): Adapter {
+// packages/noormme-core/schema/migrator.ts
+export async function generateMigration(
+  schema: SchemaDefinition,
+  currentDb: Kysely<any>
+) {
+  // 1. Introspect current database
+  const currentSchema = await introspect(currentDb);
+
+  // 2. Diff with new schema
+  const changes = diff(currentSchema, schema);
+
+  // 3. Generate SQL migration
+  const sql = changes.map(change => {
+    if (change.type === 'add_table') {
+      return `CREATE TABLE ${change.table} (${change.columns.join(', ')});`;
+    }
+    if (change.type === 'add_column') {
+      return `ALTER TABLE ${change.table} ADD COLUMN ${change.column};`;
+    }
+    // ... other change types
+  }).join('\n');
+
+  // 4. Save migration file
+  const timestamp = Date.now();
+  await fs.writeFile(
+    `migrations/${timestamp}_auto.sql`,
+    sql
+  );
+}
+```
+
+### Phase 5: CLI Tools 📋
+
+**Goal:** Developer experience tools
+
+**Tasks:**
+1. `noormme dev` - dev server with hot reload
+2. `noormme db:migrate` - run migrations
+3. `noormme db:seed` - seed database
+4. `noormme generate:model` - scaffold model
+
+**CLI implementation:**
+```typescript
+// packages/noormme-cli/index.ts
+import { Command } from 'commander';
+
+const program = new Command();
+
+program
+  .command('dev')
+  .description('Start dev server with auto-migration')
+  .action(async () => {
+    // Run migrations
+    await runMigrations();
+
+    // Start Next.js dev
+    spawn('next', ['dev'], { stdio: 'inherit' });
+  });
+
+program
+  .command('db:migrate')
+  .description('Run database migrations')
+  .action(async () => {
+    await runMigrations();
+  });
+
+program
+  .command('generate:model <name>')
+  .description('Generate a new model')
+  .action(async (name) => {
+    await generateModel(name);
+  });
+
+program.parse();
+```
+
+---
+
+## Critical Implementation Details
+
+### 1. Zero Config Philosophy
+
+**Key principle:** Everything works immediately, customization optional
+
+```typescript
+// Default config (noormme.config.ts)
+export default {
+  database: {
+    path: './database/app.db',
+    wal: true,
+    pool: {
+      min: 1,
+      max: 10,
+    },
+  },
+  admin: {
+    enabled: true,
+    path: '/admin',
+    title: 'Admin Panel',
+  },
+  auth: {
+    providers: ['github'], // Pre-configured
+  },
+  rbac: {
+    enabled: true,
+    defaultRole: 'user',
+  },
+};
+```
+
+### 2. Type Safety Throughout
+
+**Strategy:** Generate types from schemas, use Kysely's inference
+
+```typescript
+// Auto-generated: types/db.ts
+export interface DB {
+  users: UserTable;
+  sessions: SessionTable;
+  accounts: AccountTable;
+  roles: RoleTable;
+  permissions: PermissionTable;
+  role_permissions: RolePermissionTable;
+  user_roles: UserRoleTable;
+}
+
+// Usage (fully typed):
+const users = await db
+  .selectFrom('users')
+  .where('email', '=', 'test@example.com')
+  .selectAll()
+  .execute(); // Type: UserTable[]
+```
+
+### 3. Admin Panel Architecture
+
+**Component hierarchy:**
+```
+AdminLayout (auth check, navigation)
+├── Dashboard (overview)
+├── ModelList (generic table view)
+│   └── DataTable (reusable)
+├── ModelDetail (view/edit)
+│   └── Form (reusable)
+└── ModelDelete (confirmation)
+```
+
+### 4. NextAuth Adapter
+
+**Kysely-based adapter:**
+```typescript
+// packages/noormme-nextauth-adapter/index.ts
+import { Adapter } from 'next-auth/adapters';
+import { Kysely } from 'kysely';
+
+export function KyselyAdapter(db: Kysely<any>): Adapter {
   return {
     async createUser(data) {
-      return await db.model('users').objects.create(data);
+      const user = await db
+        .insertInto('users')
+        .values({
+          id: crypto.randomUUID(),
+          ...data,
+        })
+        .returningAll()
+        .executeTakeFirstOrThrow();
+
+      return user;
     },
+
     async getUser(id) {
-      return await db.model('users').objects.get({ id });
+      return await db
+        .selectFrom('users')
+        .where('id', '=', id)
+        .selectAll()
+        .executeTakeFirst() ?? null;
     },
+
     // ... other adapter methods
   };
 }
 ```
 
-## Implementation Roadmap
+---
 
-### Phase 1: Core Kysely Wrapper ✅
-
-**Goal:** Basic Django-style API on top of Kysely
-
-**Tasks:**
-1. Set up Kysely with SQLite
-2. Implement Manager class
-3. Implement QuerySet with basic methods:
-   - `.filter(conditions)`
-   - `.exclude(conditions)`
-   - `.get(conditions)`
-   - `.all()`
-   - `.first()`
-   - `.count()`
-4. Type safety through Kysely's inference
-
-**Files to Create:**
-```
-src/
-├── core/
-│   ├── manager.ts        # Manager class
-│   ├── queryset.ts       # QuerySet implementation
-│   └── database.ts       # Main NOORMME class
-```
-
-**Example Implementation:**
-```typescript
-// src/core/queryset.ts
-import { SelectQueryBuilder } from 'kysely';
-
-export class QuerySet<DB, TB extends keyof DB, O> {
-  constructor(
-    private qb: SelectQueryBuilder<DB, TB, O>
-  ) {}
-
-  filter(conditions: Partial<O>): QuerySet<DB, TB, O> {
-    let query = this.qb;
-
-    for (const [key, value] of Object.entries(conditions)) {
-      query = query.where(key as any, '=', value);
-    }
-
-    return new QuerySet(query);
-  }
-
-  exclude(conditions: Partial<O>): QuerySet<DB, TB, O> {
-    let query = this.qb;
-
-    for (const [key, value] of Object.entries(conditions)) {
-      query = query.where(key as any, '!=', value);
-    }
-
-    return new QuerySet(query);
-  }
-
-  async all(): Promise<O[]> {
-    return await this.qb.execute();
-  }
-
-  async get(conditions: Partial<O>): Promise<O> {
-    const results = await this.filter(conditions).qb.limit(2).execute();
-
-    if (results.length === 0) {
-      throw new Error('Object does not exist');
-    }
-    if (results.length > 1) {
-      throw new Error('Multiple objects returned');
-    }
-
-    return results[0];
-  }
-}
-```
-
-### Phase 2: Auto-Discovery & Type Generation ✅
-
-**Goal:** Automatically detect schema and generate types
-
-**Tasks:**
-1. SQLite schema introspection
-2. TypeScript type generation
-3. Dynamic model creation
-4. Relationship detection
-
-**Files to Create:**
-```
-src/
-├── introspection/
-│   ├── schema-reader.ts     # Read SQLite schema
-│   ├── type-generator.ts    # Generate TS types
-│   └── relationship-detector.ts
-```
-
-**Key Implementation:**
-```typescript
-// src/introspection/schema-reader.ts
-export async function introspectDatabase(db: Database) {
-  // Query SQLite system tables
-  const tables = await db
-    .selectFrom('sqlite_master')
-    .where('type', '=', 'table')
-    .selectAll()
-    .execute();
-
-  const schema: DatabaseSchema = {};
-
-  for (const table of tables) {
-    // Get column info
-    const columns = await db.pragma(`table_info(${table.name})`);
-
-    // Get foreign keys
-    const foreignKeys = await db.pragma(`foreign_key_list(${table.name})`);
-
-    schema[table.name] = {
-      columns: parseColumns(columns),
-      foreignKeys: parseForeignKeys(foreignKeys),
-    };
-  }
-
-  return schema;
-}
-```
-
-### Phase 3: Next.js Integration ✅
-
-**Goal:** Optimize for Next.js patterns
-
-**Tasks:**
-1. Server Component compatibility
-2. Server Actions support
-3. Edge Runtime compatibility
-4. Connection pooling for serverless
-
-**Files to Create:**
-```
-src/
-├── nextjs/
-│   ├── server-components.ts
-│   ├── server-actions.ts
-│   └── edge-runtime.ts
-```
-
-**Key Considerations:**
-- SQLite in Edge Runtime (use edge-compatible driver or Turso)
-- Connection pooling for serverless cold starts
-- Optimized for App Router patterns
-
-### Phase 4: NextAuth Adapter ✅
-
-**Goal:** Seamless NextAuth integration
-
-**Tasks:**
-1. Implement NextAuth Adapter interface
-2. Create auth table schemas
-3. Type-safe auth operations
-4. Session management
-
-**Files to Create:**
-```
-src/
-├── adapters/
-│   └── nextauth.ts          # NextAuth adapter
-```
-
-**Implementation:**
-```typescript
-// src/adapters/nextauth.ts
-import { Adapter } from 'next-auth/adapters';
-
-export function NOORMMEAdapter(db: NOORMME): Adapter {
-  const users = db.model('users');
-  const accounts = db.model('accounts');
-  const sessions = db.model('sessions');
-
-  return {
-    async createUser(data) {
-      return await users.objects.create(data);
-    },
-
-    async getUser(id) {
-      try {
-        return await users.objects.get({ id });
-      } catch {
-        return null;
-      }
-    },
-
-    async getUserByEmail(email) {
-      try {
-        return await users.objects.get({ email });
-      } catch {
-        return null;
-      }
-    },
-
-    async updateUser(data) {
-      const { id, ...updateData } = data;
-      return await users.objects.filter({ id }).update(updateData);
-    },
-
-    async createSession(data) {
-      return await sessions.objects.create(data);
-    },
-
-    async getSessionAndUser(sessionToken) {
-      const session = await sessions.objects
-        .filter({ sessionToken })
-        .prefetch('user')
-        .first();
-
-      return session ? { session, user: session.user } : null;
-    },
-
-    async updateSession(data) {
-      const { sessionToken, ...updateData } = data;
-      return await sessions.objects
-        .filter({ sessionToken })
-        .update(updateData);
-    },
-
-    async deleteSession(sessionToken) {
-      return await sessions.objects
-        .filter({ sessionToken })
-        .delete();
-    },
-
-    async linkAccount(data) {
-      return await accounts.objects.create(data);
-    },
-
-    async unlinkAccount({ provider, providerAccountId }) {
-      return await accounts.objects
-        .filter({ provider, providerAccountId })
-        .delete();
-    },
-  };
-}
-```
-
-### Phase 5: Relationship Loading 🔄
-
-**Goal:** Efficient relationship loading
-
-**Tasks:**
-1. `prefetch()` for eager loading
-2. Lazy loading helpers
-3. Nested relationship support
-4. N+1 query prevention
-
-**Implementation Strategy:**
-```typescript
-// Django-style prefetch using Kysely joins
-class QuerySet<T> {
-  async prefetch(...relations: string[]): QuerySet<T> {
-    for (const relation of relations) {
-      // Analyze relationship from schema
-      const fk = this.schema.relationships[relation];
-
-      // Add Kysely join
-      this.kyselyQuery = this.kyselyQuery
-        .leftJoin(fk.table, `${this.tableName}.${fk.column}`, `${fk.table}.id`)
-        .select(/* select related fields */);
-    }
-
-    return this;
-  }
-}
-```
-
-### Phase 6: Advanced Features 📋
-
-**Future enhancements:**
-1. Query optimization and analysis
-2. Migration system
-3. Transaction support
-4. Aggregation helpers
-5. Raw SQL escape hatch
-6. Performance monitoring
-
-## Critical Implementation Details
-
-### 1. Type Safety Strategy
-
-**Problem:** How to maintain type safety when wrapping Kysely?
-
-**Solution:** Leverage Kysely's generic types throughout
-
-```typescript
-// DON'T: Lose type safety
-class Manager {
-  objects: QuerySet<any>; // ❌
-}
-
-// DO: Preserve Kysely's types
-class Manager<DB, TB extends keyof DB> {
-  objects: QuerySet<DB, TB, DB[TB]>; // ✅
-
-  constructor(
-    private kysely: Kysely<DB>,
-    private tableName: TB
-  ) {
-    this.objects = new QuerySet(
-      kysely.selectFrom(tableName).selectAll()
-    );
-  }
-}
-```
-
-### 2. Django-Style Field Lookups
-
-**Problem:** Django has `email__endswith`, `created_at__gte`, etc.
-
-**Solution:** Parse lookup syntax and convert to Kysely operators
-
-```typescript
-// src/core/lookups.ts
-export function parseLookup(field: string, value: any) {
-  const [fieldName, lookup = 'exact'] = field.split('__');
-
-  const operators = {
-    exact: '=',
-    gt: '>',
-    gte: '>=',
-    lt: '<',
-    lte: '<=',
-    contains: 'like',
-    startswith: 'like',
-    endswith: 'like',
-  };
-
-  let finalValue = value;
-  if (lookup === 'contains') finalValue = `%${value}%`;
-  if (lookup === 'startswith') finalValue = `${value}%`;
-  if (lookup === 'endswith') finalValue = `%${value}`;
-
-  return {
-    field: fieldName,
-    operator: operators[lookup],
-    value: finalValue,
-  };
-}
-
-// Usage in QuerySet
-filter(conditions: Record<string, any>) {
-  let query = this.qb;
-
-  for (const [field, value] of Object.entries(conditions)) {
-    const { field: fieldName, operator, value: finalValue } = parseLookup(field, value);
-    query = query.where(fieldName as any, operator as any, finalValue);
-  }
-
-  return new QuerySet(query);
-}
-```
-
-### 3. Connection Management
-
-**Problem:** Serverless cold starts and connection pooling
-
-**Solution:** Singleton pattern with lazy initialization
-
-```typescript
-// src/core/connection.ts
-let dbInstance: Kysely<Database> | null = null;
-
-export function getDatabase(config: Config) {
-  if (!dbInstance) {
-    dbInstance = new Kysely<Database>({
-      dialect: new SqliteDialect({
-        database: new Database(config.database),
-      }),
-    });
-  }
-  return dbInstance;
-}
-
-// Usage
-export class NOORMME {
-  private db: Kysely<Database>;
-
-  constructor(config: Config) {
-    this.db = getDatabase(config);
-  }
-}
-```
-
-### 4. Edge Runtime Compatibility
-
-**Problem:** `better-sqlite3` doesn't work in Edge Runtime
-
-**Solutions:**
-1. **Development**: Use `better-sqlite3` (Node.js)
-2. **Edge Production**: Use Turso/LibSQL (HTTP-based)
-
-```typescript
-// src/dialects/auto.ts
-export function createDialect(config: Config) {
-  if (config.runtime === 'edge') {
-    // Use HTTP-based SQLite (Turso)
-    return new LibsqlDialect({
-      url: config.url,
-      authToken: config.authToken,
-    });
-  } else {
-    // Use better-sqlite3 (Node.js)
-    return new SqliteDialect({
-      database: new Database(config.database),
-    });
-  }
-}
-```
-
-## File Structure
+## File Structure (Full Framework)
 
 ```
 noormme/
-├── src/
-│   ├── core/
-│   │   ├── database.ts           # Main NOORMME class
-│   │   ├── manager.ts            # Manager (provides .objects)
-│   │   ├── queryset.ts           # QuerySet (filter, exclude, etc.)
-│   │   └── lookups.ts            # Django-style field lookups
+├── packages/
+│   ├── create-noormme-app/      # CLI for scaffolding
+│   │   ├── templates/
+│   │   └── index.ts
 │   │
-│   ├── introspection/
-│   │   ├── schema-reader.ts      # Read SQLite schema
-│   │   ├── type-generator.ts     # Generate TypeScript types
-│   │   └── relationships.ts      # Detect relationships
+│   ├── noormme-core/            # Core utilities
+│   │   ├── schema/              # Schema DSL
+│   │   ├── migrations/          # Migration tools
+│   │   └── generators/          # Code generation
 │   │
-│   ├── adapters/
-│   │   └── nextauth.ts           # NextAuth adapter
+│   ├── noormme-admin/           # Admin panel
+│   │   ├── components/          # UI components
+│   │   └── generators/          # Page generation
 │   │
-│   ├── dialects/
-│   │   ├── sqlite.ts             # better-sqlite3 dialect
-│   │   ├── libsql.ts             # Turso/LibSQL for Edge
-│   │   └── auto.ts               # Auto-detect runtime
+│   ├── noormme-cli/             # CLI tools
+│   │   └── commands/
 │   │
-│   ├── nextjs/
-│   │   ├── server-components.ts  # RSC helpers
-│   │   ├── server-actions.ts     # Server action helpers
-│   │   └── cache.ts              # Next.js cache integration
-│   │
-│   └── index.ts                  # Public API
+│   └── noormme-nextauth-adapter/ # NextAuth adapter
+│       └── index.ts
 │
-├── types/
-│   └── database.d.ts             # Generated types
-│
-└── tests/
-    ├── core/
-    ├── introspection/
-    └── adapters/
+└── examples/
+    └── basic-app/               # Example generated app
 ```
+
+---
 
 ## Testing Strategy
 
-### 1. Core QuerySet Tests
+### 1. CLI Tests
 ```typescript
-// tests/core/queryset.test.ts
-describe('QuerySet', () => {
-  it('should filter records', async () => {
-    const users = await User.objects.filter({ is_active: true }).all();
-    expect(users).toHaveLength(2);
-  });
+describe('create-noormme-app', () => {
+  it('should scaffold project', async () => {
+    await createApp('test-app');
 
-  it('should chain filters', async () => {
-    const users = await User.objects
-      .filter({ is_active: true })
-      .exclude({ email__endswith: '@spam.com' })
-      .all();
-    expect(users).toHaveLength(1);
-  });
-
-  it('should throw on multiple results for get()', async () => {
-    await expect(
-      User.objects.get({ is_active: true })
-    ).rejects.toThrow('Multiple objects returned');
+    expect(fs.existsSync('test-app/lib/db.ts')).toBe(true);
+    expect(fs.existsSync('test-app/app/admin')).toBe(true);
   });
 });
 ```
 
-### 2. Type Generation Tests
+### 2. Admin Generation Tests
 ```typescript
-// tests/introspection/type-generator.test.ts
-describe('Type Generator', () => {
-  it('should generate correct types from schema', async () => {
-    const schema = await introspectDatabase(db);
-    const types = generateTypes(schema);
-
-    expect(types).toContain('export interface User');
-    expect(types).toContain('id: number');
-    expect(types).toContain('email: string');
-  });
-});
-```
-
-### 3. NextAuth Adapter Tests
-```typescript
-// tests/adapters/nextauth.test.ts
-describe('NextAuth Adapter', () => {
-  const adapter = NOORMMEAdapter(db);
-
-  it('should create user', async () => {
-    const user = await adapter.createUser({
-      email: 'test@example.com',
-      emailVerified: null,
+describe('Admin Generator', () => {
+  it('should generate list page', () => {
+    const code = generateListPage({
+      name: 'User',
+      tableName: 'users',
+      fields: [{ name: 'email', label: 'Email' }],
     });
 
-    expect(user.email).toBe('test@example.com');
-  });
-
-  it('should get session and user', async () => {
-    const result = await adapter.getSessionAndUser('session-token');
-    expect(result?.user).toBeDefined();
-    expect(result?.session).toBeDefined();
+    expect(code).toContain('selectFrom');
+    expect(code).toContain('DataTable');
   });
 });
 ```
+
+### 3. RBAC Tests
+```typescript
+describe('RBAC', () => {
+  it('should enforce role requirement', async () => {
+    await expect(
+      requireRole('admin')
+    ).rejects.toThrow('Forbidden');
+  });
+});
+```
+
+---
 
 ## Performance Considerations
 
-### 1. Query Optimization
-- Use `.select()` to limit columns
-- Implement query analysis
-- Add index suggestions
+### 1. SQLite Optimization
+- WAL mode enabled by default
+- Optimized pragmas (cache, mmap)
+- Connection pooling for serverless
 
-### 2. Connection Pooling
-- Singleton pattern for connections
-- Lazy initialization
-- Proper cleanup on shutdown
+### 2. Admin Panel
+- RSC for server-side rendering
+- Pagination for large tables
+- Lazy loading for relationships
 
-### 3. Caching Strategy
-- Integrate with Next.js cache
-- Query result caching
-- Schema cache (don't introspect on every request)
+### 3. Type Generation
+- Cache generated types
+- Only regenerate on schema changes
+- Use incremental build
 
-```typescript
-// Cache schema introspection
-let schemaCache: DatabaseSchema | null = null;
+---
 
-export async function getSchema(db: Kysely<Database>, refresh = false) {
-  if (!schemaCache || refresh) {
-    schemaCache = await introspectDatabase(db);
-  }
-  return schemaCache;
-}
-```
+## Next Steps
 
-## Common Pitfalls & Solutions
+### Immediate (Phase 1)
+1. Build `create-noormme-app` CLI
+2. Create project templates
+3. Implement database initialization
+4. Generate auth schemas
 
-### Pitfall 1: Losing Type Safety
-**Problem:** Using `any` types breaks Kysely's inference
-**Solution:** Always use generic types and preserve Kysely's type parameters
+### Short-term (Phases 2-3)
+1. Admin panel components
+2. Page generators
+3. RBAC implementation
 
-### Pitfall 2: N+1 Queries
-**Problem:** Lazy loading causes N+1 queries
-**Solution:** Implement `prefetch()` for eager loading with Kysely joins
+### Long-term (Phases 4-5)
+1. Schema DSL
+2. Migration system
+3. CLI tools
 
-### Pitfall 3: Edge Runtime Incompatibility
-**Problem:** `better-sqlite3` uses native modules
-**Solution:** Auto-detect runtime and use LibSQL/Turso for Edge
-
-### Pitfall 4: Schema Introspection Overhead
-**Problem:** Introspecting schema on every request is slow
-**Solution:** Cache schema, only regenerate on schema changes
-
-## Next Steps for Implementation
-
-### Immediate Priorities
-1. ✅ Implement core QuerySet with Django API
-2. ✅ Add auto-discovery and type generation
-3. ✅ Build NextAuth adapter
-4. 📋 Enhance relationship loading
-5. 📋 Add migration system
-6. 📋 Performance monitoring
-
-### Documentation Needed
-1. API Reference (all methods)
-2. Next.js integration guide
-3. Migration from Prisma/Drizzle guide
-4. Best practices and patterns
-5. Troubleshooting guide
-
-### Community & Ecosystem
-1. Example Next.js projects
-2. Starter templates
-3. Video tutorials
-4. Blog posts and announcements
+---
 
 ## Resources
 
-### Essential Reading
 - [Kysely Documentation](https://kysely.dev/)
-- [NextAuth Adapter Spec](https://authjs.dev/reference/adapters)
-- [Django QuerySet API](https://docs.djangoproject.com/en/stable/ref/models/querysets/)
-- [SQLite Schema Introspection](https://www.sqlite.org/pragma.html#pragma_table_info)
-
-### Related Projects
-- **Kysely**: Foundation we build on
-- **Drizzle ORM**: Schema-first approach (different strategy)
-- **Prisma**: Schema-first with custom engine (different strategy)
-- **Django ORM**: Inspiration for API design
+- [NextAuth Documentation](https://authjs.dev/)
+- [SQLite Optimization](https://www.sqlite.org/pragma.html)
+- [Next.js App Router](https://nextjs.org/docs/app)

@@ -2,511 +2,479 @@
 
 ## Core Mission
 
-**"Django-Inspired Type-Safe ORM Built on Kysely for Next.js"**
+**"Django's Batteries-Included Philosophy for Next.js"**
 
-NOORMME is a specialized ORM built on Kysely that brings Django's elegant API patterns to Next.js + SQLite applications, with seamless NextAuth integration and full TypeScript support.
+NOORMME is a zero-config framework for Next.js that provides instant setup for SQLite, authentication, admin panel, and RBAC - built on Kysely for type-safe database operations.
 
 ## Vision
 
-To become the go-to ORM for Next.js developers who want Django's intuitive API patterns combined with Kysely's type-safety and performance, specialized for SQLite.
+To become the fastest way to start a production-ready Next.js application, eliminating hours of boilerplate setup and letting developers focus on building features instead of infrastructure.
 
 ## Core Values
 
-### 1. Built on Kysely
-- **Type-Safe Foundation**: Leverages Kysely's excellent TypeScript inference
-- **Query Builder**: Kysely's powerful, composable query building
-- **SQLite Optimized**: Built specifically for SQLite with Kysely
-- **Performance**: Kysely's lightweight, fast query execution
+### 1. Zero Configuration
+- **Instant Setup**: One command creates a fully-featured app
+- **Smart Defaults**: Optimal configuration out-of-box
+- **Convention Over Configuration**: Common patterns pre-configured
+- **Customizable**: Override defaults when needed
 
-### 2. Django-Inspired API
-- **Familiar Patterns**: Django-style `.objects.filter()` and query methods
-- **Intuitive API**: Easy-to-learn query interface for Django developers
-- **Relationship Loading**: Simplified eager/lazy loading patterns
-- **Clean Syntax**: Readable, expressive query construction
+### 2. Batteries Included
+- **SQLite Auto-Configured**: WAL mode, optimal pragmas, ready to use
+- **NextAuth Pre-Integrated**: OAuth providers configured, auth tables created
+- **Admin Panel Generated**: Full CRUD UI at `/admin` instantly
+- **RBAC Built-In**: Roles and permissions working out-of-box
 
-### 3. Next.js Specialization
-- **App Router First**: Optimized for Next.js 13+ App Router patterns
-- **Server Components**: Seamless data fetching integration
-- **Server Actions**: Form handling and mutations
-- **Edge Runtime**: Full compatibility with Edge Runtime
+### 3. Next.js Native
+- **App Router First**: Optimized for Next.js 13+ App Router
+- **React Server Components**: Leverages RSC patterns
+- **Server Actions**: Built-in form handling
+- **Type-Safe**: Full TypeScript integration
 
-### 4. SQLite Focus
-- **Single Database**: Specialized for SQLite, not generic multi-database
-- **WAL Mode**: Optimized for SQLite's Write-Ahead Logging
-- **Auto-Discovery**: Automatic schema detection from existing SQLite databases
-- **Type Generation**: TypeScript types generated from SQLite schema
+### 4. Built on Kysely
+- **No Abstraction Layer**: Use Kysely directly for queries
+- **Type-Safe Queries**: Leverage Kysely's excellent type inference
+- **Composable**: Full power of Kysely's query builder
+- **Transparent**: No magic, just configured tools
 
-### 5. NextAuth Integration
-- **Built-in Adapter**: Native NextAuth database adapter
-- **Session Management**: Optimized session storage and retrieval
-- **User Authentication**: Seamless integration with NextAuth patterns
-- **Type Safety**: Fully typed authentication models
+### 5. Production Ready
+- **Performance**: SQLite optimized for production workloads
+- **Security**: RBAC and authentication by default
+- **Scalability**: Designed for real applications
+- **Monitoring**: Built-in admin tools for management
 
 ## What We Build
 
-### Core Features (Built on Kysely)
-- **Django-Style Query API**: `.objects.filter()`, `.exclude()`, `.get()` wrapping Kysely queries
-- **Type Generation**: Generate TypeScript types from SQLite schema
-- **Auto-Discovery**: Automatically introspect existing SQLite databases
-- **Relationship Helpers**: Simplified eager/lazy loading on top of Kysely joins
-- **NextAuth Adapter**: Native integration for authentication and sessions
+### Core Offering
+- **CLI Scaffolding**: `create-noormme-app` for instant project setup
+- **Database Setup**: Auto-configured SQLite with optimal settings
+- **Authentication**: NextAuth pre-integrated with adapters
+- **Admin Panel**: Auto-generated CRUD interface
+- **RBAC System**: Role-based access control ready to use
+- **Schema Management**: Zero-boilerplate schema definition
 
-### Next.js Integration
-- **Server Components**: Optimized data fetching patterns for RSC
-- **Server Actions**: Form handling and mutations
-- **Edge Runtime**: Full compatibility with Vercel Edge Runtime
-- **App Router Patterns**: Best practices for Next.js 13+ App Router
+### Developer Tools
+- **CLI Commands**: `noormme dev`, `db:migrate`, `generate:model`
+- **Type Generation**: Auto-generate TypeScript types from schemas
+- **Hot Reload**: Schema changes reflected immediately (dev mode)
+- **Migration System**: Automatic in dev, files in production
 
-### Developer Experience
-- **Kysely + Django API**: Best of both worlds - type safety and intuitive syntax
-- **TypeScript First**: Full type inference and autocomplete
-- **Error Handling**: Clear, actionable error messages
-- **Documentation**: Comprehensive guides for Next.js + SQLite + Kysely patterns
+### Integration Layer
+- **NextAuth Adapter**: Kysely-based adapter for SQLite
+- **Admin Components**: Reusable UI components for CRUD
+- **RBAC Helpers**: Middleware and Server Action decorators
+- **Template System**: Customizable project templates
 
 ## What We Don't Build
 
-### Not a Django ORM Port
-- **Not Replicating Django**: Django-inspired API, not full Django ORM features
-- **Built on Kysely**: Leverages Kysely, doesn't reinvent query building
-- **SQLite Only**: Specialized for SQLite, not multi-database like Django
-- **Next.js Focused**: Not a generic framework-agnostic ORM
+### Not a Query Builder
+- **Use Kysely Directly**: No abstraction over Kysely's API
+- **No ORM Wrapper**: Kysely is already excellent
+- **No Custom DSL**: TypeScript + Kysely is enough
+- **Transparent**: Developers use Kysely, not a wrapper
 
-### Not Generic Multi-Database
-- **SQLite Specialization**: Not PostgreSQL, MySQL, or other databases
-- **Kysely Handles Queries**: We build patterns on top, not replace Kysely
-- **No Complex Migrations**: Simple migration helpers, not full migration framework
-- **No ORM Magic**: Transparent, predictable behavior built on Kysely
+### Not Multi-Database
+- **SQLite Only**: Specialized for SQLite use cases
+- **No Postgres/MySQL**: Focus on doing one thing well
+- **Simple Stack**: Reduce complexity, increase reliability
+- **Edge Compatible**: Via Turso/LibSQL when needed
 
 ### Not Framework Agnostic
-- **Next.js First**: Optimized specifically for Next.js patterns
-- **Not Express/Fastify/etc**: Focused on Next.js use cases
-- **Not Generic Node**: Server Components and Server Actions focused
-- **NextAuth Coupled**: Authentication integrated with NextAuth specifically
+- **Next.js Specific**: Optimized for Next.js patterns
+- **Not Express/Fastify**: Different use cases
+- **App Router Focus**: Built for modern Next.js
+- **Opinionated**: Best practices baked in
 
 ## Target Audience
 
 ### Primary Users
-- **Next.js Developers**: Building modern web applications with Server Components and SQLite
-- **Django Developers**: Transitioning to Next.js who want familiar query patterns
-- **Kysely Users**: Looking for a higher-level, Django-inspired API on top of Kysely
-- **Full-Stack Next.js Teams**: Building complete solutions with NextAuth authentication
-- **Startup Teams**: Need rapid Next.js + SQLite development with type safety
 
-### Use Cases
+#### 1. Rapid Prototypers
+**Profile**: Building MVPs and prototypes quickly
 
-#### 1. Rapid Next.js Prototyping
-**Scenario**: Build a Next.js MVP with SQLite in days
+**Needs**:
+- Zero setup time
+- Working auth immediately
+- Admin panel for testing
+- Quick iterations
 
-```typescript
-// Django-inspired API built on Kysely
-import { NOORMME } from 'noormme';
+**Value Proposition**:
+```bash
+npx create-noormme-app my-mvp
+cd my-mvp
+npm run dev
 
-const db = new NOORMME({ database: './app.db' });
-
-// Auto-discovers SQLite schema and generates TypeScript types
-const User = db.model('users');
-const users = await User.objects.all(); // Kysely-powered, Django-style API, fully typed!
+# 2 minutes later: fully-featured app
 ```
 
-**Benefits**: Kysely's type safety + Django's intuitive API for Next.js
+#### 2. Solo Developers
+**Profile**: Indie hackers, side projects, freelancers
 
-#### 2. Next.js Production Apps with NextAuth
-**Scenario**: Full-featured Next.js app with authentication
+**Needs**:
+- Don't want to configure infrastructure
+- Need auth and admin for client demos
+- Want to focus on features
+- Type-safe development
 
-```typescript
-// Built-in NextAuth adapter for SQLite
-const db = new NOORMME({
-  database: './prod.db',
-  enableWAL: true, // SQLite WAL mode for concurrency
+**Value Proposition**:
+- No DevOps knowledge needed
+- Admin panel impresses clients
+- RBAC for multi-tenant SaaS
+- Ship faster
+
+#### 3. Startup Teams
+**Profile**: Small teams building production apps
+
+**Needs**:
+- Fast initial development
+- Production-ready foundation
+- Team collaboration (RBAC)
+- Maintainable codebase
+
+**Value Proposition**:
+- Week 1: MVP shipped
+- Built-in user management
+- Type-safe across team
+- Scales with growth
+
+#### 4. Next.js Beginners
+**Profile**: Learning Next.js, need structure
+
+**Needs**:
+- Best practices guidance
+- Working examples
+- Type safety
+- Clear patterns
+
+**Value Proposition**:
+- Learn by seeing working code
+- Pre-configured best practices
+- Type hints guide development
+- Production patterns from day 1
+
+## Use Cases
+
+### 1. SaaS Application
+
+```bash
+# Day 1: Setup
+npx create-noormme-app my-saas
+cd my-saas
+
+# Already have:
+# ✅ User authentication (GitHub OAuth)
+# ✅ Admin panel for user management
+# ✅ RBAC (admin, user, guest roles)
+# ✅ Database with proper indexes
+# ✅ Type-safe queries
+
+# Day 2: Add business logic
+# schemas/subscription.ts
+export const Subscription = schema.table('subscriptions', {
+  id: schema.text().primaryKey(),
+  userId: schema.text().references('users.id'),
+  plan: schema.text(),
+  status: schema.text(),
+  createdAt: schema.datetime().default('CURRENT_TIMESTAMP'),
 });
 
-// NextAuth integration
-import { NOORMMEAdapter } from 'noormme/nextauth';
-export const authOptions = {
-  adapter: NOORMMEAdapter(db),
-  // ...
-};
+# Auto-generates:
+# - Migration file
+# - TypeScript types
+# - Admin UI routes
+# - RBAC permissions
 
-// Django-style API in Next.js Server Components
-export default async function PostsPage() {
-  const posts = await Post.objects
-    .filter({ published: true })
-    .prefetch('author') // Kysely joins under the hood
-    .all();
-  return <PostList posts={posts} />;
+# Day 3: Ship to production
+```
+
+### 2. Internal Tool
+
+```typescript
+// Built-in admin panel = instant internal tool
+// app/admin customization
+import { AdminLayout } from '@noormme/admin';
+
+export default function CustomAdmin() {
+  return (
+    <AdminLayout
+      models={['users', 'orders', 'products']}
+      theme="corporate"
+      logo="/company-logo.png"
+    />
+  );
+}
+
+// Team has admin access immediately
+// RBAC controls who can edit what
+// No custom UI building needed
+```
+
+### 3. Learning Project
+
+```typescript
+// Perfect for tutorials and learning
+// Everything is pre-configured and working
+
+// lib/db.ts - already exists, fully typed
+import { db } from '@/lib/db';
+
+// Students learn Kysely, not configuration
+const users = await db
+  .selectFrom('users')
+  .where('isActive', '=', true)
+  .selectAll()
+  .execute();
+
+// RBAC teaches security patterns
+import { requireRole } from '@/lib/rbac';
+
+export async function deleteUser(id: string) {
+  await requireRole('admin'); // Security by default
+  return db.deleteFrom('users').where('id', '=', id).execute();
 }
 ```
 
-**Benefits**: NextAuth + Django API + Kysely type safety for Next.js
-
-#### 3. Migration from Prisma/TypeORM to Kysely+NOORMME
-**Scenario**: Moving to Kysely with a familiar API layer
+### 4. API Backend
 
 ```typescript
-// Works with existing SQLite databases
-const db = new NOORMME({ database: './existing.db' });
+// Use as backend for mobile/web apps
+// app/api/posts/route.ts
 
-// Django-style queries on top of Kysely
-const activeUsers = await User.objects
-  .filter({ is_active: true })
-  .exclude({ email__endswith: '@example.com' })
-  .orderBy('-created_at')
-  .all();
+import { db } from '@/lib/db';
+import { requirePermission } from '@/lib/rbac';
 
-// Drop down to Kysely when needed
-const complexQuery = await db.kysely
-  .selectFrom('users')
-  .where(/* complex Kysely query */)
-  .execute();
+export async function GET() {
+  const posts = await db
+    .selectFrom('posts')
+    .selectAll()
+    .execute();
+
+  return Response.json(posts);
+}
+
+export async function POST(req: Request) {
+  await requirePermission('posts', 'create');
+
+  const data = await req.json();
+  const post = await db
+    .insertInto('posts')
+    .values(data)
+    .returningAll()
+    .executeTakeFirstOrThrow();
+
+  return Response.json(post);
+}
+
+// Admin panel = instant API dashboard
+// RBAC = instant API security
 ```
-
-**Benefits**: Familiar API + direct Kysely access when needed
-
-#### 4. Learning Next.js + SQLite + Kysely
-**Scenario**: Learning modern Next.js development patterns
-
-```typescript
-// Clear, Django-inspired API built on Kysely
-const blog = await Blog.objects.get({ id: 1 });
-
-// Django-style relationship loading (Kysely joins underneath)
-const posts = await blog.posts.all();
-const author = await posts[0].author.get();
-
-// When you need raw Kysely power:
-const stats = await db.kysely
-  .selectFrom('posts')
-  .select(({ fn }) => [
-    fn.count('id').as('total'),
-    fn.avg('view_count').as('avgViews')
-  ])
-  .groupBy('category')
-  .execute();
-```
-
-**Benefits**: Learn Next.js patterns + Kysely power + Django API design
 
 ## Success Criteria
 
-### Technical Excellence
+### Setup Speed (Primary Metric)
 
-#### Performance Benchmarks
-- ⚡ **Query Execution**: <10ms average (p95), <5ms median (p50)
-- 🚀 **Throughput**: >100 operations/second sustained load
-- 💾 **Memory Efficiency**: <50MB baseline memory footprint
-- 📊 **Cache Hit Rate**: >80% for repeated queries
+**Goal**: Fastest time from zero to working app
 
-**Measurement**:
-```typescript
-// Built-in performance monitoring
-const metrics = db.getMetrics();
-console.log(metrics);
-// {
-//   avgQueryTime: 4.2,
-//   p95QueryTime: 9.8,
-//   throughput: 156,
-//   cacheHitRate: 0.84
-// }
-```
+Metrics:
+- ⚡ **Project Creation**: < 60 seconds
+- 🚀 **First Query**: < 2 minutes from start
+- 🎯 **Auth Working**: < 5 minutes (add OAuth keys)
+- 📊 **Admin Panel**: < 3 minutes (visit `/admin`)
+- ✅ **Production Deploy**: < 15 minutes
 
-#### Reliability Metrics
-- 🛡️ **Uptime**: 99.9% in production environments (8.76 hours downtime/year max)
-- 🔄 **Error Recovery**: Automatic reconnection and retry mechanisms
-- ✅ **Data Integrity**: Zero data corruption incidents
-- 🔒 **Security**: Zero critical vulnerabilities in dependency audits
-
-#### Compatibility Standards
-- ✅ **Next.js Support**: 100% App Router, Pages Router, and Edge Runtime
-- 📦 **TypeScript**: Full type safety with strict mode
-- 🌐 **Node.js**: Support for LTS versions (18+, 20+)
-- 🗄️ **SQLite**: Compatible with SQLite 3.35+ (WAL mode required)
-
-### Developer Satisfaction
-
-#### Onboarding Speed
-- ⏱️ **Setup Time**: 5 minutes from install to first query
-- 📚 **Learning Curve**: 1 hour to productivity (for Django devs: 15 minutes)
-- 🎯 **First Success**: Working CRUD app in <30 minutes
-
-**Example Onboarding**:
+**Benchmark**:
 ```bash
-# 1. Install (30 seconds)
-npm install noormme
+# Stopwatch test
+time npx create-noormme-app test-app
+# Target: < 60 seconds
 
-# 2. Initialize (1 minute)
-npx noormme init
-
-# 3. First Query (2 minutes)
-# Auto-discovery detects schema, generates types, ready to use!
+# Time to first successful query
+# Target: < 120 seconds total
 ```
 
-#### Documentation Quality
-- 📖 **Coverage**: 100% API coverage with examples
-- 🎓 **Tutorials**: Step-by-step guides for all major use cases
-- 💡 **Examples**: Real-world patterns and best practices
-- 🔍 **Searchability**: Full-text search and categorization
+### Feature Completeness
 
-**Standard**: Match Django ORM documentation quality and depth
+**Goal**: Everything needed for production
 
-#### Error Experience
-- 🚨 **Clear Messages**: Plain English errors with context
-- 🔧 **Actionable Suggestions**: Specific fixes for common issues
-- 📍 **Source Location**: File and line number for debugging
-- 📚 **Documentation Links**: Relevant docs for each error type
+Checklist:
+- ✅ Database (SQLite, WAL mode)
+- ✅ Authentication (NextAuth)
+- ✅ User Management (admin panel)
+- ✅ Authorization (RBAC)
+- ✅ Type Safety (TypeScript + Kysely)
+- ✅ Migrations (auto + manual)
+- ✅ Admin UI (CRUD)
+- ✅ Security (role-based access)
 
-**Example Error**:
-```
-❌ Query Error: Column 'user_id' not found in table 'posts'
+**Measure**: Can ship SaaS MVP without adding infrastructure
 
-💡 Suggestion: Did you mean 'author_id'? Available columns:
-   - id, title, content, author_id, created_at
+### Developer Experience
 
-📖 Learn more: https://docs.noormme.dev/errors/column-not-found
-📍 Location: src/queries/post.ts:42
-```
+**Goal**: Delightful to use, minimal friction
 
-#### Type Safety
-- 🔒 **Auto-Generated Types**: TypeScript types from database schema
-- ✅ **Compile-Time Checks**: Catch errors before runtime
-- 🎯 **IntelliSense**: Full autocomplete and hints
-- 🛡️ **Strict Mode**: Compatible with TypeScript strict mode
+Metrics:
+- 😊 **Satisfaction**: 90%+ positive feedback
+- 📚 **Learning Curve**: < 1 hour to productivity
+- 🐛 **Setup Issues**: < 5% failure rate
+- 💬 **Support Requests**: < 10 per 100 users
 
-### Community Growth
+**Indicators**:
+- "Just worked" feedback
+- Minimal configuration questions
+- Low setup-related issues
+- Positive social mentions
 
-#### Adoption Metrics (12-month targets)
-- 👥 **Users**: 1,000+ active projects
-- ⭐ **GitHub Stars**: 500+ stars
-- 📦 **NPM Downloads**: 10,000+ monthly downloads
-- 🌍 **Geographic Reach**: Used in 20+ countries
+### Production Adoption
 
-#### Engagement Metrics
-- 💬 **Active Contributors**: 10+ regular contributors
-- 🐛 **Issue Resolution**: <48 hours median response time
-- 📝 **Pull Requests**: 20+ merged PRs per quarter
-- 🎤 **Community Events**: 4+ talks/workshops per year
+**Goal**: Used in real production apps
 
-#### Quality Indicators
-- ⭐ **Ratings**: 4.5+ average rating
-- 💯 **Satisfaction**: 80%+ positive feedback
-- 🏆 **Awards**: Featured in "State of JS" survey
-- 📈 **Growth**: 20% month-over-month growth
+Targets (12 months):
+- 🚀 **Apps Deployed**: 500+ production deployments
+- 👥 **Active Users**: 5,000+ developers
+- ⭐ **GitHub Stars**: 2,000+ stars
+- 📦 **NPM Downloads**: 50,000+ monthly
 
-#### Ecosystem Development
-- 🔌 **Integrations**: Next.js, Vercel, Netlify, Cloudflare
-- 🛠️ **Tools**: CLI, migrations, admin panel, devtools
-- 📚 **Resources**: Video tutorials, blog posts, courses
-- 🤝 **Partnerships**: Collaborations with framework authors
+**Quality Indicators**:
+- Production success stories
+- Case studies from users
+- Featured in Next.js ecosystem
+- Recommended by community
 
 ## Principles in Action
 
-### 1. Simplicity Over Complexity
+### 1. Zero Config Wins
 
-**Principle**: Clean API, minimal configuration, clear documentation
+**Principle**: Working app before configuration
 
-**Example - Simple CRUD Operations**:
-```typescript
-// No complex setup, no schema definitions
-const db = new NOORMME({ database: './app.db' });
+**Good**:
+```bash
+npx create-noormme-app my-app
+cd my-app
+npm run dev
 
-// Intuitive, Django-style queries
-const user = await User.objects.create({
-  email: 'user@example.com',
-  name: 'John Doe'
-});
-
-const users = await User.objects.filter({ is_active: true }).all();
-const user = await User.objects.get({ id: 1 });
-await user.update({ name: 'Jane Doe' });
-await user.delete();
+# Already working:
+# - Database ✅
+# - Auth ✅
+# - Admin ✅
+# - RBAC ✅
 ```
 
-**vs. Complex Alternative**:
-```typescript
-// Traditional ORM requires extensive setup
-@Entity()
-class User {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ type: 'varchar', length: 255 })
-  email: string;
-  // ... many more decorators and configuration
-}
+**Bad**:
+```bash
+npm install orm
+# Now configure database...
+# Now set up auth...
+# Now build admin panel...
+# Now implement RBAC...
+# (Hours of work before "hello world")
 ```
 
-### 2. Power Through Simplicity
+### 2. Batteries Included
 
-**Principle**: Advanced features with simple, intuitive API
+**Principle**: Everything needed, nothing more
 
-**Example - Relationship Loading**:
-```typescript
-// Powerful eager loading with simple syntax
-const posts = await Post.objects
-  .prefetch('author', 'comments.user', 'tags')
-  .filter({ published: true })
-  .all();
+**Included**:
+- ✅ Database (SQLite + Kysely)
+- ✅ Auth (NextAuth)
+- ✅ Admin (auto-generated)
+- ✅ RBAC (roles + permissions)
+- ✅ Types (auto-generated)
+- ✅ Migrations (automated)
 
-// Access related data without additional queries (N+1 solved!)
-posts.forEach(post => {
-  console.log(post.author.name); // No query!
-  console.log(post.comments.length); // No query!
-  post.comments.forEach(comment => {
-    console.log(comment.user.name); // No query!
-  });
-});
+**Not Included**:
+- ❌ Bloat (unused features)
+- ❌ Complex config
+- ❌ Proprietary lock-in
+- ❌ Magic behavior
+
+### 3. Progressive Customization
+
+**Principle**: Defaults work, customization available
+
+**Level 1 - Zero Config**:
+```bash
+# Just works with defaults
+npx create-noormme-app my-app
 ```
 
-**Example - Auto-Discovery & Type Generation**:
+**Level 2 - Simple Config**:
 ```typescript
-// NOORMME automatically generates TypeScript types
-const User = db.model('users'); // Fully typed based on schema!
-
-// IntelliSense knows all columns and relationships
-const user = await User.objects.get({ id: 1 });
-user.email; // ✅ TypeScript knows this exists
-user.invalidField; // ❌ TypeScript error!
-
-// Relationship types are inferred automatically
-const posts = await user.posts.all(); // Type: Post[]
+// noormme.config.ts
+export default {
+  admin: {
+    path: '/dashboard', // change admin path
+  },
+  auth: {
+    providers: ['google', 'github'], // add provider
+  },
+};
 ```
 
-### 3. Production Focus
-
-**Principle**: Performance, reliability, and monitoring built-in
-
-**Example - Performance Optimization**:
+**Level 3 - Full Control**:
 ```typescript
-// Connection pooling and caching enabled by default
-const db = new NOORMME({
-  database: './prod.db',
-  enableWAL: true, // WAL mode for concurrency
-  poolSize: 10, // Connection pooling
-  enableCache: true, // Query caching
-  cacheConfig: {
-    ttl: 300000, // 5 minutes
-    maxSize: 1000
-  }
-});
+// Override anything
+// lib/db.ts - customize database
+// app/admin - rebuild admin UI
+// lib/rbac.ts - custom permissions
 
-// Automatic query optimization
-const optimizedQuery = await Post.objects
-  .select('id', 'title') // Only needed columns
-  .filter({ category: 'tech' })
-  .orderBy('-created_at')
-  .limit(10);
-
-// Get performance insights
-const metrics = db.getMetrics();
-if (metrics.slowQueries.length > 0) {
-  console.log('Slow queries detected:', metrics.slowQueries);
-  // Automatic suggestions for improvement
-}
+// Still get the scaffolding benefits
 ```
 
-**Example - Error Handling & Recovery**:
-```typescript
-// Comprehensive error handling with recovery
-try {
-  const result = await db.transaction(async (trx) => {
-    const user = await User.objects.create({ email: 'test@example.com' });
-    const profile = await Profile.objects.create({ user_id: user.id });
-    return { user, profile };
-  });
-} catch (error) {
-  if (error.code === 'SQLITE_BUSY') {
-    // Automatic retry with exponential backoff
-    await db.retryWithBackoff(() => /* ... */);
-  } else {
-    // Clear error message with suggestions
-    console.error(error.message);
-    // "Transaction failed: Database is locked
-    //  💡 Suggestion: Enable WAL mode for better concurrency
-    //  📖 Learn more: https://docs.noormme.dev/wal-mode"
-  }
-}
-```
+### 4. Production First
 
-### 4. Framework Independence
+**Principle**: Production-ready by default
 
-**Principle**: Works with any database, easy to migrate, adaptable
+**Performance**:
+- WAL mode enabled
+- Optimal SQLite pragmas
+- Connection pooling
+- Query optimization
 
-**Example - Zero Migration Setup**:
-```typescript
-// Works with existing SQLite database immediately
-const db = new NOORMME({ database: './legacy-app.db' });
+**Security**:
+- RBAC from day 1
+- Auth required for admin
+- Secure session management
+- Input validation
 
-// No schema definition needed - auto-discovers everything
-const LegacyUser = db.model('legacy_users');
-const users = await LegacyUser.objects.all();
+**Reliability**:
+- Type-safe queries
+- Error boundaries
+- Transaction support
+- Backup patterns
 
-// Gradually migrate to better patterns
-class ModernUserRepository extends Repository<LegacyUser> {
-  async findActive() {
-    return this.filter({ status: 'active' }).all();
-  }
-}
-```
-
-**Example - Next.js Integration (Framework Specific, Not Framework Locked)**:
-```typescript
-// app/actions.ts - Server Actions
-'use server';
-import { db } from '@/lib/db';
-
-export async function createPost(formData: FormData) {
-  const post = await Post.objects.create({
-    title: formData.get('title'),
-    content: formData.get('content')
-  });
-  revalidatePath('/posts');
-  return post;
-}
-
-// app/posts/page.tsx - Server Component
-import { db } from '@/lib/db';
-
-export default async function PostsPage() {
-  const posts = await Post.objects.all();
-  return <PostList posts={posts} />;
-}
-
-// BUT: Same db instance works in API routes, middleware, etc.
-// NOT locked into Next.js patterns!
-```
-
-**Example - Portable Across Projects**:
-```typescript
-// Same code works in different environments
-// Next.js App:
-const db = new NOORMME({ database: './app.db' });
-
-// Express API:
-const db = new NOORMME({ database: './api.db' });
-
-// CLI Tool:
-const db = new NOORMME({ database: process.env.DB_PATH });
-
-// Same API, same patterns, zero code changes!
+**Monitoring**:
+- Admin panel insights
+- User activity tracking
+- Query performance
+- Error logging
 
 ## Long-term Vision
 
-### 1. Ecosystem Leader
-- **Industry Standard**: Go-to ORM for Next.js + SQLite
-- **Community Driven**: Active community and contributions
-- **Ecosystem Integration**: Works seamlessly with other tools
+### Year 1: Foundation
+- ✅ Solid core framework
+- ✅ 500+ production apps
+- ✅ Active community
+- ✅ Comprehensive docs
 
-### 2. Innovation Hub
-- **Pattern Innovation**: New patterns and best practices
-- **Performance Leadership**: Setting performance standards
-- **Developer Experience**: Raising the bar for developer tools
+### Year 2: Ecosystem
+- 🔌 Plugin system
+- 🎨 Admin themes
+- 📊 Analytics integration
+- 🔄 Multi-database (Postgres)
 
-### 3. Educational Resource
-- **Learning Platform**: Teaching ORM patterns and best practices
-- **Best Practices**: Establishing industry standards
-- **Knowledge Sharing**: Community knowledge and expertise
+### Year 3: Platform
+- ☁️ Hosted service option
+- 📱 Mobile admin app
+- 🤝 Enterprise features
+- 🌍 Global adoption
 
 ## Conclusion
 
-NOORMME's mission is to bring Django's powerful ORM patterns to Next.js developers while maintaining framework independence and avoiding vendor lock-in. We focus on simplicity, power, and production readiness, creating a tool that developers love to use and can rely on in production.
+NOORMME's mission is to eliminate the tedious setup work that precedes every Next.js project. By providing a batteries-included framework built on proven tools (Next.js, Kysely, NextAuth, SQLite), we let developers focus on building features instead of configuring infrastructure.
 
-Our vision is to become the go-to ORM for Next.js + SQLite development, setting new standards for developer experience, performance, and reliability in the JavaScript ecosystem.
+Our vision is to become the default starting point for Next.js applications, known for:
+- **Speed**: Fastest setup in the ecosystem
+- **Completeness**: Everything needed out-of-box
+- **Quality**: Production-ready from day 1
+- **Simplicity**: No configuration needed
+
+We succeed when developers say: *"I went from idea to deployed app in a day."*

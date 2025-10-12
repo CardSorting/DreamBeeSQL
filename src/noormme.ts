@@ -14,6 +14,7 @@ import { SchemaWatcher, WatchOptions } from './watch/schema-watcher.js'
 import { MetricsCollector } from './performance/services/metrics-collector.js'
 import { SQLiteAutoOptimizer } from './dialect/sqlite/sqlite-auto-optimizer.js'
 import { SQLiteAutoIndexer } from './dialect/sqlite/sqlite-auto-indexer.js'
+import { SqliteDialect } from './dialect/sqlite/sqlite-dialect.js'
 
 // Global initialization lock to prevent concurrent initialization
 const globalInitLock = new Map<string, Promise<void>>()
@@ -539,6 +540,13 @@ export class NOORMME {
   }
 
   /**
+   * Alias for close() - for backward compatibility
+   */
+  async destroy(): Promise<void> {
+    return this.close()
+  }
+
+  /**
    * Get the underlying Kysely instance for custom queries
    */
   getKysely(): Kysely<any> {
@@ -665,7 +673,7 @@ export class NOORMME {
     switch (dialect) {
       case 'sqlite':
         const Database = require('better-sqlite3')
-        return new (require('./dialect/sqlite/sqlite-dialect').SqliteDialect)({
+        return new SqliteDialect({
           database: new Database(connection.database)
         })
       

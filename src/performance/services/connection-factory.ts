@@ -108,10 +108,11 @@ export class ConnectionFactory {
     } catch (error) {
       const responseTime = performance.now() - startTime
       this.updateStats('validated', responseTime)
+      const errorMessage = error instanceof Error ? error.message : String(error)
       
       return {
         isValid: false,
-        error: error.message,
+        error: errorMessage,
         responseTime
       }
     }

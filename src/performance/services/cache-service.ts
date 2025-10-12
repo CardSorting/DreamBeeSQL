@@ -56,7 +56,7 @@ export class CacheService<T = any> {
   private stats: CacheStats
   private metrics: CacheMetrics
   private cleanupTimer?: NodeJS.Timeout
-  private logger: Logger
+  protected logger: Logger
 
   constructor(config: Partial<CacheConfig> = {}, logger?: Logger) {
     this.logger = logger || new Logger('CacheService')

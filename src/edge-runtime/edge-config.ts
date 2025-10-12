@@ -35,8 +35,8 @@ export function getEdgeRuntimeConfig(): NOORMConfig {
  */
 export function isEdgeRuntime(): boolean {
   return (
-    typeof EdgeRuntime !== 'undefined' ||
-    typeof process !== 'undefined' && process.env.NEXT_RUNTIME === 'edge'
+    (typeof globalThis !== 'undefined' && 'EdgeRuntime' in globalThis) ||
+    (typeof process !== 'undefined' && process.env.NEXT_RUNTIME === 'edge')
   )
 }
 
@@ -97,7 +97,7 @@ export class EdgeRuntimeDB {
       const result = await db.execute(query, params)
       return result
     } finally {
-      await db.destroy()
+      await db.close()
     }
   }
 
@@ -110,9 +110,9 @@ export class EdgeRuntimeDB {
     
     try {
       const repo = db.getRepository(table)
-      return await repo.findAll({ where: conditions })
+      return await repo.findAll()
     } finally {
-      await db.destroy()
+      await db.close()
     }
   }
 
@@ -127,7 +127,7 @@ export class EdgeRuntimeDB {
       const repo = db.getRepository(table)
       return await repo.create(data)
     } finally {
-      await db.destroy()
+      await db.close()
     }
   }
 }

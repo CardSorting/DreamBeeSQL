@@ -4,6 +4,7 @@ import { SchemaInfo } from '../types'
 import { QueryParser, ParsedQuery } from './utils/query-parser'
 import { QueryCacheService } from './services/cache-service'
 import { MetricsCollector } from './services/metrics-collector'
+import { sql } from '../raw-builder/sql'
 
 export interface QueryOptimizationOptions {
   enableQueryCache: boolean
@@ -143,13 +144,14 @@ export class QueryOptimizer {
       const executionTime = performance.now() - startTime
       
       // Record error metrics
+      const errorMessage = error instanceof Error ? error.message : String(error)
       this.metricsCollector.recordQuery(query, executionTime, {
         table: context?.table,
         operation: context?.operation,
-        error: error.message
+        error: errorMessage
       })
 
-      this.logger.error(`Query optimization failed: ${error.message}`, { 
+      this.logger.error(`Query optimization failed: ${errorMessage}`, { 
         query, 
         executionTime 
       })
@@ -461,13 +463,24 @@ export class QueryOptimizer {
 
   /**
    * Execute a query with error handling
+   * Note: This creates a proper SQL query with parameters
    */
   private async executeQuery<T>(query: string, params: any[]): Promise<T> {
     try {
-      const result = await this.db.executeQuery({ sql: query, parameters: params })
+      // Split query by '?' placeholders and create template string array
+      const parts = query.split('?')
+      const templateStrings = Object.assign([...parts], { raw: [...parts] }) as TemplateStringsArray
+      
+      // Create SQL query using template tag syntax
+      const sqlQuery = sql<T>(templateStrings, ...params)
+      
+      // Compile the query first to match the expected interface
+      const compiledQuery = sqlQuery.compile(this.db)
+      const result = await this.db.executeQuery(compiledQuery)
       return result.rows as T
     } catch (error) {
-      this.logger.error(`Query execution failed: ${error.message}`, { query, params })
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      this.logger.error(`Query execution failed: ${errorMessage}`, { query, params })
       throw error
     }
   }
@@ -479,9 +492,13 @@ export class QueryOptimizer {
     const tableInfo = this.schemaInfo.tables.find(t => t.name === table)
     if (!tableInfo) return false
 
-    // Check if column has an index (simplified check)
-    return tableInfo.columns.some(col => 
-      col.name === column && (col.isPrimaryKey || col.isUnique)
+    // Check if column is primary key
+    const columnInfo = tableInfo.columns.find(col => col.name === column)
+    if (columnInfo?.isPrimaryKey) return true
+
+    // Check if column has an index
+    return tableInfo.indexes.some(idx => 
+      idx.columns.includes(column)
     )
   }
 }

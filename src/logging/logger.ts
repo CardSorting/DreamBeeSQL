@@ -16,15 +16,32 @@ export class Logger {
   private queryLogs: QueryLog[] = []
   private queryCount = 0
   private totalQueryTime = 0
+  private config: LoggingConfig
+  private namespace?: string
 
-  constructor(private config: LoggingConfig = {}) {}
+  constructor(configOrNamespace?: LoggingConfig | string) {
+    if (typeof configOrNamespace === 'string') {
+      this.namespace = configOrNamespace
+      this.config = { enabled: true, level: 'info' }
+    } else {
+      this.config = configOrNamespace || {}
+    }
+  }
+
+  /**
+   * Format namespace prefix
+   */
+  private getPrefix(level: string): string {
+    const prefix = this.namespace ? `[${this.namespace}]` : ''
+    return `[NOORMME ${level.toUpperCase()}]${prefix}`
+  }
 
   /**
    * Log debug message
    */
   debug(message: string, ...args: any[]): void {
     if (this.shouldLog('debug')) {
-      console.debug(`[NOORMME DEBUG] ${message}`, ...args)
+      console.debug(`${this.getPrefix('debug')} ${message}`, ...args)
     }
   }
 
@@ -33,7 +50,7 @@ export class Logger {
    */
   info(message: string, ...args: any[]): void {
     if (this.shouldLog('info')) {
-      console.info(`[NOORMME INFO] ${message}`, ...args)
+      console.info(`${this.getPrefix('info')} ${message}`, ...args)
     }
   }
 
@@ -42,7 +59,7 @@ export class Logger {
    */
   warn(message: string, ...args: any[]): void {
     if (this.shouldLog('warn')) {
-      console.warn(`[NOORMME WARN] ${message}`, ...args)
+      console.warn(`${this.getPrefix('warn')} ${message}`, ...args)
     }
   }
 
@@ -51,7 +68,7 @@ export class Logger {
    */
   error(message: string, ...args: any[]): void {
     if (this.shouldLog('error')) {
-      console.error(`[NOORMME ERROR] ${message}`, ...args)
+      console.error(`${this.getPrefix('error')} ${message}`, ...args)
     }
   }
 

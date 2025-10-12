@@ -37,7 +37,7 @@ export async function createTestDatabase(config: TestDatabaseConfig = {}): Promi
           password: ''
         },
         logging: {
-          enabled: false // Disable logging in tests by default
+          enabled: process.env.TEST_DEBUG === 'true' // Enable with TEST_DEBUG=true
         }
       }
       break
@@ -130,9 +130,11 @@ export async function setupTestSchema(db: NOORMME): Promise<void> {
  * Clean up test database
  */
 export async function cleanupTestDatabase(db: NOORMME): Promise<void> {
-  const kysely = db.getKysely()
+  if (!db) return
 
   try {
+    const kysely = db.getKysely()
+
     // Drop tables in reverse order to handle foreign keys
     await kysely.schema.dropTable('comments').ifExists().execute()
     await kysely.schema.dropTable('posts').ifExists().execute()
@@ -141,7 +143,11 @@ export async function cleanupTestDatabase(db: NOORMME): Promise<void> {
     // Ignore errors during cleanup
   }
 
-  await db.close()
+  try {
+    await db.close()
+  } catch (error) {
+    // Ignore close errors
+  }
 }
 
 /**

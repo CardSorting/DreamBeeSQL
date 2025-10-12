@@ -40,6 +40,7 @@ export class NOORMME {
   private initialized = false
   private repositories = new Map<string, Repository<any>>()
   private instanceId: string
+  private schemaChangeCallbacks: Array<(changes: SchemaChange[]) => void> = []
 
   constructor(configOrConnectionString?: NOORMConfig | string) {
     // Load .env if it exists
@@ -407,36 +408,44 @@ export class NOORMME {
   /**
    * Start monitoring schema changes in development mode
    */
-  startSchemaWatching(options?: WatchOptions): void {
+  async startSchemaWatching(options?: WatchOptions): Promise<void> {
     if (!this.initialized) {
       throw new NoormError('NOORMME must be initialized before starting schema watching')
     }
 
-    if (!this.schemaWatcher) {
-      this.schemaWatcher = new SchemaWatcher(
-        this.db,
-        this.schemaDiscovery,
-        this.logger,
-        options
-      )
-
-      // Auto-refresh schema when changes detected
-      this.schemaWatcher.onSchemaChange(async (changes) => {
-        this.logger.info(`Schema changes detected: ${changes.length} changes`)
-        changes.forEach(change => {
-          this.logger.info(`  - ${change.type}: ${change.table}`)
-        })
-
-        try {
-          await this.refreshSchema()
-          this.logger.info('Schema refreshed successfully')
-        } catch (error) {
-          this.logger.error('Failed to refresh schema:', error)
-        }
-      })
+    // If watcher already exists (e.g., from onSchemaChange), recreate it with new options
+    if (this.schemaWatcher) {
+      this.schemaWatcher.stopWatching()
     }
 
-    this.schemaWatcher.startWatching()
+    this.schemaWatcher = new SchemaWatcher(
+      this.db,
+      this.schemaDiscovery,
+      this.logger,
+      options
+    )
+
+    // Register all previously registered callbacks
+    for (const callback of this.schemaChangeCallbacks) {
+      this.schemaWatcher.onSchemaChange(callback)
+    }
+
+    // Auto-refresh schema when changes detected
+    this.schemaWatcher.onSchemaChange(async (changes) => {
+      this.logger.info(`Schema changes detected: ${changes.length} changes`)
+      changes.forEach(change => {
+        this.logger.info(`  - ${change.type}: ${change.table}`)
+      })
+
+      try {
+        await this.refreshSchema()
+        this.logger.info('Schema refreshed successfully')
+      } catch (error) {
+        this.logger.error('Failed to refresh schema:', error)
+      }
+    })
+
+    await this.schemaWatcher.startWatching()
   }
 
   /**
@@ -445,6 +454,7 @@ export class NOORMME {
   stopSchemaWatching(): void {
     if (this.schemaWatcher) {
       this.schemaWatcher.stopWatching()
+      // Don't set to null - keep watcher instance for potential restart
     }
   }
 
@@ -452,15 +462,13 @@ export class NOORMME {
    * Register callback for schema changes
    */
   onSchemaChange(callback: (changes: SchemaChange[]) => void): void {
-    if (!this.schemaWatcher) {
-      this.schemaWatcher = new SchemaWatcher(
-        this.db,
-        this.schemaDiscovery,
-        this.logger
-      )
-    }
+    // Store callback so it can be re-registered if watcher is recreated
+    this.schemaChangeCallbacks.push(callback)
 
-    this.schemaWatcher.onSchemaChange(callback)
+    // If watcher already exists, register callback immediately
+    if (this.schemaWatcher) {
+      this.schemaWatcher.onSchemaChange(callback)
+    }
   }
 
   /**

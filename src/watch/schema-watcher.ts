@@ -25,11 +25,13 @@ export class SchemaWatcher {
     private logger: Logger,
     private options: WatchOptions = {}
   ) {
+    // Merge options, giving priority to explicitly passed values
+    const defaultEnabled = process.env.NODE_ENV === 'development';
     this.options = {
       pollInterval: 5000,
       ignoreViews: true,
       ignoredTables: [],
-      enabled: process.env.NODE_ENV === 'development',
+      enabled: options.enabled !== undefined ? options.enabled : defaultEnabled,
       ...options
     };
   }
@@ -51,8 +53,14 @@ export class SchemaWatcher {
     this.logger.info('Starting schema change monitoring...');
 
     // Get initial schema snapshot
-    const initialSchema = await this.getCurrentSchema();
-    this.lastSchemaHash = this.hashSchema(initialSchema);
+    try {
+      const initialSchema = await this.getCurrentSchema();
+      this.lastSchemaHash = this.hashSchema(initialSchema);
+    } catch (error) {
+      this.logger.error('Failed to get initial schema snapshot:', error);
+      // Set a default hash to allow watching to continue
+      this.lastSchemaHash = '0';
+    }
 
     this.isWatching = true;
     this.intervalId = setInterval(() => {
@@ -61,6 +69,11 @@ export class SchemaWatcher {
       });
     }, this.options.pollInterval);
 
+    // Unref the interval to allow the process to exit
+    if (this.intervalId && typeof this.intervalId.unref === 'function') {
+      this.intervalId.unref();
+    }
+
     this.logger.info(`Schema watcher started (polling every ${this.options.pollInterval}ms)`);
   }
 
@@ -68,17 +81,17 @@ export class SchemaWatcher {
    * Stop watching for schema changes
    */
   stopWatching(): void {
-    if (!this.isWatching) {
-      return;
-    }
-
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
 
     this.isWatching = false;
-    this.logger.info('Schema watcher stopped');
+    this.callbacks = []; // Clear callbacks on stop
+    
+    if (this.logger) {
+      this.logger.info('Schema watcher stopped');
+    }
   }
 
   /**
@@ -106,6 +119,9 @@ export class SchemaWatcher {
       const currentSchema = await this.getCurrentSchema();
       const currentHash = this.hashSchema(currentSchema);
 
+      // Debug logging
+      this.logger.debug(`Schema check - Last hash: ${this.lastSchemaHash}, Current hash: ${currentHash}, Tables: ${currentSchema.tables.length}`);
+
       if (this.lastSchemaHash && currentHash !== this.lastSchemaHash) {
         this.logger.info('Schema changes detected, analyzing...');
 
@@ -121,6 +137,11 @@ export class SchemaWatcher {
         }
 
         return changes;
+      }
+
+      // Update hash even if no changes detected yet (for first check after initialization)
+      if (!this.lastSchemaHash) {
+        this.lastSchemaHash = currentHash;
       }
 
       return [];

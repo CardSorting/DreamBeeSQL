@@ -14,6 +14,10 @@ describe('Schema Watcher Integration', () => {
   })
 
   afterEach(async () => {
+    // Ensure schema watching is stopped before cleanup
+    if (db) {
+      db.stopSchemaWatching()
+    }
     await cleanupTestDatabase(db)
   })
 
@@ -37,7 +41,7 @@ describe('Schema Watcher Integration', () => {
         detectedChanges = changes
       })
 
-      db.startSchemaWatching({
+      await db.startSchemaWatching({
         pollInterval: 100, // Fast polling for tests
         enabled: true
       })
@@ -76,7 +80,7 @@ describe('Schema Watcher Integration', () => {
         changeCount++
       })
 
-      db.startSchemaWatching({
+      await db.startSchemaWatching({
         pollInterval: 50,
         enabled: true
       })
@@ -120,7 +124,7 @@ describe('Schema Watcher Integration', () => {
       const initialSchema = await db.getSchemaInfo()
       expect(initialSchema.tables.length).toBe(1)
 
-      db.startSchemaWatching({
+      await db.startSchemaWatching({
         pollInterval: 100,
         enabled: true
       })
@@ -160,7 +164,7 @@ describe('Schema Watcher Integration', () => {
       })
 
       // Start watching with disabled = true
-      db.startSchemaWatching({
+      await db.startSchemaWatching({
         enabled: false,
         pollInterval: 50
       })
@@ -195,7 +199,7 @@ describe('Schema Watcher Integration', () => {
         changeTimestamps.push(Date.now())
       })
 
-      db.startSchemaWatching({
+      await db.startSchemaWatching({
         pollInterval: 200, // 200ms interval
         enabled: true
       })
@@ -243,7 +247,7 @@ describe('Schema Watcher Integration', () => {
         changeDetected = true
       })
 
-      db.startSchemaWatching({
+      await db.startSchemaWatching({
         pollInterval: 100,
         enabled: true,
         ignoredTables: ['temp_table']
@@ -271,7 +275,7 @@ describe('Schema Watcher Integration', () => {
     it('should handle database connection errors gracefully', async () => {
       await db.initialize()
 
-      db.startSchemaWatching({
+      await db.startSchemaWatching({
         pollInterval: 100,
         enabled: true
       })
@@ -289,9 +293,9 @@ describe('Schema Watcher Integration', () => {
 
     it('should not start watching if not initialized', async () => {
       // Don't initialize the database
-      expect(() => {
-        db.startSchemaWatching()
-      }).toThrow('NOORMME must be initialized')
+      await expect(async () => {
+        await db.startSchemaWatching()
+      }).rejects.toThrow('NOORMME must be initialized')
     })
   })
 
@@ -316,7 +320,7 @@ describe('Schema Watcher Integration', () => {
         callback2Called = true
       })
 
-      db.startSchemaWatching({
+      await db.startSchemaWatching({
         pollInterval: 100,
         enabled: true
       })
@@ -349,19 +353,19 @@ describe('Schema Watcher Integration', () => {
 
       await db.initialize()
 
-      db.startSchemaWatching({
+      await db.startSchemaWatching({
         pollInterval: 50, // Aggressive polling
         enabled: true
       })
 
-      const repo = db.getRepository('performance_test')
-
       // Perform multiple database operations
       const { time } = await TestUtils.measureTime(async () => {
         for (let i = 0; i < 10; i++) {
-          await repo.create({ data: `test data ${i}` })
+          await kysely.insertInto('performance_test')
+            .values({ data: `test data ${i}` })
+            .execute()
         }
-        const results = await repo.findAll()
+        const results = await kysely.selectFrom('performance_test').selectAll().execute()
         expect(results.length).toBe(10)
       })
 

@@ -116,13 +116,15 @@ describe('Pagination', () => {
       const result = await userRepo.paginate({
         page: 1,
         limit: 10,
-        orderBy: { column: 'age', direction: 'asc' }
+        orderBy: { column: 'age' as any, direction: 'asc' }
       })
 
       // Check that results are ordered by age ascending
       for (let i = 1; i < result.data.length; i++) {
-        if (result.data[i-1].age && result.data[i].age) {
-          expect(result.data[i-1].age).toBeLessThanOrEqual(result.data[i].age)
+        const prev = result.data[i-1] as any
+        const current = result.data[i] as any
+        if (prev.age && current.age) {
+          expect(prev.age).toBeLessThanOrEqual(current.age)
         }
       }
     })
@@ -137,13 +139,15 @@ describe('Pagination', () => {
       const result = await userRepo.paginate({
         page: 1,
         limit: 10,
-        orderBy: { column: 'age', direction: 'desc' }
+        orderBy: { column: 'age' as any, direction: 'desc' }
       })
 
       // Check that results are ordered by age descending
       for (let i = 1; i < result.data.length; i++) {
-        if (result.data[i-1].age && result.data[i].age) {
-          expect(result.data[i-1].age).toBeGreaterThanOrEqual(result.data[i].age)
+        const prev = result.data[i-1] as any
+        const current = result.data[i] as any
+        if (prev.age && current.age) {
+          expect(prev.age).toBeGreaterThanOrEqual(current.age)
         }
       }
     })
@@ -161,7 +165,7 @@ describe('Pagination', () => {
         page: 1,
         limit: 10,
         where: { active: true },
-        orderBy: { column: 'age', direction: 'desc' }
+        orderBy: { column: 'age' as any, direction: 'desc' }
       })
 
       expect(result.pagination.total).toBe(10) // Only active users
@@ -169,8 +173,10 @@ describe('Pagination', () => {
 
       // Check ordering
       for (let i = 1; i < result.data.length; i++) {
-        if (result.data[i-1].age && result.data[i].age) {
-          expect(result.data[i-1].age).toBeGreaterThanOrEqual(result.data[i].age)
+        const prev = result.data[i-1] as any
+        const current = result.data[i] as any
+        if (prev.age && current.age) {
+          expect(prev.age).toBeGreaterThanOrEqual(current.age)
         }
       }
     })

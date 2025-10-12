@@ -19,8 +19,8 @@ describe('Error Messages', () => {
       const userRepo = db.getRepository('users')
 
       try {
-        // Intentionally use wrong column name
-        await userRepo.findByEmai('test@example.com') // Should be 'email'
+        // Intentionally use wrong column name - use type assertion to bypass TypeScript check
+        await (userRepo as any).findByEmai('test@example.com') // Should be 'email'
         expect(true).toBe(false) // Should not reach here
       } catch (error) {
         expect(error).toBeInstanceOf(ColumnNotFoundError)
@@ -36,7 +36,7 @@ describe('Error Messages', () => {
       const userRepo = db.getRepository('users')
 
       try {
-        await userRepo.findByInvalidColumn('test')
+        await (userRepo as any).findByInvalidColumn('test')
         expect(true).toBe(false) // Should not reach here
       } catch (error) {
         expect(error).toBeInstanceOf(ColumnNotFoundError)
@@ -53,7 +53,7 @@ describe('Error Messages', () => {
       const userRepo = db.getRepository('users')
 
       try {
-        await userRepo.findByInvalidColumn('test')
+        await (userRepo as any).findByInvalidColumn('test')
         expect(true).toBe(false)
       } catch (error) {
         const noormError = error as ColumnNotFoundError
@@ -101,7 +101,7 @@ describe('Error Messages', () => {
       const userRepo = db.getRepository('users')
 
       try {
-        await userRepo.findByInvalidColumn('test')
+        await (userRepo as any).findByInvalidColumn('test')
         expect(true).toBe(false)
       } catch (error) {
         const noormError = error as ColumnNotFoundError

@@ -116,7 +116,7 @@ describe('Pagination', () => {
       const result = await userRepo.paginate({
         page: 1,
         limit: 10,
-        orderBy: { column: 'age' as any, direction: 'asc' }
+        orderBy: { column: 'age', direction: 'asc' } as any
       })
 
       // Check that results are ordered by age ascending
@@ -139,7 +139,7 @@ describe('Pagination', () => {
       const result = await userRepo.paginate({
         page: 1,
         limit: 10,
-        orderBy: { column: 'age' as any, direction: 'desc' }
+        orderBy: { column: 'age', direction: 'desc' } as any
       })
 
       // Check that results are ordered by age descending
@@ -165,7 +165,7 @@ describe('Pagination', () => {
         page: 1,
         limit: 10,
         where: { active: true },
-        orderBy: { column: 'age' as any, direction: 'desc' }
+        orderBy: { column: 'age', direction: 'desc' } as any
       })
 
       expect(result.pagination.total).toBe(10) // Only active users

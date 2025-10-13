@@ -132,9 +132,10 @@ export class SQLiteConstraintDiscovery {
       return (result.rows || []).map((row: any) => ({
         name: `${tableName}_fk_${row.column}`,
         type: 'f',
-        column: row.column,
+        column: row.column || row.from,
         referencedTable: row.table,
-        referencedColumn: row.to,
+        // If 'to' is null/undefined, the FK references the primary key (default to 'id')
+        referencedColumn: row.to || 'id',
         onDelete: row.on_delete || 'NO ACTION',
         onUpdate: row.on_update || 'NO ACTION'
       }))

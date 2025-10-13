@@ -123,7 +123,60 @@ export async function setupTestSchema(db: NOORMME): Promise<void> {
     .execute()
 
   // Initialize NOORMME to discover the schema
-  await db.initialize()
+  // Temporarily enable warnings to see discovery errors
+  const originalWarn = console.warn
+  let discoveryError: any = null
+  console.warn = (...args: any[]) => {
+    if (args[0]?.includes?.('Schema discovery failed')) {
+      discoveryError = args
+      console.error('[DISCOVERY ERROR]', ...args)
+    }
+    originalWarn(...args)
+  }
+  
+  try {
+    await db.initialize()
+  } catch (error) {
+    console.error('NOORMME initialization error:', error)
+    throw new Error(`Test setup failed during initialization: ${error}`)
+  } finally {
+    console.warn = originalWarn
+  }
+  
+  // Verify schema was discovered
+  const schemaInfo = await db.getSchemaInfo()
+  
+  if (schemaInfo.tables.length === 0) {
+    // Try to manually check if tables exist
+    let actualTables: any[] = []
+    try {
+      actualTables = await kysely.selectFrom('sqlite_master')
+        .select(['name', 'type'])
+        .where('type', '=', 'table')
+        .where('name', 'not like', 'sqlite_%')
+        .execute()
+    } catch (e) {
+      console.error('[DEBUG] Failed to query sqlite_master:', e)
+    }
+    
+    throw new Error(
+      `Test setup failed: Schema discovery returned no tables but ${actualTables.length} tables exist in database (${actualTables.map((t: any) => t.name).join(', ')}). ` +
+      `Discovery error: ${discoveryError ? discoveryError.join(' ') : 'Unknown'}`
+    )
+  }
+  
+  // Verify expected tables exist
+  const tableNames = schemaInfo.tables.map(t => t.name)
+  const expectedTables = ['users', 'posts', 'comments']
+  const missingTables = expectedTables.filter(t => !tableNames.includes(t))
+  
+  if (missingTables.length > 0) {
+    throw new Error(
+      `Test setup failed: Missing tables: ${missingTables.join(', ')}. ` +
+      `Found tables: ${tableNames.join(', ')}. ` +
+      `Expected: ${expectedTables.join(', ')}`
+    )
+  }
 }
 
 /**

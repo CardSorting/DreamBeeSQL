@@ -14,7 +14,7 @@ const mockKysely = {
 } as any
 
 // Mock DatabaseIntrospector
-jest.mock('../../../dialect/database-introspector.js', () => ({
+jest.mock('../../dialect/database-introspector.js', () => ({
   DatabaseIntrospector: jest.fn().mockImplementation(() => ({
     getTables: jest.fn(),
     getTableMetadata: jest.fn(),

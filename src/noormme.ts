@@ -145,6 +145,12 @@ export class NOORMME {
         schemaInfo = await this.schemaDiscovery.discoverSchema()
         this.logger.info(`Discovered ${schemaInfo.tables.length} tables`)
       } catch (error) {
+        // In test mode, throw the error instead of silently continuing
+        if (process.env.NODE_ENV === 'test') {
+          this.logger.error('Schema discovery failed in test mode:', error)
+          throw new Error(`Schema discovery failed: ${error instanceof Error ? error.message : String(error)}`)
+        }
+        
         this.logger.warn('Schema discovery failed, using empty schema:', error)
         // Create empty schema info if discovery fails
         schemaInfo = {

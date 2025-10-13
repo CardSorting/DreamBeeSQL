@@ -40,7 +40,10 @@ jest.mock('../core/discovery/view-discovery.js', () => ({
 jest.mock('../dialects/sqlite/discovery/sqlite-index-discovery.js', () => ({
   SQLiteIndexDiscovery: {
     getInstance: jest.fn().mockReturnValue({
-      discoverIndexes: jest.fn().mockResolvedValue([])
+      discoverIndexes: jest.fn().mockResolvedValue([]),
+      discoverTableIndexes: jest.fn().mockResolvedValue([]),
+      getTableSize: jest.fn().mockResolvedValue({ pages: 0, size: 0, estimatedRows: 0 }),
+      analyzeIndexEfficiency: jest.fn().mockReturnValue({ recommendations: [] })
     })
   }
 }))
@@ -48,7 +51,11 @@ jest.mock('../dialects/sqlite/discovery/sqlite-index-discovery.js', () => ({
 jest.mock('../dialects/sqlite/discovery/sqlite-constraint-discovery.js', () => ({
   SQLiteConstraintDiscovery: {
     getInstance: jest.fn().mockReturnValue({
-      discoverConstraints: jest.fn().mockResolvedValue([])
+      discoverConstraints: jest.fn().mockResolvedValue([]),
+      isForeignKeySupportEnabled: jest.fn().mockResolvedValue(true),
+      getForeignKeyInfo: jest.fn().mockResolvedValue([]),
+      discoverTableConstraints: jest.fn().mockResolvedValue([]),
+      analyzeConstraintCompatibility: jest.fn().mockReturnValue({ recommendations: [], compatibilityIssues: [] })
     })
   }
 }))

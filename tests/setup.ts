@@ -22,9 +22,9 @@ const originalConsole = { ...console }
 
 beforeEach(() => {
   // Reset console mocks before each test
+  // Note: We don't mock console.error to allow error visibility in tests
   console.log = jest.fn()
   console.warn = jest.fn()
-  console.error = jest.fn()
   console.info = jest.fn()
 })
 

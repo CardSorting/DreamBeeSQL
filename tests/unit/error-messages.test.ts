@@ -83,9 +83,17 @@ describe('Error Messages', () => {
   describe('Relationship Not Found Errors', () => {
     it('should suggest available relationships', async () => {
       const userRepo = db.getRepository('users')
+      
+      // Create a user first so entity exists for relationship validation
+      const user = await userRepo.create({
+        name: 'Test User',
+        email: 'relationship-test@example.com',
+        age: 30,
+        active: true
+      }) as any
 
       try {
-        await userRepo.withCount(1, ['invalid_relationship'])
+        await userRepo.withCount(user.id, ['invalid_relationship'])
         expect(true).toBe(false)
       } catch (error) {
         expect(error).toBeInstanceOf(RelationshipNotFoundError)
@@ -107,7 +115,7 @@ describe('Error Messages', () => {
         const noormError = error as ColumnNotFoundError
         const json = noormError.toJSON()
 
-        expect(json.name).toBe('NoormError')
+        expect(json.name).toBe('ColumnNotFoundError')
         expect(json.message).toBeDefined()
         expect(json.context).toBeDefined()
         expect(json.context.table).toBe('users')

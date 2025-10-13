@@ -1,6 +1,6 @@
 import type { Kysely } from '../kysely.js'
 import type { Repository, TableInfo, RelationshipInfo } from '../types/index.js'
-import { RelationshipNotFoundError } from '../errors/NoormError.js'
+import { RelationshipNotFoundError, ColumnNotFoundError } from '../errors/NoormError.js'
 
 /**
  * Simple repository factory for creating table repositories
@@ -56,7 +56,7 @@ export class RepositoryFactory {
     // Determine the primary key column name
     const primaryKey = table.columns.find(c => c.isPrimaryKey)?.name || 'id'
 
-    return {
+    const repository = {
       // Django-style objects wrapper
       objects: {
         all: async () => {
@@ -348,7 +348,79 @@ export class RepositoryFactory {
         
         return { ...entity, ...counts } as T & Record<string, number>
       }
-    } as Repository<T>
+    }
+    
+    // Wrap repository in Proxy to handle dynamic method calls like findByXxx
+    return this.wrapWithDynamicMethods(repository as Repository<T>, table)
+  }
+  
+  /**
+   * Wrap repository with Proxy to handle dynamic method calls
+   */
+  private wrapWithDynamicMethods<T>(
+    repository: Repository<T>,
+    table: TableInfo
+  ): Repository<T> {
+    const availableColumns = table.columns.map(c => c.name)
+    const db = this.db
+    const transformBooleans = this.transformBooleans.bind(this)
+    
+    return new Proxy(repository, {
+      get(target, prop, receiver) {
+        // Check if property exists on target
+        if (prop in target) {
+          return Reflect.get(target, prop, receiver)
+        }
+        
+        // Handle dynamic findByXxx methods
+        if (typeof prop === 'string' && prop.startsWith('findBy')) {
+          return async (value: any) => {
+            // Extract column name from method name
+            // findByEmail -> Email -> email
+            // findByInvalidColumn -> InvalidColumn -> invalid_column
+            const columnNameRaw = prop.substring(6) // Remove 'findBy'
+            
+            // Convert from PascalCase to snake_case
+            // Handle both camelCase and PascalCase
+            let columnName = columnNameRaw
+              // Insert underscore before uppercase letters that follow lowercase
+              .replace(/([a-z])([A-Z])/g, '$1_$2')
+              // Insert underscore before uppercase letters that follow numbers
+              .replace(/([0-9])([A-Z])/g, '$1_$2')
+              // Convert to lowercase
+              .toLowerCase()
+            
+            // Check if column exists (case-insensitive)
+            const columnExists = availableColumns.some(
+              col => col.toLowerCase() === columnName.toLowerCase()
+            )
+            
+            if (!columnExists) {
+              throw new ColumnNotFoundError(
+                columnName,
+                table.name,
+                availableColumns
+              )
+            }
+            
+            // Execute query with the valid column
+            const actualColumn = availableColumns.find(
+              col => col.toLowerCase() === columnName.toLowerCase()
+            )!
+            
+            const result = await db
+              .selectFrom(table.name as any)
+              .selectAll()
+              .where(actualColumn as any, '=', value)
+              .executeTakeFirst()
+            
+            return transformBooleans(result || null, table)
+          }
+        }
+        
+        return undefined
+      }
+    }) as Repository<T>
   }
 }
 

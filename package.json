@@ -1,6 +1,6 @@
 {
   "name": "noormme",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "NOORMME - The NO-ORM for Normies. SQLite automation so simple, even normies can use it.",
   "repository": {
     "type": "git",

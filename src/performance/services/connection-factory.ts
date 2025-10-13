@@ -1,6 +1,6 @@
 import { NOORMME } from '../../noormme'
 import { NOORMConfig } from '../../types'
-import { Logger } from '../../logging/logger'
+import { Logger } from '../../logging/logger.js'
 
 export interface ConnectionConfig extends NOORMConfig {
   id?: string

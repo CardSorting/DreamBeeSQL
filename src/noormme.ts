@@ -1,4 +1,4 @@
-import type { Kysely } from './kysely.js'
+import { Kysely } from './kysely.js'
 import type { Dialect } from './dialect/dialect.js'
 import { DatabaseIntrospector } from './dialect/database-introspector.js'
 import { SchemaDiscovery } from './schema/schema-discovery.js'
@@ -15,6 +15,9 @@ import { MetricsCollector } from './performance/services/metrics-collector.js'
 import { SQLiteAutoOptimizer } from './dialect/sqlite/sqlite-auto-optimizer.js'
 import { SQLiteAutoIndexer } from './dialect/sqlite/sqlite-auto-indexer.js'
 import { SqliteDialect } from './dialect/sqlite/sqlite-dialect.js'
+import { sql as rawSql } from './raw-builder/sql.js'
+import Database from 'better-sqlite3'
+import { CompiledQuery } from './query-compiler/compiled-query.js'
 
 // Global initialization lock to prevent concurrent initialization
 const globalInitLock = new Map<string, Promise<void>>()
@@ -76,7 +79,7 @@ export class NOORMME {
     
     // Initialize Kysely with the provided dialect
     this.dialect = this.createDialect()
-    this.db = new (require('./kysely.js').Kysely)({
+    this.db = new Kysely({
       dialect: this.dialect,
       log: this.config.logging?.enabled ? this.logger.createKyselyLogger() : undefined
     })
@@ -578,11 +581,9 @@ export class NOORMME {
   /**
    * Execute raw SQL
    */
-  async execute(sql: string, parameters?: unknown[]): Promise<unknown> {
-    const { sql: rawSql } = require('./raw-builder/sql.js')
-    return await this.db.executeQuery(
-      rawSql(sql, parameters || [])
-    )
+  async execute(sqlString: string, parameters?: unknown[]): Promise<unknown> {
+    const compiledQuery = CompiledQuery.raw(sqlString, parameters || [])
+    return await this.db.executeQuery(compiledQuery)
   }
 
   private mergeConfig(config: NOORMConfig): NOORMConfig {
@@ -687,7 +688,6 @@ export class NOORMME {
     
     switch (dialect) {
       case 'sqlite':
-        const Database = require('better-sqlite3')
         return new SqliteDialect({
           database: new Database(connection.database)
         })

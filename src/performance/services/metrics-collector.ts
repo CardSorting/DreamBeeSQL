@@ -1,4 +1,4 @@
-import { Logger } from '../../logging/logger'
+import { Logger } from '../../logging/logger.js'
 
 export interface QueryMetrics {
   query: string

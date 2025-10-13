@@ -1,5 +1,5 @@
 import { Kysely } from '../kysely'
-import { Logger } from '../logging/logger'
+import { Logger } from '../logging/logger.js'
 import { SchemaInfo } from '../types'
 import { QueryParser, ParsedQuery } from './utils/query-parser'
 import { QueryCacheService } from './services/cache-service'

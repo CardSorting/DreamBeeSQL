@@ -68,8 +68,12 @@ export class NoormError extends Error {
  */
 export class TableNotFoundError extends NoormError {
   constructor(tableName: string, availableTables: string[] = []) {
+    const message = availableTables.length > 0
+      ? `Table '${tableName}' not found. Available tables: ${availableTables.join(', ')}`
+      : `Table '${tableName}' not found. Check your table name or run schema discovery.`
+    
     super(
-      `Table '${tableName}' not found`,
+      message,
       {
         table: tableName,
         operation: 'table_lookup',

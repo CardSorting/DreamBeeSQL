@@ -155,10 +155,18 @@ describe('Schema Strategy Integration Tests', () => {
     })
 
     it('should handle discovery errors gracefully', async () => {
+      // Import the mocked module to override its behavior for this test
+      const { TableMetadataDiscovery } = await import('../core/discovery/table-metadata-discovery.js')
+      const mockTableDiscovery = (TableMetadataDiscovery as any).getInstance()
+      
+      // Make the mock throw an error for this test
+      mockTableDiscovery.discoverTables.mockRejectedValueOnce(new Error('Database error'))
+      
       const mockKyselyWithError = {
-        selectFrom: jest.fn().mockImplementation(() => {
-          throw new Error('Database error')
-        })
+        selectFrom: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue([])
       }
 
       await expect(

@@ -8,7 +8,7 @@ import { RelationshipEngine } from './relationships/relationship-engine.js'
 import { CacheManager } from './cache/cache-manager.js'
 import { Logger } from './logging/logger.js'
 import { NOORMConfig, SchemaInfo, Repository, RelationshipInfo, SchemaChange } from './types/index.js'
-import { NoormError } from './errors/NoormError.js'
+import { NoormError, TableNotFoundError } from './errors/NoormError.js'
 import { config as loadDotenv } from 'dotenv'
 import { SchemaWatcher, WatchOptions } from './watch/schema-watcher.js'
 import { MetricsCollector } from './performance/services/metrics-collector.js'
@@ -345,7 +345,8 @@ export class NOORMME {
 
     const table = schemaInfo.tables.find(t => t.name === tableName)
     if (!table) {
-      throw new Error(`Table '${tableName}' not found in schema. Available tables: ${schemaInfo.tables.map(t => t.name).join(', ')}`)
+      const availableTables = schemaInfo.tables.map(t => t.name)
+      throw new TableNotFoundError(tableName, availableTables)
     }
 
     const repository = this.repositoryFactory.createRepository<T>(table, schemaInfo.relationships)

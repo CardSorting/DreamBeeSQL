@@ -55,23 +55,17 @@ export class DatabaseIntrospector {
    * Get all tables in the database
    */
   async getTables(): Promise<TableMetadata[]> {
-    try {
-      // SQLite
-      const sqliteTables = await this.db
-        .selectFrom('sqlite_master')
-        .select('name')
-        .where('type', '=', 'table')
-        .where('name', 'not like', 'sqlite_%')
-        .execute()
+    // SQLite
+    const sqliteTables = await this.db
+      .selectFrom('sqlite_master')
+      .select('name')
+      .where('type', '=', 'table')
+      .where('name', 'not like', 'sqlite_%')
+      .execute()
 
-      return sqliteTables.map(t => ({
-        name: t.name
-      }))
-    } catch (error) {
-      console.warn('SQLite table discovery failed:', error)
-      // Return empty array instead of throwing for empty databases
-      return []
-    }
+    return sqliteTables.map(t => ({
+      name: t.name
+    }))
   }
 
   /**

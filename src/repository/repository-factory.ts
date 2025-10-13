@@ -1,5 +1,6 @@
 import type { Kysely } from '../kysely.js'
 import type { Repository, TableInfo, RelationshipInfo } from '../types/index.js'
+import { RelationshipNotFoundError } from '../errors/NoormError.js'
 
 /**
  * Simple repository factory for creating table repositories
@@ -9,6 +10,41 @@ export class RepositoryFactory {
     private db: Kysely<any>,
     private performanceConfig?: any
   ) {}
+
+  /**
+   * Transform boolean columns from SQLite integers (0/1) to JavaScript booleans
+   */
+  private transformBooleans<T>(data: T | T[], table: TableInfo): T | T[] {
+    // Find all boolean columns
+    const booleanColumns = table.columns
+      .filter(col => col.type === 'boolean')
+      .map(col => col.name)
+    
+    if (booleanColumns.length === 0) {
+      return data
+    }
+    
+    const transformRecord = (record: any): any => {
+      if (!record || typeof record !== 'object') {
+        return record
+      }
+      
+      const transformed = { ...record }
+      for (const col of booleanColumns) {
+        if (col in transformed) {
+          // Convert 0/1 to false/true
+          transformed[col] = Boolean(transformed[col])
+        }
+      }
+      return transformed
+    }
+    
+    if (Array.isArray(data)) {
+      return data.map(transformRecord) as T[]
+    }
+    
+    return transformRecord(data) as T
+  }
 
   /**
    * Create a repository for the specified table
@@ -66,14 +102,17 @@ export class RepositoryFactory {
           .selectAll()
           .where(primaryKey as any, '=', id)
           .executeTakeFirst()
-        return (result as T | undefined) ?? null
+        
+        return (result ? this.transformBooleans(result, table) : null) as T | null
       },
 
       findAll: async () => {
-        return await this.db
+        const results = await this.db
           .selectFrom(table.name as any)
           .selectAll()
-          .execute() as T[]
+          .execute()
+        
+        return this.transformBooleans(results, table) as T[]
       },
 
       create: async (data: Partial<T>) => {
@@ -195,9 +234,10 @@ export class RepositoryFactory {
         const data = await query.execute()
         
         const totalPages = Math.ceil(total / options.limit)
+        const transformedData = this.transformBooleans(data, table) as T[]
         
         return {
-          data: data as T[],
+          data: transformedData,
           pagination: {
             page: options.page,
             limit: options.limit,
@@ -230,20 +270,36 @@ export class RepositoryFactory {
 
       withCount: async (id: string | number, relationshipNames: string[]) => {
         // Fetch the base entity
-        const entity = await this.db
+        const rawEntity = await this.db
           .selectFrom(table.name as any)
           .selectAll()
           .where(primaryKey as any, '=', id)
           .executeTakeFirst()
         
-        if (!entity) {
+        if (!rawEntity) {
           throw new Error(
             `Entity with ${primaryKey}=${id} not found in table ${table.name}`
           )
         }
         
+        // Transform booleans in the entity
+        const entity = this.transformBooleans(rawEntity, table) as any
+        
         // Filter relationships to only those from this table
         const tableRelationships = relationships.filter(r => r.fromTable === table.name)
+        const availableRelationshipNames = tableRelationships.map(r => r.name)
+        
+        // Validate all relationships exist before executing queries
+        for (const relationshipName of relationshipNames) {
+          const relationship = tableRelationships.find(r => r.name === relationshipName)
+          if (!relationship) {
+            throw new RelationshipNotFoundError(
+              relationshipName,
+              table.name,
+              availableRelationshipNames
+            )
+          }
+        }
         
         // Create counts object for each relationship
         const counts: Record<string, number> = {}
@@ -260,17 +316,33 @@ export class RepositoryFactory {
             // Example: For user.posts, count posts where posts.user_id = user.id
             const entityKeyValue = (entity as any)[relationship.fromColumn]
             
-            const relatedCount = await this.db
-              .selectFrom(relationship.toTable as any)
-              .select((eb: any) => eb.fn.countAll().as('count'))
-              .where(relationship.toColumn as any, '=', entityKeyValue)
-              .executeTakeFirst()
-            
-            // Use camelCase format for count property (e.g., "posts" -> "postsCount")
-            counts[`${relationshipName}Count`] = Number((relatedCount as any)?.count || 0)
-          } else {
-            // If relationship not found, default to 0
-            counts[`${relationshipName}Count`] = 0
+            // Only count if the foreign key value is not NULL
+            if (entityKeyValue != null) {
+              // Build query to count related records
+              let countQuery = this.db
+                .selectFrom(relationship.toTable as any)
+                .select((eb: any) => eb.fn.countAll().as('count'))
+                .where(relationship.toColumn as any, '=', entityKeyValue)
+              
+              // Find the related table's foreign keys to exclude orphaned records
+              // Get all relationships FROM the target table to find its foreign keys
+              const targetTableInfo = relationships
+                .filter(r => r.fromTable === relationship.toTable)
+                .map(r => r.fromColumn)
+              
+              // Exclude records where any foreign key is NULL (orphaned records)
+              for (const fkColumn of targetTableInfo) {
+                countQuery = countQuery.where(fkColumn as any, 'is not', null)
+              }
+              
+              const relatedCount = await countQuery.executeTakeFirst()
+              
+              // Use camelCase format for count property (e.g., "posts" -> "postsCount")
+              counts[`${relationshipName}Count`] = Number((relatedCount as any)?.count || 0)
+            } else {
+              // If the foreign key is NULL, count is 0
+              counts[`${relationshipName}Count`] = 0
+            }
           }
         }
         

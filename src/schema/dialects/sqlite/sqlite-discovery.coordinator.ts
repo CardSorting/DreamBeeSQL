@@ -129,7 +129,13 @@ export class SQLiteDiscoveryCoordinator {
         })
       } catch (error) {
         console.warn(`Failed to enhance SQLite metadata for table ${table.name}:`, error)
-        enhancedTables.push(table)
+        enhancedTables.push({
+          ...table,
+          indexes: [],
+          constraints: [],
+          foreignKeys: [],
+          tableSize: undefined
+        })
       }
     }
 
@@ -144,7 +150,7 @@ export class SQLiteDiscoveryCoordinator {
       supportsViews: true,
       supportsIndexes: true,
       supportsConstraints: true,
-      supportsForeignKeys: false, // Depends on PRAGMA foreign_keys setting
+      supportsForeignKeys: true, // SQLite supports FK (requires PRAGMA foreign_keys = ON)
       supportsCheckConstraints: true,
       supportsDeferredConstraints: false,
       supportsPartialIndexes: true,
@@ -155,7 +161,9 @@ export class SQLiteDiscoveryCoordinator {
       supportsExtensions: false,
       supportsPRAGMA: true,
       supportsAutoIncrement: true,
-      supportsRowId: true
+      supportsRowId: true,
+      supportsTriggers: true,
+      supportsFullTextSearch: true
     }
   }
 
@@ -166,8 +174,13 @@ export class SQLiteDiscoveryCoordinator {
     const recommendations: string[] = []
 
     // Check foreign key support
-    const fkEnabled = await this.constraintDiscovery.isForeignKeySupportEnabled(db)
-    if (!fkEnabled) {
+    try {
+      const fkEnabled = await this.constraintDiscovery.isForeignKeySupportEnabled(db)
+      if (!fkEnabled) {
+        recommendations.push('Consider enabling foreign key support with PRAGMA foreign_keys = ON for better data integrity')
+      }
+    } catch (error) {
+      // If checking FK support fails, still provide the recommendation
       recommendations.push('Consider enabling foreign key support with PRAGMA foreign_keys = ON for better data integrity')
     }
 

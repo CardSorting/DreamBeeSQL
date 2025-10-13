@@ -11,7 +11,7 @@ import { DiscoveryFactory } from '../factories/discovery-factory.js'
 export class SchemaDiscoveryCoordinator {
   private static instance: SchemaDiscoveryCoordinator
   private factory: DiscoveryFactory
-  private currentDialect: string = ''
+  private currentDialect: string = 'sqlite'
 
   private constructor() {
     this.factory = DiscoveryFactory.getInstance()
@@ -32,13 +32,15 @@ export class SchemaDiscoveryCoordinator {
     config: IntrospectionConfig = {},
     dialect?: Dialect
   ): Promise<SchemaInfo> {
-    // Determine the dialect
-    const dialectName = (dialect as any)?.name || 'sqlite'
+    // Determine the dialect - handle both string and dialect objects
+    const dialectName = typeof dialect === 'string' 
+      ? dialect 
+      : (dialect as any)?.name || 'sqlite'
     this.currentDialect = dialectName
 
     // Check if dialect is supported
     if (!this.factory.isDialectSupported(dialectName)) {
-      throw new Error(`Unsupported database dialect: ${dialectName}`)
+      throw new Error(`Unsupported dialect: ${dialectName}`)
     }
 
     // Create dialect-specific discovery coordinator

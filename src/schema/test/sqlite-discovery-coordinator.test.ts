@@ -145,7 +145,7 @@ describe('SQLiteDiscoveryCoordinator', () => {
       discoverTableConstraints: jest.fn().mockResolvedValue(mockConstraintData),
       getForeignKeyInfo: jest.fn().mockResolvedValue(mockForeignKeyData),
       analyzeConstraintCompatibility: jest.fn().mockReturnValue({
-        recommendations: ['Consider enabling foreign key constraints for data integrity']
+        recommendations: ['Consider optimizing constraint definitions']
       })
     } as any
 
@@ -274,7 +274,7 @@ describe('SQLiteDiscoveryCoordinator', () => {
         supportsViews: true,
         supportsIndexes: true,
         supportsConstraints: true,
-        supportsForeignKeys: false, // Depends on PRAGMA setting
+        supportsForeignKeys: true, // SQLite supports FK (requires PRAGMA foreign_keys = ON)
         supportsCheckConstraints: true,
         supportsDeferredConstraints: false,
         supportsPartialIndexes: true,
@@ -285,13 +285,16 @@ describe('SQLiteDiscoveryCoordinator', () => {
         supportsExtensions: false,
         supportsPRAGMA: true,
         supportsAutoIncrement: true,
-        supportsRowId: true
+        supportsRowId: true,
+        supportsTriggers: true,
+        supportsFullTextSearch: true
       })
     })
   })
 
   describe('Recommendations', () => {
     it('should provide SQLite-specific recommendations', async () => {
+      mockConstraintDiscovery.isForeignKeySupportEnabled.mockResolvedValue(false)
       const tables = [
         { name: 'users', primaryKey: ['id'], indexes: [], foreignKeys: [] },
         { name: 'posts', primaryKey: ['id'], indexes: [], foreignKeys: [] }
@@ -331,6 +334,7 @@ describe('SQLiteDiscoveryCoordinator', () => {
     })
 
     it('should handle recommendation errors gracefully', async () => {
+      mockConstraintDiscovery.isForeignKeySupportEnabled.mockResolvedValue(false)
       mockIndexDiscovery.discoverTableIndexes.mockRejectedValue(new Error('Index analysis failed'))
       const tables = [{ name: 'users', primaryKey: ['id'], indexes: [], foreignKeys: [] }]
 

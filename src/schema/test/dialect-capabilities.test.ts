@@ -98,7 +98,13 @@ describe('Dialect Capabilities', () => {
           supportsDeferredConstraints: false,
           supportsPartialIndexes: true,
           supportsExpressionIndexes: true,
+          supportsConcurrentIndexCreation: false,
           supportsMaterializedViews: false,
+          supportsCustomTypes: false,
+          supportsExtensions: false,
+          supportsPRAGMA: true,
+          supportsAutoIncrement: true,
+          supportsRowId: true,
           supportsTriggers: true,
           supportsFullTextSearch: true
         })

@@ -45,7 +45,7 @@ export class DiscoveryFactory {
    * Create index discovery service based on dialect
    */
   createIndexDiscovery(dialect: string): SQLiteIndexDiscovery {
-    switch (dialect.toLowerCase()) {
+    switch (dialect.trim().toLowerCase()) {
       case 'sqlite':
         return SQLiteIndexDiscovery.getInstance()
       default:
@@ -57,7 +57,7 @@ export class DiscoveryFactory {
    * Create constraint discovery service based on dialect
    */
   createConstraintDiscovery(dialect: string): SQLiteConstraintDiscovery {
-    switch (dialect.toLowerCase()) {
+    switch (dialect.trim().toLowerCase()) {
       case 'sqlite':
         return SQLiteConstraintDiscovery.getInstance()
       default:
@@ -69,7 +69,7 @@ export class DiscoveryFactory {
    * Create dialect-specific discovery coordinator
    */
   createDiscoveryCoordinator(dialect: string): SQLiteDiscoveryCoordinator {
-    switch (dialect.toLowerCase()) {
+    switch (dialect.trim().toLowerCase()) {
       case 'sqlite':
         return SQLiteDiscoveryCoordinator.getInstance()
       default:
@@ -107,7 +107,7 @@ export class DiscoveryFactory {
    * Check if a dialect is supported
    */
   isDialectSupported(dialect: string): boolean {
-    return this.getSupportedDialects().includes(dialect.toLowerCase())
+    return this.getSupportedDialects().includes(dialect.trim().toLowerCase())
   }
 
   /**
@@ -121,7 +121,7 @@ export class DiscoveryFactory {
     supportsCheckConstraints: boolean
     supportsDeferredConstraints: boolean
   } {
-    switch (dialect.toLowerCase()) {
+    switch (dialect.trim().toLowerCase()) {
       case 'sqlite':
         return {
           supportsViews: true,

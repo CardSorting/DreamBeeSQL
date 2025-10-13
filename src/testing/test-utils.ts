@@ -207,7 +207,17 @@ export async function cleanupTestDatabase(db: NOORMME): Promise<void> {
  * Test data factory
  */
 export class TestDataFactory {
+  private static emailCounter = 0
+
   constructor(private db: NOORMME) {}
+
+  /**
+   * Generate a unique email address
+   */
+  private generateUniqueEmail(): string {
+    TestDataFactory.emailCounter++
+    return `test${Date.now()}_${TestDataFactory.emailCounter}_${Math.random().toString(36).substring(7)}@example.com`
+  }
 
   /**
    * Create a test user
@@ -217,7 +227,7 @@ export class TestDataFactory {
 
     const userData = {
       name: 'Test User',
-      email: `test${Date.now()}@example.com`,
+      email: this.generateUniqueEmail(),
       age: 25,
       active: true,
       ...overrides
@@ -234,7 +244,6 @@ export class TestDataFactory {
     for (let i = 0; i < count; i++) {
       const user = await this.createUser({
         name: `Test User ${i + 1}`,
-        email: `test${Date.now()}_${i}@example.com`,
         ...overrides
       })
       users.push(user)

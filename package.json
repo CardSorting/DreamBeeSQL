@@ -1,7 +1,7 @@
 {
   "name": "noormme",
   "version": "1.0.2",
-  "description": "NOORMME - The NO-ORM for Normies. SQLite automation so simple, even normies can use it.",
+  "description": "NOORMME - The NO-ORM for Normies. Database automation (SQLite, PostgreSQL) so simple, even normies can use it.",
   "repository": {
     "type": "git",
     "url": "git://github.com/cardsorting/noormme.git"
@@ -11,6 +11,8 @@
     "noormme",
     "no-orm",
     "sqlite",
+    "postgresql",
+    "postgres",
     "automation",
     "zero-config",
     "auto-discovery",
@@ -55,6 +57,12 @@
       "require": "./dist/cjs/helpers/sqlite.js",
       "types": "./dist/esm/helpers/sqlite.d.ts",
       "default": "./dist/cjs/helpers/sqlite.js"
+    },
+    "./helpers/postgresql": {
+      "import": "./dist/esm/helpers/postgresql.js",
+      "require": "./dist/cjs/helpers/postgresql.js",
+      "types": "./dist/esm/helpers/postgresql.d.ts",
+      "default": "./dist/cjs/helpers/postgresql.js"
     },
     "./cli": {
       "import": "./dist/esm/cli/index.js",
@@ -118,6 +126,7 @@
     "@types/node": "^24.5.2",
     "@types/semver": "^7.7.1",
     "@types/sinon": "^17.0.4",
+    "@types/pg": "^8.11.10",
     "better-sqlite3": "^12.4.1",
     "chai": "^6.2.0",
     "chai-as-promised": "^8.0.2",
@@ -144,7 +153,8 @@
     "glob": "^11.0.3",
     "inquirer": "^9.0.0",
     "better-sqlite3": "^12.4.1",
-    "kysely": "^0.27.4"
+    "kysely": "^0.27.4",
+    "pg": "^8.13.1"
   },
   "bin": {
     "noormme": "./dist/cjs/cli/index.js"

@@ -202,6 +202,14 @@ export class TypeGenerator {
       return this.config.customTypeMappings[column.type]
     }
 
+    // Handle PostgreSQL array types
+    if (column.type.endsWith('[]')) {
+      const baseType = column.type.slice(0, -2)
+      const elementType = this.mapColumnToTypeScript({ ...column, type: baseType, nullable: false })
+      const arrayType = `Array<${elementType}>`
+      return column.nullable ? `${arrayType} | null` : arrayType
+    }
+
     const typeMapping: Record<string, string> = {
       // PostgreSQL types
       'varchar': 'string',
@@ -222,6 +230,8 @@ export class TypeGenerator {
       'json': 'Record<string, unknown>',
       'jsonb': 'Record<string, unknown>',
       'uuid': 'string',
+      'tsvector': 'string',
+      'tsquery': 'string',
 
       // MySQL specific types
       'longtext': 'string',

@@ -15,8 +15,10 @@ import { MetricsCollector } from './performance/services/metrics-collector.js'
 import { SQLiteAutoOptimizer } from './dialect/sqlite/sqlite-auto-optimizer.js'
 import { SQLiteAutoIndexer } from './dialect/sqlite/sqlite-auto-indexer.js'
 import { SqliteDialect } from './dialect/sqlite/sqlite-dialect.js'
+import { PostgresDialect } from './dialect/postgresql/postgresql-dialect.js'
 import { sql as rawSql } from './raw-builder/sql.js'
 import Database from 'better-sqlite3'
+import { Pool } from 'pg'
 import { CompiledQuery } from './query-compiler/compiled-query.js'
 
 // Global initialization lock to prevent concurrent initialization
@@ -628,12 +630,19 @@ export class NOORMME {
         case 'sqlite:':
           dialect = 'sqlite'
           break
+        case 'postgres:':
+        case 'postgresql:':
+          dialect = 'postgresql'
+          break
+        case 'mysql:':
+          dialect = 'mysql'
+          break
         default:
           throw new NoormError(
             `Unsupported database protocol: ${url.protocol}`,
             {
               operation: 'connection_string_parsing',
-              suggestion: 'Supported protocols: sqlite'
+              suggestion: 'Supported protocols: sqlite, postgresql, postgres, mysql'
             }
           )
       }
@@ -647,6 +656,40 @@ export class NOORMME {
             port: 0,
             username: '',
             password: ''
+          }
+        }
+      }
+
+      if (dialect === 'postgresql' || dialect === 'mysql') {
+        // Parse query parameters for SSL and pool configuration
+        const searchParams = new URLSearchParams(url.search)
+        const sslParam = searchParams.get('ssl') || searchParams.get('sslmode')
+        
+        let ssl: boolean | object = false
+        if (sslParam) {
+          if (sslParam === 'true' || sslParam === 'require') {
+            ssl = true
+          } else if (sslParam === 'false' || sslParam === 'disable') {
+            ssl = false
+          } else {
+            // For other SSL modes, we'll need more configuration
+            ssl = { rejectUnauthorized: sslParam !== 'allow' && sslParam !== 'prefer' }
+          }
+        }
+
+        return {
+          dialect,
+          connection: {
+            host: url.hostname || 'localhost',
+            port: url.port ? parseInt(url.port, 10) : this.getDefaultPort(dialect),
+            database: url.pathname.replace(/^\//, ''),
+            username: url.username || undefined,
+            password: url.password || undefined,
+            ssl,
+            pool: {
+              max: searchParams.get('pool_max') ? parseInt(searchParams.get('pool_max')!, 10) : 10,
+              min: searchParams.get('pool_min') ? parseInt(searchParams.get('pool_min')!, 10) : 0,
+            }
           }
         }
       }
@@ -679,6 +722,8 @@ export class NOORMME {
   private getDefaultPort(dialect: NOORMConfig['dialect']): number {
     switch (dialect) {
       case 'sqlite': return 0
+      case 'postgresql': return 5432
+      case 'mysql': return 3306
       default: return 0
     }
   }
@@ -690,6 +735,21 @@ export class NOORMME {
       case 'sqlite':
         return new SqliteDialect({
           database: new Database(connection.database)
+        })
+      
+      case 'postgresql':
+        return new PostgresDialect({
+          poolConfig: {
+            host: connection.host,
+            port: connection.port,
+            database: connection.database,
+            user: connection.username,
+            password: connection.password,
+            ssl: connection.ssl,
+            max: connection.pool?.max ?? 10,
+            min: connection.pool?.min ?? 0,
+            idleTimeoutMillis: connection.pool?.idleTimeoutMillis ?? 10000,
+          }
         })
       
       default:

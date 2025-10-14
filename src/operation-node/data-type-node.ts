@@ -45,6 +45,32 @@ const SIMPLE_COLUMN_DATA_TYPES = [
   'tstzmultirange',
   'daterange',
   'datemultirange',
+  // PostgreSQL array types
+  'text[]',
+  'varchar[]',
+  'char[]',
+  'integer[]',
+  'int2[]',
+  'int4[]',
+  'int8[]',
+  'smallint[]',
+  'bigint[]',
+  'boolean[]',
+  'real[]',
+  'double precision[]',
+  'float4[]',
+  'float8[]',
+  'decimal[]',
+  'numeric[]',
+  'date[]',
+  'timestamp[]',
+  'timestamptz[]',
+  'uuid[]',
+  'json[]',
+  'jsonb[]',
+  // PostgreSQL full-text search types
+  'tsvector',
+  'tsquery',
 ] as const
 
 const COLUMN_DATA_TYPE_REGEX = [

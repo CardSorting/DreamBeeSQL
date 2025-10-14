@@ -31,6 +31,21 @@ export class TypeMapper {
     'date': 'Date',
     'datetime': 'Date',
     'blob': 'Buffer',
+    // PostgreSQL types
+    'bigint': 'number',
+    'smallint': 'number',
+    'decimal': 'number',
+    'double precision': 'number',
+    'timestamp': 'Date',
+    'timestamptz': 'Date',
+    'time': 'Date',
+    'timetz': 'Date',
+    'json': 'Record<string, unknown>',
+    'jsonb': 'Record<string, unknown>',
+    'uuid': 'string',
+    'tsvector': 'string',
+    'tsquery': 'string',
+    'bytea': 'Buffer',
   }
 
   /**
@@ -60,6 +75,13 @@ export class TypeMapper {
     // Handle custom type mappings first
     if (customTypeMappings?.[dbType]) {
       return customTypeMappings[dbType]
+    }
+
+    // Handle PostgreSQL array types
+    if (dbType.endsWith('[]')) {
+      const baseType = dbType.slice(0, -2)
+      const elementType = this.mapColumnType(baseType, customTypeMappings)
+      return `Array<${elementType}>`
     }
 
     // Try exact match first

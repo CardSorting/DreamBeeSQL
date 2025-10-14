@@ -34,6 +34,34 @@ This directory contains historical documentation tracking the major milestones, 
   - Security best practices implemented
   - Audit findings remediation
 
+### PostgreSQL Support Evolution
+
+- **[POSTGRESQL_FEATURES_IMPLEMENTATION.md](POSTGRESQL_FEATURES_IMPLEMENTATION.md)** - PostgreSQL-specific features
+  - Array types implementation
+  - JSON/JSONB support
+  - Full-text search capabilities
+  - Materialized views
+  - Type introspection enhancements
+
+- **[MIGRATION_TOOLS_IMPLEMENTATION.md](MIGRATION_TOOLS_IMPLEMENTATION.md)** - Database migration tools
+  - SQLite ↔ PostgreSQL migration
+  - Schema diff and sync utilities
+  - Data migration with transformations
+  - Type mapping system
+  - Migration verification
+
+### Core Implementation History
+
+- **[NOORMME_IMPLEMENTATION_SUMMARY.md](NOORMME_IMPLEMENTATION_SUMMARY.md)** - Core NOORMME implementation
+  - Original implementation summary
+  - Core architecture decisions
+  - Feature set overview
+
+- **[DOCUMENTATION_ORGANIZATION.md](DOCUMENTATION_ORGANIZATION.md)** - Documentation structure
+  - Documentation organization decisions
+  - File structure rationale
+  - Content organization principles
+
 ## 🎯 Purpose of This Directory
 
 This historical documentation serves several purposes:
@@ -70,6 +98,7 @@ For **current status and reports**, see [../reports/](../reports/)
 Initial Implementation
     ↓
 [IMPLEMENTATION_COMPLETE.md]
+[NOORMME_IMPLEMENTATION_SUMMARY.md]
     ↓
 Production Refactoring
     ↓
@@ -79,6 +108,18 @@ Production Refactoring
 Security Improvements
     ↓
 [SECURITY_UPDATE_COMPLETE.md]
+    ↓
+PostgreSQL Support
+    ↓
+[POSTGRESQL_FEATURES_IMPLEMENTATION.md]
+    ↓
+Migration Tools
+    ↓
+[MIGRATION_TOOLS_IMPLEMENTATION.md]
+    ↓
+Documentation Organization
+    ↓
+[DOCUMENTATION_ORGANIZATION.md]
     ↓
 Ongoing Development
 ```

@@ -32,26 +32,45 @@ We fixed all that nonsense:
 
 ### **Real Benefits (The Stuff That Actually Matters):**
 - 🚀 **Feel like a coding wizard** - AI that understands your project
-- 💰 **Save money** - No expensive database servers to maintain
-- 🔧 **Deploy easily** - One file instead of a server farm
-- ⚡ **Go fast** - Direct file access beats network calls every time
-- 🛡️ **Stay secure** - No network = no network attacks
+- 🗄️ **Multi-database support** - SQLite for simplicity, PostgreSQL for power
+- 💰 **Save money** - SQLite for dev/small apps, PostgreSQL when you need it
+- 🔧 **Deploy easily** - SQLite = one file, PostgreSQL = full production ready
+- ⚡ **Go fast** - Optimized performance for both SQLite and PostgreSQL
+- 🛡️ **Stay secure** - Built-in connection pooling and security best practices
 - 😊 **Have fun** - Finally, coding that doesn't make you cry
 
-**Bottom line:** You get enterprise-grade superpowers with the simplicity of a single file.
+**Bottom line:** You get enterprise-grade superpowers with your choice of database.
 
 ## 🚀 What's the Big Deal? (Spoiler: It's Actually Pretty Big)
 
 **Before NOORMME:** You spend 8 hours setting up a database, 4 hours organizing your project, and 2 hours fighting with AI tools that suggest code from 2019.
 
 **With NOORMME:** Your development environment becomes AI-ready in 5 minutes:
-- ✅ **SQLite that acts like PostgreSQL** - All the power, none of the pain
+- ✅ **SQLite & PostgreSQL support** - Start simple, scale when needed
 - ✅ **Organized architecture** - Patterns that actually make sense
 - ✅ **AI context rules** - Cursor IDE integration that works
 - ✅ **Type safety** - TypeScript that doesn't make you want to throw things
-- ✅ **Production features** - WAL mode, caching, and performance optimization
+- ✅ **Production features** - WAL mode, connection pooling, caching, and performance optimization
 
 **It's literally a development environment that makes AI assistance useful.** 🤯
+
+## 🗄️ Database Support
+
+NOORMME supports multiple database systems with the same API:
+
+### SQLite - Perfect for:
+- 🚀 **Prototyping & MVPs** - Get started in seconds
+- 📱 **Edge deployments** - Cloudflare Workers, Vercel Edge, etc.
+- 💻 **Local-first apps** - Embedded databases in desktop/mobile apps
+- 🧪 **Testing** - Fast, isolated test environments
+- 💰 **Small to medium apps** - No database server needed
+
+### PostgreSQL - Perfect for:
+- 🏢 **Production applications** - Battle-tested reliability
+- 📊 **Complex queries** - Advanced SQL features
+- 🔒 **Multi-user systems** - Robust concurrency handling
+- 📈 **Scaling** - Handle millions of records
+- 🌐 **Traditional deployments** - Client-server architecture
 
 ## ⚡ Get Started in 60 Seconds (No, Really)
 
@@ -66,15 +85,51 @@ npx noormme init
 ```
 
 ### 3. Point at Your Database (The "Wait, That's It?" Part)
+
+#### Option A: SQLite (Simplest)
 ```typescript
 import { NOORMME } from 'noormme'
 
 const db = new NOORMME({
   dialect: 'sqlite',
   connection: {
-    database: './your-database.sqlite'  // Point to your existing database
+    database: './your-database.sqlite'
   }
 })
+
+await db.initialize()
+```
+
+#### Option B: PostgreSQL (Production-Ready)
+```typescript
+import { NOORMME } from 'noormme'
+
+const db = new NOORMME({
+  dialect: 'postgresql',
+  connection: {
+    host: 'localhost',
+    port: 5432,
+    database: 'your_database',
+    username: 'postgres',
+    password: 'your_password'
+  }
+})
+
+await db.initialize()
+```
+
+#### Option C: Connection String (Easiest)
+```typescript
+import { NOORMME } from 'noormme'
+
+// SQLite
+const db = new NOORMME('sqlite:./your-database.sqlite')
+
+// PostgreSQL
+// const db = new NOORMME('postgresql://user:password@localhost:5432/database')
+
+// Or use DATABASE_URL environment variable
+// const db = new NOORMME()  // Reads from process.env.DATABASE_URL
 
 await db.initialize()
 ```
@@ -247,10 +302,50 @@ const featuredProducts = await productRepo.findManyByFeatured(true)
 const pendingOrders = await orderRepo.findManyByStatus('pending')
 ```
 
+### Production App with PostgreSQL (The "I'm Going Big" Example)
+```typescript
+// Connect to PostgreSQL for production-grade performance
+const db = new NOORMME({
+  dialect: 'postgresql',
+  connection: {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432'),
+    database: process.env.DB_NAME || 'myapp',
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD,
+    ssl: process.env.NODE_ENV === 'production',
+    pool: {
+      max: 20,  // Maximum connections
+      min: 5,   // Minimum connections
+      idleTimeoutMillis: 30000,
+    }
+  }
+})
+
+await db.initialize()
+
+// Same API as SQLite - just more powerful!
+const userRepo = db.getRepository('users')
+const users = await userRepo.findAll()
+
+// Advanced PostgreSQL features work seamlessly
+const analytics = await db.getKysely()
+  .selectFrom('orders')
+  .select(({ fn }) => [
+    fn.count('id').as('total_orders'),
+    fn.sum('amount').as('total_revenue'),
+    fn.avg('amount').as('avg_order_value'),
+  ])
+  .where('created_at', '>=', new Date('2024-01-01'))
+  .groupBy('user_id')
+  .execute()
+```
+
 ## 🔧 Configuration (Optional, Because We're Not Dictators)
 
 For most people, the default settings work perfectly. But if you want to customize (because you're a special snowflake):
 
+### SQLite Configuration
 ```typescript
 const db = new NOORMME({
   dialect: 'sqlite',
@@ -268,6 +363,183 @@ const db = new NOORMME({
   }
 })
 ```
+
+### PostgreSQL Configuration
+```typescript
+const db = new NOORMME({
+  dialect: 'postgresql',
+  connection: {
+    host: 'localhost',
+    port: 5432,
+    database: 'myapp',
+    username: 'postgres',
+    password: 'secret',
+    ssl: true,  // Enable SSL
+    pool: {
+      max: 20,                    // Maximum pool size
+      min: 5,                     // Minimum pool size
+      idleTimeoutMillis: 30000,   // Close idle connections after 30s
+      connectionTimeoutMillis: 2000, // Timeout for acquiring connection
+    }
+  },
+  automation: {
+    enableAutoOptimization: true,
+    enableIndexRecommendations: true,
+    enableQueryAnalysis: true,
+  },
+  performance: {
+    enableCaching: true,
+    maxCacheSize: 1000
+  }
+})
+```
+
+### PostgreSQL-Specific Features (The Power Tools)
+
+NOORMME provides comprehensive support for PostgreSQL-specific features:
+
+#### Array Types
+```typescript
+import { PostgresArrayHelpers } from 'noormme/helpers/postgresql'
+
+// Create table with array columns
+await db.kysely.schema
+  .createTable('posts')
+  .addColumn('tags', 'text[]')
+  .addColumn('scores', 'integer[]')
+  .execute()
+
+// Query with array operations
+const posts = await db.kysely
+  .selectFrom('posts')
+  .where(PostgresArrayHelpers.contains('tags', ['typescript']))
+  .execute()
+```
+
+#### JSON/JSONB Operations
+```typescript
+import { PostgresJSONHelpers } from 'noormme/helpers/postgresql'
+
+// Extract and query JSON fields
+const users = await db.kysely
+  .selectFrom('users')
+  .select(PostgresJSONHelpers.extract('metadata', 'email').as('email'))
+  .where(PostgresJSONHelpers.hasKey('metadata', 'phone'))
+  .execute()
+```
+
+#### Full-Text Search
+```typescript
+import { PostgresFullTextHelpers } from 'noormme/helpers/postgresql'
+
+// Add full-text search
+await PostgresFullTextHelpers.addGeneratedTSVectorColumn(
+  db.kysely, 'articles', 'search_vector', ['title', 'content']
+)
+
+// Search with ranking
+const results = await db.kysely
+  .selectFrom('articles')
+  .select(PostgresFullTextHelpers.rank('search_vector', 'typescript').as('rank'))
+  .where(PostgresFullTextHelpers.match('search_vector', 'typescript'))
+  .orderBy('rank', 'desc')
+  .execute()
+```
+
+#### Materialized Views
+```typescript
+import { PostgresMaterializedViewHelpers } from 'noormme/helpers/postgresql'
+
+// Create and manage materialized views
+await PostgresMaterializedViewHelpers.create(
+  db.kysely, 'user_stats',
+  sql`SELECT user_id, COUNT(*) as post_count FROM posts GROUP BY user_id`
+)
+
+await PostgresMaterializedViewHelpers.refresh(db.kysely, 'user_stats', {
+  concurrently: true
+})
+```
+
+**📚 Learn More:** 
+- [PostgreSQL Features Documentation](docs/postgresql-features.md) for detailed feature guides
+- [PostgreSQL Support Documentation](docs/postgresql/POSTGRESQL_SUPPORT.md) for comprehensive overview
+
+### Database Migration Tools (The "Time to Move" Feature)
+
+NOORMME provides powerful tools for migrating databases between SQLite and PostgreSQL:
+
+#### Automated Migration
+
+```typescript
+import { createMigrationManager } from 'noormme/helpers/postgresql'
+
+// Source database (SQLite)
+const sourceDb = new NOORMME('sqlite:./source.sqlite')
+
+// Target database (PostgreSQL)
+const targetDb = new NOORMME('postgresql://user:pass@localhost/target')
+
+await sourceDb.initialize()
+await targetDb.initialize()
+
+// Create migration manager
+const migrationManager = createMigrationManager(
+  sourceDb.getKysely(),
+  targetDb.getKysely(),
+  {
+    source: {
+      dialect: 'sqlite',
+      database: './source.sqlite',
+    },
+    target: {
+      dialect: 'postgresql',
+      database: 'target',
+      host: 'localhost',
+      port: 5432,
+      username: 'user',
+      password: 'pass',
+    },
+    options: {
+      batchSize: 1000,
+      verbose: true,
+    },
+  }
+)
+
+// Perform complete migration (schema + data)
+const result = await migrationManager.migrate()
+console.log(`Migrated ${result.rowsMigrated} rows in ${(result.duration / 1000).toFixed(2)}s`)
+```
+
+#### Schema Comparison & Sync
+
+```typescript
+// Compare schemas
+const comparison = await migrationManager.compareSchemas()
+console.log(`Differences: ${comparison.differences.length}`)
+
+// Generate sync SQL
+const syncResult = await migrationManager.syncSchema({
+  generateSQL: true,
+  apply: false,  // Preview changes without applying
+})
+
+syncResult.sqlStatements.forEach(sql => console.log(sql))
+```
+
+#### Key Migration Features
+
+- ✅ **Bidirectional Migration** - SQLite ↔ PostgreSQL
+- ✅ **Automatic Type Conversion** - Smart mapping between database types
+- ✅ **Value Transformation** - Handle booleans, arrays, JSON, and dates
+- ✅ **Batch Processing** - Efficient large dataset migration
+- ✅ **Parallel Migration** - Multi-table concurrent processing
+- ✅ **Progress Tracking** - Real-time migration progress
+- ✅ **Schema Diff** - Detect schema differences
+- ✅ **Verification** - Automated post-migration checks
+
+**📚 Learn More:** See [Migration Tools Documentation](docs/migration-tools.md) for detailed guides and examples.
 
 ## 🚀 Production Ready (Because We're Not Playing Around)
 
@@ -294,10 +566,15 @@ The DreamBeesArt application successfully migrated from Drizzle ORM to NOORMME w
 A: Nope! NOORMME handles most things automatically. You only need SQL for complex queries (and even then, we'll help you).
 
 **Q: Can I use my existing database?**
-A: Yes! Just point NOORMME at your existing SQLite file and it figures everything out (because we're not picky).
+A: Yes! Just point NOORMME at your existing SQLite or PostgreSQL database and it figures everything out (because we're not picky).
+
+**Q: Should I use SQLite or PostgreSQL?**
+A: Start with SQLite for prototyping and small apps (it's faster to set up). Switch to PostgreSQL when you need multi-user support, complex queries, or scaling. The API is identical, so switching is easy!
 
 **Q: Is this really production-ready?**
-A: Absolutely. Real applications are using it right now with better performance than PostgreSQL (because we're not lying).
+A: Absolutely. Real applications are using it right now:
+- SQLite with WAL mode for edge deployments and local-first apps
+- PostgreSQL for traditional production deployments with millions of records
 
 **Q: What if I'm already using another ORM?**
 A: NOORMME works alongside other tools. You can migrate gradually or use both (because we're not territorial).
@@ -309,7 +586,10 @@ A: NOORMME works with JavaScript too, but TypeScript gives you the best experien
 A: NOORMME includes Cursor IDE context rules that make AI assistance actually useful. The AI understands your project structure and generates code that follows your conventions (because we're not savages).
 
 **Q: What makes this different from other toolkits?**
-A: NOORMME combines database automation, organized architecture, and AI-ready patterns in one integrated toolkit. It's not just an ORM - it's a complete development environment (because we're ambitious).
+A: NOORMME combines database automation, organized architecture, and AI-ready patterns in one integrated toolkit. It's not just an ORM - it's a complete development environment that supports both SQLite and PostgreSQL with the same API (because we're ambitious).
+
+**Q: Can I migrate from SQLite to PostgreSQL later?**
+A: Yes! Since NOORMME uses the same API for both databases, migrating is as simple as changing the connection config. Your application code stays the same!
 
 **Q: Will this make me a better developer?**
 A: Probably not, but it will make you feel like one (which is half the battle).
